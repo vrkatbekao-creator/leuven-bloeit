@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1, "lat": 50.8778, "lng": 4.6912, "icon": "🌸", "status": "peak",
+    "name": { "en": "Botanical Garden", "fr": "Jardin botanique", "nl": "Kruidtuin", "zh": "植物園" },
+    "flowers": { "en": "Wisteria, roses, camellia, medicinal herbs", "fr": "Glycine, roses, camélia, plantes médicinales", "nl": "Blauweregen, rozen, camelia, kruiden", "zh": "紫藤、玫瑰、山茶花、藥草" },
+    "best": { "en": "Mid Apr – Mid May", "fr": "Mi-avr – Mi-mai", "nl": "Half apr – Half mei", "zh": "4月中 – 5月中" },
+    "hours": { "en": "08:00–18:00", "fr": "08:00–18:00", "nl": "08:00–18:00", "zh": "08:00–18:00" },
+    "tip": { "en": "Belgium's oldest botanical garden (1738). Camellia & crocus bloom early; wisteria peaks in April. Free entry.", "fr": "Le plus ancien jardin botanique (1738). Entrée gratuite.", "nl": "Oudste botanische tuin (1738). Gratis.", "zh": "比利時最古老植物園（1738年）。山茶花與番紅花早春開放，四月紫藤盛開。免費。" },
+    "gmaps": "https://maps.google.com/?q=Kruidtuin+Leuven"
+  },
+  {
+    "id": 2, "lat": 50.8769, "lng": 4.6898, "icon": "🌿", "status": "peak",
+    "name": { "en": "Sunken Garden", "fr": "Jardin en creux", "nl": "Verzonken Tuin", "zh": "沉園" },
+    "flowers": { "en": "Crocus, seasonal perennials, ornamental grasses", "fr": "Crocus, vivaces saisonnières, graminées", "nl": "Krokus, vaste planten, siergrassen", "zh": "番紅花、季節花卉、觀葉植物" },
+    "best": { "en": "Feb–Oct", "fr": "Fév–Oct", "nl": "Feb–Okt", "zh": "2月–10月" },
+    "hours": { "en": "Open 24h", "fr": "Ouvert 24h/24", "nl": "24u open", "zh": "全天開放" },
+    "tip": { "en": "Crocus carpets appear as early as February. Hidden beside the Botanical Garden — perfect for a quiet picnic.", "fr": "Tapis de crocus dès février. Caché à côté du jardin botanique.", "nl": "Krokustapijten al in februari. Verborgen naast de Kruidtuin.", "zh": "二月起番紅花就鋪成花毯，藏在植物園旁，適合野餐。" },
+    "gmaps": "https://maps.google.com/?q=Verzonken+Tuin+Leuven"
+  },
+  {
+    "id": 3, "lat": 50.8768, "lng": 4.6937, "icon": "🌼", "status": "peak",
+    "name": { "en": "Janseniuspark", "fr": "Parc Jansénius", "nl": "Janseniuspark", "zh": "雅森尼斯公園" },
+    "flowers": { "en": "Crocus, wildflowers, spring bulbs, narcissus", "fr": "Crocus, fleurs sauvages, bulbes, narcisses", "nl": "Krokus, wilde bloemen, bollen, narcissen", "zh": "番紅花、野花、春季球根、水仙" },
+    "best": { "en": "Feb–May", "fr": "Fév–Mai", "nl": "Feb–Mei", "zh": "2月–5月" },
+    "hours": { "en": "Open 24h", "fr": "Ouvert 24h/24", "nl": "24u open", "zh": "全天開放" },
+    "tip": { "en": "A hidden city gem — crocus and narcissus carpet the lawns in late February. Sometimes a cat wanders through!", "fr": "Un joyau caché — crocus et narcisses en fin février. Parfois un chat se promène !", "nl": "Een verborgen parel — krokus en narcissen in late februari. Soms loopt er een kat rond!", "zh": "二月底番紅花與水仙鋪滿草地，有時有貓咪出沒！" },
+    "gmaps": "https://maps.google.com/?q=Janseniuspark+Leuven"
+  },
+  {
+    "id": 4, "lat": 50.8813, "lng": 4.6969, "icon": "🌱", "status": "fading",
+    "name": { "en": "Dijle Terraces", "fr": "Terrasses de la Dyle", "nl": "Dijleterrassen", "zh": "迪耶勒河台地" },
+    "flowers": { "en": "Cherry blossom, riverside wildflowers, willows", "fr": "Cerisier en fleurs, fleurs riveraines, saules", "nl": "Kersenbloesem, oeverplanten, wilgen", "zh": "櫻花、水邊草花、柳枝" },
+    "best": { "en": "Mar–Mid Apr", "fr": "Mar–Mi-avr", "nl": "Mrt–Half apr", "zh": "3月–4月中" },
+    "hours": { "en": "Open 24h", "fr": "Ouvert 24h/24", "nl": "24u open", "zh": "全天開放" },
+    "tip": { "en": "Cherry trees line the riverbank — stunning in late March. Spring flowers now fading.", "fr": "Les cerisiers longent la rive — magnifiques fin mars.", "nl": "Kerselaarstraat langs de oever — prachtig eind maart.", "zh": "河堤櫻花樹列，三月底最美，春花現已漸退。" },
+    "gmaps": "https://maps.google.com/?q=Dijleterrassen+Leuven"
+  },
+  {
+    "id": 5, "lat": 50.8626, "lng": 4.6839, "icon": "🌷", "status": "soon",
+    "name": { "en": "Arenberg Castle Park", "fr": "Parc du Château d'Arenberg", "nl": "Kasteelpark Arenberg", "zh": "阿倫堡城堡公園" },
+    "flowers": { "en": "Cherry blossom, roses, peonies, meadow wildflowers", "fr": "Cerisier, roses, pivoines, fleurs des prés", "nl": "Kersenbloesem, rozen, pioenen, weidebloemen", "zh": "櫻花、玫瑰、牡丹、草地野花" },
+    "best": { "en": "Mar–Jun", "fr": "Mar–Juin", "nl": "Mrt–Jun", "zh": "3月–6月" },
+    "hours": { "en": "Open 24h", "fr": "Ouvert 24h/24", "nl": "24u open", "zh": "全天開放" },
+    "tip": { "en": "Cherry blossom in March, then roses and peonies through June. KU Leuven campus — great for picnics.", "fr": "Cerisiers en mars, puis roses et pivoines jusqu'en juin. Campus KU Leuven.", "nl": "Kerselaar in maart, dan rozen en pioenen tot juni. KU Leuven campus.", "zh": "三月賞櫻，六月玫瑰牡丹接力。魯汶大學校園，適合野餐。" },
+    "gmaps": "https://maps.google.com/?q=Kasteelpark+Arenberg+Leuven"
+  },
+  {
+    "id": 6, "lat": 50.8643, "lng": 4.7174, "icon": "🌺", "status": "soon",
+    "name": { "en": "Park Abbey", "fr": "Abbaye du Parc", "nl": "Abdij van Park", "zh": "公園修道院" },
+    "flowers": { "en": "Plum blossom, hydrangea, abbey garden flowers, lakeside wildflowers", "fr": "Prunier en fleurs, hortensia, jardin abbatial, fleurs des rives", "nl": "Pruimenbloesem, hortensia, abdijtuin, oeverbloemen", "zh": "梅花、繡球花、修道院花園、湖邊野花" },
+    "best": { "en": "Feb–Jun", "fr": "Fév–Juin", "nl": "Feb–Jun", "zh": "2月–6月" },
+    "hours": { "en": "Tue–Sun 10:00–17:00", "fr": "Mar–Dim 10:00–17:00", "nl": "Di–Zo 10:00–17:00", "zh": "週二–日 10:00–17:00" },
+    "tip": { "en": "Plum trees bloom as early as February. 12th-century abbey with stunning lakeside gardens in late spring.", "fr": "Les pruniers fleurissent dès février. Abbaye du XIIe siècle.", "nl": "Pruimenbomen al in februari. 12e-eeuwse abdij met meertuinen.", "zh": "梅花二月最早開放。12世紀古修道院，春末湖畔景色動人。" },
+    "gmaps": "https://maps.google.com/?q=Park+Abbey+Leuven"
+  },
+  {
+    "id": 7, "lat": 50.8744, "lng": 4.7024, "icon": "🌸", "status": "fading",
+    "name": { "en": "Groot Begijnhof", "fr": "Grand Béguinage", "nl": "Groot Begijnhof", "zh": "大貝金霍夫" },
+    "flowers": { "en": "Cherry blossom, plum blossom, spring bulbs", "fr": "Cerisier, prunier, bulbes de printemps", "nl": "Kersenbloesem, pruimenbloesem, voorjaarsbollen", "zh": "櫻花、梅花、春季球根" },
+    "best": { "en": "Feb–Apr", "fr": "Fév–Avr", "nl": "Feb–Apr", "zh": "2月–4月" },
+    "hours": { "en": "Open 24h (outer grounds)", "fr": "Ouvert 24h/24 (extérieur)", "nl": "24u open (buitenterrein)", "zh": "全天開放（外部庭院）" },
+    "tip": { "en": "UNESCO World Heritage Site. Cherry and plum trees line the cobblestone lanes — magical in early spring.", "fr": "Site UNESCO. Cerisiers et pruniers bordent les ruelles pavées.", "nl": "UNESCO Werelderfgoed. Kerselaren en pruimenlaarzen langs de kasseien.", "zh": "UNESCO 世界遺產。石板小巷兩旁種滿梅花與櫻花，早春氛圍夢幻。" },
+    "gmaps": "https://maps.google.com/?q=Groot+Begijnhof+Leuven"
+  },
+  {
+    "id": 8, "lat": 50.8824, "lng": 4.7080, "icon": "🌸", "status": "peak",
+    "name": { "en": "Leopoldpark", "fr": "Parc Léopold", "nl": "Leopoldpark", "zh": "利奧波德公園" },
+    "flowers": { "en": "Cherry blossom, camellia, hydrangea, magnolia, spring bulbs", "fr": "Cerisier, camélia, hortensia, magnolia, bulbes", "nl": "Kersenbloesem, camelia, hortensia, magnolia, bollen", "zh": "櫻花、山茶花、繡球花、木蘭、春季球根" },
+    "best": { "en": "Feb–Apr", "fr": "Fév–Avr", "nl": "Feb–Apr", "zh": "2月–4月" },
+    "hours": { "en": "Open 24h", "fr": "Ouvert 24h/24", "nl": "24u open", "zh": "全天開放" },
+    "tip": { "en": "Camellia and magnolia bloom first in February; cherry blossom follows in March. One of the most photogenic spots in Leuven.", "fr": "Camélia et magnolia dès février; cerisiers en mars. Très photogénique.", "nl": "Camelia en magnolia in februari; kersenbloesem in maart. Zeer fotogeniek.", "zh": "山茶花與木蘭二月先開，三月接著是滿樹櫻花，是魯汶最上鏡的賞花地點之一。" },
+    "gmaps": "https://maps.google.com/?q=Leopoldpark+Leuven"
+  },
+  {
+    "id": 9, "lat": 50.8626, "lng": 4.6839, "icon": "🍁", "status": "foliage",
+    "name": { "en": "Arenberg Castle Park", "fr": "Parc du Château d'Arenberg", "nl": "Kasteelpark Arenberg", "zh": "阿倫堡城堡公園" },
+    "flowers": { "en": "Maple, oak, beech — peak autumn colour", "fr": "Érable, chêne, hêtre — couleurs automnales", "nl": "Esdoorn, eik, beuk — herfstkleur", "zh": "楓樹、橡樹、山毛櫸 — 秋色最盛" },
+    "best": { "en": "Late Oct – Mid Nov", "fr": "Fin oct – Mi-nov", "nl": "Eind okt – Half nov", "zh": "10月底 – 11月中" },
+    "hours": { "en": "Open 24h", "fr": "Ouvert 24h/24", "nl": "24u open", "zh": "全天開放" },
+    "tip": { "en": "A canopy of red, orange and gold surrounds the 16th-century castle — one of the most dramatic autumn scenes in Leuven.", "fr": "Un dais rouge, orange et doré entoure le château du XVIe siècle.", "nl": "Een baldakijn van rood, oranje en goud rond het 16e-eeuwse kasteel.", "zh": "楓葉火紅、橡樹金黃，16世紀古堡掩映在秋色之中，如畫一般。" },
+    "gmaps": "https://maps.google.com/?q=Kasteelpark+Arenberg+Leuven"
+  },
+  {
+    "id": 10, "lat": 50.8643, "lng": 4.7174, "icon": "🍂", "status": "foliage",
+    "name": { "en": "Park Abbey", "fr": "Abbaye du Parc", "nl": "Abdij van Park", "zh": "公園修道院" },
+    "flowers": { "en": "Beech, oak, linden — golden lakeside reflections", "fr": "Hêtre, chêne, tilleul — reflets dorés sur le lac", "nl": "Beuk, eik, linde — gouden weerspiegeling op het meer", "zh": "山毛櫸、橡樹、椴樹 — 湖面金色倒影" },
+    "best": { "en": "Oct – Nov", "fr": "Oct – Nov", "nl": "Okt – Nov", "zh": "10月 – 11月" },
+    "hours": { "en": "Tue–Sun 10:00–17:00", "fr": "Mar–Dim 10:00–17:00", "nl": "Di–Zo 10:00–17:00", "zh": "週二–日 10:00–17:00" },
+    "tip": { "en": "Lakeside trees turn golden in October — their reflection in the water is breathtaking. Combine with a visit to the abbey museum.", "fr": "Les arbres au bord du lac deviennent dorés en octobre.", "nl": "Bomen aan het meer worden goudkleurig in oktober.", "zh": "十月湖畔樹木轉為金黃，倒映在水面上美不勝收，可順便參觀修道院博物館。" },
+    "gmaps": "https://maps.google.com/?q=Park+Abbey+Leuven"
+  },
+  {
+    "id": 11, "lat": 50.8778, "lng": 4.6912, "icon": "🍁", "status": "foliage",
+    "name": { "en": "Botanical Garden", "fr": "Jardin botanique", "nl": "Kruidtuin", "zh": "植物園" },
+    "flowers": { "en": "Japanese maple, ginkgo, scarlet oak — vivid autumn tones", "fr": "Érable du Japon, ginkgo, chêne écarlate", "nl": "Japanse esdoorn, ginkgo, scharlaken eik", "zh": "日本楓、銀杏、猩紅橡 — 秋色濃烈" },
+    "best": { "en": "Mid Oct – Early Nov", "fr": "Mi-oct – Début nov", "nl": "Half okt – Begin nov", "zh": "10月中 – 11月初" },
+    "hours": { "en": "08:00–18:00", "fr": "08:00–18:00", "nl": "08:00–18:00", "zh": "08:00–18:00" },
+    "tip": { "en": "The Japanese maple near the greenhouse is exceptional. Ginkgo fan-leaves carpet the ground in gold by late October.", "fr": "L'érable japonais près de la serre est exceptionnel. Feuilles de ginkgo dorées fin octobre.", "nl": "De Japanse esdoorn bij de serre is uitzonderlijk. Ginkgoblaadjes bedekken de grond eind oktober.", "zh": "溫室旁的日本楓格外出色。十月底銀杏落葉鋪成金色地毯。" },
+    "gmaps": "https://maps.google.com/?q=Kruidtuin+Leuven"
+  },
+  {
+    "id": 12, "lat": 50.8744, "lng": 4.7024, "icon": "🍂", "status": "foliage",
+    "name": { "en": "Groot Begijnhof", "fr": "Grand Béguinage", "nl": "Groot Begijnhof", "zh": "大貝金霍夫" },
+    "flowers": { "en": "Virginia creeper, plane tree, linden — cobblestone lanes in autumn gold", "fr": "Vigne vierge, platane, tilleul — ruelles en or automnal", "nl": "Wilde wingerd, plataan, linde — kasseien in herfstgoud", "zh": "爬牆虎、梧桐、椴樹 — 石板巷弄秋金" },
+    "best": { "en": "Oct – Nov", "fr": "Oct – Nov", "nl": "Okt – Nov", "zh": "10月 – 11月" },
+    "hours": { "en": "Open 24h (outer grounds)", "fr": "Ouvert 24h/24 (extérieur)", "nl": "24u open (buitenterrein)", "zh": "全天開放（外部庭院）" },
+    "tip": { "en": "Virginia creeper turns deep crimson on the ancient walls. Walk the cobblestone lanes at golden hour for the most dramatic light.", "fr": "La vigne vierge devient cramoisi sur les vieux murs. Promenez-vous à l'heure dorée.", "nl": "Wilde wingerd wordt karmozijnrood op de oude muren. Wandel over kasseien tijdens het gouden uur.", "zh": "爬牆虎在古牆上染成深紅，石板巷弄在秋日黃金時刻光線最美，強烈推薦傍晚前往。" },
+    "gmaps": "https://maps.google.com/?q=Groot+Begijnhof+Leuven"
+  }
+]

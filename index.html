@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leuven Bloeit — Flower Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+/* ── TOKENS ── */
+:root{
+  --cream:#FAF6EF;--petal:#E8A0B0;--petal-dark:#C4607A;--petal-light:#F5D0D9;
+  --green:#4A7C59;--green-light:#D4EAD8;--amber:#D4882A;--amber-light:#F5E0B8;
+  --ink:#1E1A16;--ink-muted:#6B5E52;--ink-faint:#BFB5AA;
+  --white:#FFFFFF;--border:rgba(30,26,22,.10);
+  --info-bg:#EAF3FB;--info:#1A6FAA;
+  --success-bg:#D4EAD8;--success:#2E6640;
+  --danger-bg:#FAE0E0;--danger:#B03030;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;overflow-x:hidden;}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:1000;background:var(--cream);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px;}
+.logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;text-decoration:none;white-space:nowrap;}
+.logo-bloom{width:30px;height:30px;background:var(--petal-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.header-center{display:flex;gap:3px;}
+.nav-tab{padding:6px 13px;border-radius:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink-muted);cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.nav-tab:hover{background:rgba(30,26,22,.06);}
+.nav-tab.active{background:var(--ink);color:var(--white);font-weight:500;}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.weather-chip{display:flex;align-items:center;gap:6px;padding:5px 11px;background:var(--white);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--ink-muted);white-space:nowrap;}
+.weather-chip b{font-weight:500;color:var(--ink);}
+.wdot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.season-badge{padding:4px 11px;background:var(--petal-light);color:var(--petal-dark);border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
+.lang-switcher{display:flex;gap:2px;background:var(--cream);border:1px solid var(--border);border-radius:20px;padding:3px;}
+.lang-btn{padding:3px 8px;border-radius:14px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--ink-muted);cursor:pointer;transition:background .15s,color .15s;}
+.lang-btn.active{background:var(--ink);color:var(--white);}
+
+/* ── HERO ── */
+.hero{padding:18px 24px 0;display:flex;align-items:flex-end;justify-content:space-between;}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,36px);font-weight:600;line-height:1.15;color:var(--ink);}
+.hero-title em{font-style:italic;color:var(--petal-dark);}
+.hero-sub{font-size:13px;color:var(--ink-muted);margin-top:5px;}
+.hero-stats{display:flex;gap:20px;padding-bottom:4px;}
+.stat{text-align:right;}
+.stat-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:var(--ink);line-height:1;}
+.stat-label{font-size:11px;color:var(--ink-muted);margin-top:2px;}
+
+/* ── MAP LAYOUT ── */
+.layout{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 60px - 80px);min-height:440px;}
+@media(max-width:760px){
+  .layout{grid-template-columns:1fr;grid-template-rows:1fr 280px;}
+  .sidebar{order:2;border-right:none;border-top:1px solid var(--border);max-height:280px;}
+  #map{order:1;}
+  .season-badge{display:none;}
+}
+.sidebar{border-right:1px solid var(--border);overflow-y:auto;background:var(--white);scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.sidebar-section{padding:14px 18px;border-bottom:1px solid var(--border);}
+.sidebar-section:last-child{border-bottom:none;}
+.section-label{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;}
+
+/* ── FLOWER CARDS ── */
+.flower-card{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:background .15s;margin-bottom:3px;animation:fadeIn .4s ease both;}
+.flower-card:hover,.flower-card.active{background:var(--cream);}
+.flower-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.flower-info{flex:1;min-width:0;}
+.flower-name{font-size:13px;font-weight:500;color:var(--ink);}
+.flower-loc{font-size:11px;color:var(--ink-faint);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pill{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:500;flex-shrink:0;}
+.pill-peak{background:var(--petal-light);color:var(--petal-dark);}
+.pill-soon{background:var(--amber-light);color:var(--amber);}
+.pill-fading{background:var(--green-light);color:var(--green);}
+.pill-ended{background:#EEEBE6;color:var(--ink-faint);}
+.pill-foliage{background:#FDE8CC;color:#A0440A;}
+.marker-foliage{background:#D4610A;}
+
+/* ── WEATHER ── */
+.weather-row{display:flex;gap:7px;}
+.weather-card{flex:1;background:var(--cream);border-radius:10px;padding:9px;text-align:center;}
+.weather-val{font-size:17px;font-weight:500;color:var(--ink);}
+.weather-key{font-size:10px;color:var(--ink-faint);margin-top:2px;}
+
+/* ── WEEKLY STRIP ── */
+.cal-strip{display:flex;gap:3px;align-items:flex-end;height:44px;margin-bottom:4px;}
+.cal-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.cal-bar-wrap{width:100%;flex:1;display:flex;align-items:flex-end;}
+.cal-bar-inner{width:100%;border-radius:3px 3px 0 0;}
+.cal-month-label{font-size:9px;color:var(--ink-faint);margin-top:1px;}
+.cal-now{border-top:2px solid var(--petal-dark);}
+
+/* ── COMMUNITY REPORT CARDS ── */
+.report-card{display:flex;gap:10px;padding:9px 10px;border-radius:10px;margin-bottom:4px;background:var(--cream);}
+.report-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--petal-light);display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;}
+.report-thumb img{width:100%;height:100%;object-fit:cover;}
+.report-info{flex:1;min-width:0;}
+.report-loc{font-size:12px;font-weight:500;color:var(--ink);}
+.report-meta{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+.report-note{font-size:11px;color:var(--ink-muted);margin-top:3px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+/* ── iNAT TOGGLE ── */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--ink-muted);}
+.toggle{width:34px;height:19px;background:var(--border);border-radius:10px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:15px;height:15px;background:white;border-radius:50%;transition:transform .2s;}
+.toggle.on::after{transform:translateX(15px);}
+
+/* ── MAP ── */
+#map{z-index:1;}
+.leaflet-container{background:#E8EFE0 !important;}
+.marker-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;}
+.marker-circle{width:34px;height:34px;border-radius:50%;border:2.5px solid white;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:transform .15s;}
+.marker-circle:hover{transform:scale(1.15);}
+.marker-peak{background:var(--petal);}
+.marker-soon{background:#F0C060;}
+.marker-fading{background:#8FBF9A;}
+.marker-ended{background:#C8C4BC;}
+.marker-tip{background:white;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:500;color:var(--ink);margin-top:2px;box-shadow:0 1px 4px rgba(0,0,0,.12);white-space:nowrap;}
+.marker-inat{width:22px;height:22px;border-radius:50%;background:#2E6640;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 1px 5px rgba(0,0,0,.2);cursor:pointer;}
+
+/* ── POPUP ── */
+.leaflet-popup-content-wrapper{border-radius:14px !important;box-shadow:0 4px 20px rgba(0,0,0,.12) !important;padding:0 !important;overflow:hidden;font-family:'DM Sans',sans-serif !important;}
+.leaflet-popup-content{margin:0 !important;width:230px !important;}
+.leaflet-popup-tip-container{display:none;}
+.popup-inner{padding:15px;}
+.popup-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.popup-icon{font-size:22px;}
+.popup-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;}
+.popup-subtitle{font-size:11px;color:var(--ink-muted);}
+.popup-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);}
+.popup-row:last-of-type{border-bottom:none;}
+.popup-key{color:var(--ink-muted);}
+.popup-val{font-weight:500;text-align:right;max-width:135px;}
+.popup-tip{font-size:11px;color:var(--ink-muted);margin-top:8px;line-height:1.5;}
+.popup-btn{display:block;width:100%;margin-top:10px;padding:8px;background:var(--ink);color:var(--white);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;text-align:center;text-decoration:none;transition:opacity .15s;}
+.popup-btn:hover{opacity:.8;}
+.popup-report-btn{display:block;width:100%;margin-top:6px;padding:7px;background:var(--petal-light);color:var(--petal-dark);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:opacity .15s;}
+.popup-report-btn:hover{opacity:.8;}
+
+/* ── FOOTER ── */
+.footer-strip{height:28px;background:var(--white);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:14px;font-size:11px;color:var(--ink-faint);}
+.footer-dot{width:5px;height:5px;border-radius:50%;}
+.footer-item{display:flex;align-items:center;gap:5px;}
+
+/* ── LOADING ── */
+#loading{position:fixed;inset:0;z-index:9999;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s;}
+#loading.hidden{opacity:0;pointer-events:none;}
+.loading-title{font-family:'Playfair Display',serif;font-size:30px;font-style:italic;color:var(--ink);}
+.loading-bar{width:150px;height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
+.loading-fill{height:100%;width:0;background:var(--petal-dark);border-radius:2px;animation:load 1.6s ease forwards;}
+@keyframes load{to{width:100%;}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── ABOUT CARDS ── */
+.about-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.about-card-icon{font-size:22px;margin-bottom:7px;}
+.about-card-title{font-weight:500;margin-bottom:4px;font-size:14px;}
+.about-card-desc{font-size:12px;color:var(--ink-muted);line-height:1.6;}
+
+/* ── REPORT FORM (full tab) ── */
+.report-layout{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 60px);gap:0;}
+@media(max-width:760px){.report-layout{grid-template-columns:1fr;}}
+.report-form-col{padding:32px 32px;border-right:1px solid var(--border);overflow-y:auto;}
+.report-feed-col{padding:24px 24px;background:var(--white);overflow-y:auto;}
+.form-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;margin-bottom:6px;}
+.form-sub{font-size:13px;color:var(--ink-muted);margin-bottom:24px;line-height:1.6;}
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-size:12px;font-weight:500;color:var(--ink-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.form-select,.form-input,.form-textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--white);transition:border .15s;}
+.form-select:focus,.form-input:focus,.form-textarea:focus{outline:none;border-color:var(--petal-dark);}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.5;}
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.status-option{padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;font-size:13px;font-weight:500;transition:all .15s;}
+.status-option:hover{border-color:var(--petal-dark);}
+.status-option.selected{border-color:var(--petal-dark);background:var(--petal-light);color:var(--petal-dark);}
+.status-option.selected.s-soon{border-color:var(--amber);background:var(--amber-light);color:var(--amber);}
+.status-option.selected.s-fading{border-color:var(--green);background:var(--green-light);color:var(--green);}
+.status-option.selected.s-ended{border-color:var(--ink-faint);background:#EEEBE6;color:var(--ink-faint);}
+.status-option.selected.s-foliage{border-color:#A0440A;background:#FDE8CC;color:#A0440A;}
+.photo-drop{border:1.5px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:border .15s;background:var(--cream);}
+.photo-drop:hover,.photo-drop.dragover{border-color:var(--petal-dark);}
+.photo-drop-icon{font-size:28px;margin-bottom:8px;}
+.photo-drop-text{font-size:13px;color:var(--ink-muted);}
+.photo-drop-hint{font-size:11px;color:var(--ink-faint);margin-top:4px;}
+.photo-previews{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.photo-preview-item{position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;}
+.photo-preview-item img{width:100%;height:100%;object-fit:cover;}
+.photo-remove{position:absolute;top:3px;right:3px;width:18px;height:18px;background:rgba(0,0,0,.5);border-radius:50%;color:white;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;}
+.submit-btn{width:100%;padding:13px;background:var(--ink);color:var(--white);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .15s;margin-top:8px;}
+.submit-btn:hover{opacity:.85;}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+.form-toast{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;}
+.toast-success{background:var(--success-bg);color:var(--success);}
+.toast-error{background:var(--danger-bg);color:var(--danger);}
+
+/* ── FIREBASE NOTICE ── */
+.firebase-notice{background:var(--info-bg);border:1px solid #B5D4F4;border-radius:12px;padding:14px 16px;margin-bottom:20px;font-size:12px;color:var(--info);line-height:1.7;}
+.firebase-notice strong{font-weight:500;}
+
+/* ── SUBSCRIPTION ── */
+.sub-box{background:var(--petal-light);border-radius:14px;padding:20px;margin-top:24px;}
+.sub-title{font-weight:500;margin-bottom:4px;font-size:14px;color:var(--petal-dark);}
+.sub-desc{font-size:12px;color:var(--ink-muted);margin-bottom:12px;line-height:1.6;}
+.sub-row{display:flex;gap:8px;}
+.sub-input{flex:1;padding:9px 12px;border:1px solid rgba(196,96,122,.3);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--white);}
+.sub-input:focus{outline:none;border-color:var(--petal-dark);}
+.sub-btn{padding:9px 16px;background:var(--petal-dark);color:var(--white);border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity .15s;}
+.sub-btn:hover{opacity:.85;}
+
+/* ── INAT SECTION ── */
+.inat-badge{display:inline-flex;align-items:center;gap:5px;background:var(--success-bg);color:var(--success);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500;margin-bottom:8px;}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ LOADING ════════════════ -->
+<div id="loading">
+  <div style="font-size:34px;">🌸</div>
+  <div class="loading-title">Leuven Bloeit</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+  <div id="loading-sub" style="font-size:12px;color:var(--ink-muted);">Loading…</div>
+</div>
+
+<!-- ════════════════ HEADER ════════════════ -->
+<header>
+  <a href="#" class="logo"><div class="logo-bloom">🌸</div>Leuven Bloeit</a>
+  <div class="header-center">
+    <button class="nav-tab active" onclick="switchTab('map',this)" data-i18n="tab_map"></button>
+    <button class="nav-tab" onclick="switchTab('calendar',this)" data-i18n="tab_calendar"></button>
+    <button class="nav-tab" onclick="switchTab('report',this)" data-i18n="tab_report"></button>
+    <button class="nav-tab" onclick="switchTab('about',this)" data-i18n="tab_about"></button>
+  </div>
+  <div class="header-right">
+    <div class="weather-chip"><div class="wdot"></div><b id="hdr-temp">—°C</b><span id="hdr-desc" style="margin-left:2px;">…</span></div>
+    <div class="season-badge" id="season-badge"></div>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en',this)">EN</button>
+      <button class="lang-btn" onclick="setLang('fr',this)">FR</button>
+      <button class="lang-btn" onclick="setLang('nl',this)">NL</button>
+      <button class="lang-btn" onclick="setLang('zh',this)">中</button>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════ MAP TAB ════════════════ -->
+<div id="tab-map" class="tab-panel active">
+  <div class="hero">
+    <div>
+      <h1 class="hero-title" id="hero-title"></h1>
+      <p class="hero-sub" id="hero-sub"></p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num" id="stat-peak">—</div><div class="stat-label" id="stat-peak-lbl"></div></div>
+      <div class="stat"><div class="stat-num" id="stat-soon">—</div><div class="stat-label" id="stat-soon-lbl"></div></div>
+    </div>
+  </div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="section-label" id="lbl-spots"></div>
+        <div id="flower-list"></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="section-label" id="lbl-community"></div>
+        <div id="community-feed">
+          <div style="font-size:12px;color:var(--ink-faint);padding:4px 0;" id="feed-empty"></div>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="section-label" id="lbl-weather"></div>
+        <div class="weather-row">
+          <div class="weather-card"><div class="weather-val" id="w-temp">—</div><div class="weather-key" id="w-temp-lbl"></div></div>
+          <div class="weather-card"><div class="weather-val" id="w-rain">—</div><div class="weather-key" id="w-rain-lbl"></div></div>
+          <div class="weather-card"><div class="weather-val" id="w-wind">—</div><div class="weather-key" id="w-wind-lbl"></div></div>
+        </div>
+        <p style="font-size:10px;color:var(--ink-faint);margin-top:7px;" id="weather-source"></p>
+      </div>
+      <div class="sidebar-section">
+        <div class="toggle-row">
+          <div>
+            <div class="section-label" style="margin-bottom:2px;" id="lbl-inat"></div>
+            <div class="inat-badge" id="inat-count-badge">iNaturalist</div>
+          </div>
+          <button class="toggle on" id="inat-toggle" onclick="toggleInat(this)" title="Toggle iNaturalist"></button>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="section-label" id="lbl-week"></div>
+        <div id="cal-strip" class="cal-strip"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px;">
+          <span style="font-size:10px;color:var(--ink-faint);" id="day-start"></span>
+          <span style="font-size:10px;color:var(--ink-faint);" id="day-today"></span>
+          <span style="font-size:10px;color:var(--ink-faint);" id="day-end"></span>
+        </div>
+      </div>
+    </aside>
+    <div id="map"></div>
+  </div>
+  <div class="footer-strip">
+    <div class="footer-item"><div class="footer-dot" style="background:var(--petal);"></div><span id="leg-peak"></span></div>
+    <div class="footer-item"><div class="footer-dot" style="background:#F0C060;"></div><span id="leg-soon"></span></div>
+    <div class="footer-item"><div class="footer-dot" style="background:#8FBF9A;"></div><span id="leg-fading"></span></div>
+    <div class="footer-item"><div class="footer-dot" style="background:#C8C4BC;"></div><span id="leg-ended"></span></div>
+    <div class="footer-item"><div class="footer-dot" style="background:#2E6640;"></div><span id="leg-inat"></span></div>
+    <div class="footer-item"><div class="footer-dot" style="background:#D4610A;"></div><span id="leg-foliage"></span></div>
+    <span style="margin-left:auto;">© OpenStreetMap · iNaturalist</span>
+  </div>
+</div>
+
+<!-- ════════════════ CALENDAR TAB ════════════════ -->
+<div id="tab-calendar" class="tab-panel">
+  <div style="max-width:740px;margin:0 auto;padding:36px 24px;">
+    <h2 style="font-family:'Playfair Display',serif;font-size:30px;font-weight:600;margin-bottom:5px;" id="cal-title"></h2>
+    <p style="font-size:14px;color:var(--ink-muted);margin-bottom:28px;" id="cal-sub"></p>
+    <div id="calendar-grid"></div>
+    <p style="font-size:11px;color:var(--ink-faint);margin-top:20px;" id="cal-note"></p>
+    <!-- Email subscription -->
+    <div class="sub-box" id="sub-box">
+      <div class="sub-title" id="sub-title"></div>
+      <div class="sub-desc" id="sub-desc"></div>
+      <div class="sub-row">
+        <input class="sub-input" type="email" id="sub-email" />
+        <button class="sub-btn" onclick="subscribeEmail()" id="sub-btn"></button>
+      </div>
+      <div id="sub-msg" style="font-size:12px;margin-top:8px;display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ REPORT TAB ════════════════ -->
+<div id="tab-report" class="tab-panel">
+  <div class="report-layout">
+    <!-- Left: form -->
+    <div class="report-form-col">
+      <h2 class="form-title" id="rpt-title"></h2>
+      <p class="form-sub" id="rpt-sub"></p>
+
+      <!-- Firebase notice when not configured -->
+      <div class="firebase-notice" id="firebase-notice">
+        <strong id="fb-notice-title"></strong><br>
+        <span id="fb-notice-body"></span>
+      </div>
+
+      <div id="rpt-toast" class="form-toast"></div>
+
+      <div class="form-group">
+        <label class="form-label" id="rpt-lbl-location"></label>
+        <select class="form-select" id="rpt-location"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="rpt-lbl-status"></label>
+        <div class="status-grid" id="rpt-status-grid"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="rpt-lbl-photo"></label>
+        <div class="photo-drop" id="photo-drop" onclick="document.getElementById('photo-input').click()" ondragover="onDragOver(event)" ondrop="onDrop(event)">
+          <div class="photo-drop-icon">📷</div>
+          <div class="photo-drop-text" id="photo-drop-text"></div>
+          <div class="photo-drop-hint" id="photo-drop-hint"></div>
+        </div>
+        <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(this.files)">
+        <div class="photo-previews" id="photo-previews"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="rpt-lbl-note"></label>
+        <textarea class="form-textarea" id="rpt-note" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="rpt-lbl-name"></label>
+        <input class="form-input" type="text" id="rpt-name" maxlength="40">
+      </div>
+      <button class="submit-btn" onclick="submitReport()" id="rpt-submit"></button>
+    </div>
+    <!-- Right: recent reports feed -->
+    <div class="report-feed-col">
+      <div class="section-label" id="rpt-lbl-feed"></div>
+      <div id="report-feed-list">
+        <div style="font-size:13px;color:var(--ink-faint);padding:12px 0;" id="feed-loading-msg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ ABOUT TAB ════════════════ -->
+<div id="tab-about" class="tab-panel">
+  <div style="max-width:620px;margin:0 auto;padding:44px 24px;">
+    <h2 style="font-family:'Playfair Display',serif;font-size:30px;font-weight:600;margin-bottom:14px;" id="about-title"></h2>
+    <p style="font-size:15px;color:var(--ink-muted);line-height:1.8;margin-bottom:20px;" id="about-desc"></p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:28px;" id="about-features"></div>
+    <div style="background:var(--green-light);border-radius:14px;padding:18px;">
+      <div style="font-weight:500;margin-bottom:5px;color:var(--green);" id="about-next-title"></div>
+      <div style="font-size:13px;color:var(--ink-muted);line-height:1.7;" id="about-next-desc"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<!-- Firebase SDK (compat) — loaded from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-firestore-compat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-storage-compat.min.js"></script>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   ██████  FIREBASE CONFIG
+   ════════════════════════════════════════════════════════════
+   1. Go to https://console.firebase.google.com
+   2. Create a project → Add a web app
+   3. Copy your config here and set FIREBASE_ENABLED = true
+   4. Enable Firestore Database and Storage in the console
+   5. Set Firestore rules (see README.md)
+   ════════════════════════════════════════════════════════════ */
+const FIREBASE_ENABLED = false; // ← set to true after adding your config
+
+const firebaseConfig = {
+  apiKey:            "YOUR_API_KEY",
+  authDomain:        "YOUR_PROJECT.firebaseapp.com",
+  projectId:         "YOUR_PROJECT_ID",
+  storageBucket:     "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId:             "YOUR_APP_ID"
+};
+
+let db = null, storage = null;
+if (FIREBASE_ENABLED) {
+  firebase.initializeApp(firebaseConfig);
+  db      = firebase.firestore();
+  storage = firebase.storage();
+}
+
+/* ════════════════════════════════════════════════════════════
+   TRANSLATIONS
+   ════════════════════════════════════════════════════════════ */
+const LANGS = {
+  en: {
+    tab_map:'Map', tab_calendar:'Calendar', tab_report:'Report', tab_about:'About',
+    season:'🌷 Spring in bloom',
+    loading:'Loading…',
+    hero_title:'Leuven is <em>in bloom</em>',
+    hero_sub:'Live flower conditions · Interactive map · Leuven',
+    stat_peak:'in bloom', stat_soon:'coming soon',
+    lbl_spots:'Flower Spots',
+    lbl_community:'Community Reports',
+    feed_empty:'No reports yet — be the first!',
+    feed_loading:'Loading reports…',
+    lbl_weather:"Today's Weather · Leuven",
+    w_temp:'Temp °C', w_rain:'Rain %', w_wind:'Wind km/h',
+    weather_source:'Source: Open-Meteo API (free & open)',
+    lbl_inat:'iNaturalist Observations',
+    lbl_week:'Bloom intensity this week',
+    day_start:'Mon', day_today:'Today', day_end:'Sun',
+    leg_peak:'In bloom', leg_soon:'Coming soon', leg_fading:'Fading', leg_ended:'Ended', leg_inat:'iNaturalist', leg_foliage:'Autumn foliage',
+    status:{peak:'In bloom', soon:'Coming soon', fading:'Fading', ended:'Ended', foliage:'Autumn foliage'},
+    popup_status:'Status', popup_flowers:'Flowers', popup_best:'Best time', popup_hours:'Hours',
+    popup_gmaps:'Open in Google Maps →', popup_report:'Report condition →',
+    cal_title:'Flower Calendar', cal_sub:'Annual bloom timeline for Leuven',
+    cal_note:'* Bloom dates vary by year and climate conditions.',
+    cal_now_label:'Now',
+    sub_title:'🌸 Get bloom alerts',
+    sub_desc:'Receive an email when your favourite spots come into bloom.',
+    sub_placeholder:'your@email.com',
+    sub_btn:'Subscribe',
+    sub_success:'Subscribed! We\'ll notify you when it\'s time.',
+    sub_error:'Something went wrong. Please try again.',
+    rpt_title:'Report a bloom condition',
+    rpt_sub:'Help the community by sharing what you see in the field.',
+    fb_notice_title:'Firebase not yet connected',
+    fb_notice_body:'Set FIREBASE_ENABLED = true and add your config to save reports. Until then, submissions are previewed locally.',
+    rpt_lbl_location:'Location',
+    rpt_lbl_status:'Condition',
+    rpt_lbl_photo:'Photos (optional)',
+    rpt_lbl_note:'Note',
+    rpt_lbl_name:'Your name (optional)',
+    rpt_photo_text:'Click or drag photos here',
+    rpt_photo_hint:'JPEG / PNG · max 5 MB per photo',
+    rpt_submit:'Submit report',
+    rpt_success:'Thank you! Your report has been submitted.',
+    rpt_error:'Submission failed. Please try again.',
+    rpt_lbl_feed:'Recent community reports',
+    rpt_select_location:'Select a location…',
+    rpt_name_placeholder:'Anonymous',
+    rpt_note_placeholder:'What did you see? How many flowers? Any tips?',
+    about_title:'About Leuven Bloeit',
+    about_desc:"Leuven Bloeit (\"Leuven Blooms\") is an interactive map tracking flower conditions across Leuven's parks and gardens — helping residents and visitors find the best bloom spots at the right time.",
+    about_features:[
+      {icon:'🗺️', title:'Interactive map', desc:'Leaflet.js + OpenStreetMap — open source'},
+      {icon:'🌤️', title:'Live weather', desc:'Open-Meteo API, updated hourly'},
+      {icon:'📸', title:'Community reports', desc:'User photo reports via Firebase'},
+      {icon:'🌿', title:'iNaturalist data', desc:'Real plant observations around Leuven'},
+      {icon:'📅', title:'Bloom calendar', desc:'Full-year timeline to plan visits'},
+      {icon:'📬', title:'Bloom alerts', desc:'Email notifications when spots peak'},
+    ],
+    about_next_title:'Tech stack (free tier)',
+    about_next_desc:'Firebase Firestore + Storage · Open-Meteo · OpenStreetMap / Leaflet · iNaturalist API · GitHub Pages hosting',
+    weather_desc:{0:'Clear',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Drizzle',61:'Light rain',63:'Rain',71:'Light snow',80:'Showers',95:'Thunderstorm'},
+    time_ago:{just:'Just now', min:'min ago', hr:'hr ago', day:'day ago', days:'days ago'},
+    inat_obs:'observation',
+    inat_obs_pl:'observations',
+  },
+  fr: {
+    tab_map:'Carte', tab_calendar:'Calendrier', tab_report:'Signaler', tab_about:'À propos',
+    season:'🌷 Printemps fleuri',
+    loading:'Chargement…',
+    hero_title:'Louvain est <em>en fleurs</em>',
+    hero_sub:'Conditions florales en direct · Carte interactive · Louvain',
+    stat_peak:'en fleurs', stat_soon:'bientôt',
+    lbl_spots:'Sites fleuris',
+    lbl_community:'Signalements',
+    feed_empty:'Aucun signalement pour l\'instant — soyez le premier !',
+    feed_loading:'Chargement…',
+    lbl_weather:'Météo du jour · Louvain',
+    w_temp:'Temp °C', w_rain:'Pluie %', w_wind:'Vent km/h',
+    weather_source:'Source : Open-Meteo API (libre)',
+    lbl_inat:'Observations iNaturalist',
+    lbl_week:'Intensité florale cette semaine',
+    day_start:'Lun', day_today:"Auj.", day_end:'Dim',
+    leg_peak:'En fleurs', leg_soon:'Bientôt', leg_fading:'En déclin', leg_ended:'Terminé', leg_inat:'iNaturalist', leg_foliage:'Feuillage automnal',
+    status:{peak:'En fleurs', soon:'Bientôt', fading:'En déclin', ended:'Terminé', foliage:'Feuillage automnal'},
+    popup_status:'Statut', popup_flowers:'Fleurs', popup_best:'Meilleure période', popup_hours:'Horaires',
+    popup_gmaps:'Ouvrir dans Google Maps →', popup_report:'Signaler →',
+    cal_title:'Calendrier floral', cal_sub:'Chronologie annuelle des floraisons',
+    cal_note:'* Les dates varient selon les années et le climat.',
+    cal_now_label:'Maintenant',
+    sub_title:'🌸 Alertes de floraison',
+    sub_desc:'Recevez un e-mail quand vos sites préférés sont en fleurs.',
+    sub_placeholder:'votre@email.com',
+    sub_btn:'S\'abonner',
+    sub_success:'Abonné(e) ! Nous vous contacterons à la floraison.',
+    sub_error:'Une erreur est survenue. Réessayez.',
+    rpt_title:'Signaler une floraison',
+    rpt_sub:'Aidez la communauté en partageant ce que vous observez.',
+    fb_notice_title:'Firebase non connecté',
+    fb_notice_body:'Activez FIREBASE_ENABLED et ajoutez votre config pour sauvegarder les signalements.',
+    rpt_lbl_location:'Lieu',
+    rpt_lbl_status:'État',
+    rpt_lbl_photo:'Photos (optionnel)',
+    rpt_lbl_note:'Note',
+    rpt_lbl_name:'Votre nom (optionnel)',
+    rpt_photo_text:'Cliquez ou déposez des photos ici',
+    rpt_photo_hint:'JPEG / PNG · max 5 Mo par photo',
+    rpt_submit:'Envoyer le signalement',
+    rpt_success:'Merci ! Votre signalement a été envoyé.',
+    rpt_error:'Échec de l\'envoi. Réessayez.',
+    rpt_lbl_feed:'Signalements récents',
+    rpt_select_location:'Choisissez un lieu…',
+    rpt_name_placeholder:'Anonyme',
+    rpt_note_placeholder:'Qu\'avez-vous observé ?',
+    about_title:'À propos de Leuven Bloeit',
+    about_desc:"Leuven Bloeit (« Louvain s'épanouit ») suit les conditions florales dans les parcs de Louvain.",
+    about_features:[
+      {icon:'🗺️', title:'Carte interactive', desc:'Leaflet.js + OpenStreetMap'},
+      {icon:'🌤️', title:'Météo en direct', desc:'API Open-Meteo, toutes les heures'},
+      {icon:'📸', title:'Signalements', desc:'Photos des utilisateurs via Firebase'},
+      {icon:'🌿', title:'Données iNaturalist', desc:'Observations réelles de plantes'},
+      {icon:'📅', title:'Calendrier floral', desc:'Chronologie annuelle'},
+      {icon:'📬', title:'Alertes floraison', desc:'Notifications par e-mail'},
+    ],
+    about_next_title:'Stack technique (gratuit)',
+    about_next_desc:'Firebase · Open-Meteo · OpenStreetMap / Leaflet · iNaturalist · GitHub Pages',
+    weather_desc:{0:'Ensoleillé',1:'Dégagé',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',48:'Brouillard givrant',51:'Bruine',61:'Pluie légère',63:'Pluie',71:'Neige légère',80:'Averses',95:'Orage'},
+    time_ago:{just:'À l\'instant', min:'min', hr:'h', day:'j', days:'j'},
+    inat_obs:'observation', inat_obs_pl:'observations',
+  },
+  nl: {
+    tab_map:'Kaart', tab_calendar:'Kalender', tab_report:'Melden', tab_about:'Over',
+    season:'🌷 Lente bloeit',
+    loading:'Laden…',
+    hero_title:'Leuven staat <em>in bloei</em>',
+    hero_sub:'Live bloeistatus · Interactieve kaart · Leuven',
+    stat_peak:'in bloei', stat_soon:'binnenkort',
+    lbl_spots:'Bloeilocaties',
+    lbl_community:'Gemeenschapsmeldingen',
+    feed_empty:'Nog geen meldingen — wees de eerste!',
+    feed_loading:'Laden…',
+    lbl_weather:'Weer vandaag · Leuven',
+    w_temp:'Temp °C', w_rain:'Regen %', w_wind:'Wind km/u',
+    weather_source:'Bron: Open-Meteo API',
+    lbl_inat:'iNaturalist Waarnemingen',
+    lbl_week:'Bloei-intensiteit deze week',
+    day_start:'Ma', day_today:'Vandaag', day_end:'Zo',
+    leg_peak:'In bloei', leg_soon:'Binnenkort', leg_fading:'Afnemend', leg_ended:'Voorbij', leg_inat:'iNaturalist', leg_foliage:'Herfstkleur',
+    status:{peak:'In bloei', soon:'Binnenkort', fading:'Afnemend', ended:'Voorbij', foliage:'Herfstkleur'},
+    popup_status:'Status', popup_flowers:'Bloemen', popup_best:'Beste periode', popup_hours:'Openingsuren',
+    popup_gmaps:'Openen in Google Maps →', popup_report:'Bloei melden →',
+    cal_title:'Bloeikalender', cal_sub:'Jaarlijkse bloeitijdlijn voor Leuven',
+    cal_note:'* Bloeidata variëren per jaar.',
+    cal_now_label:'Nu',
+    sub_title:'🌸 Bloeialarmen',
+    sub_desc:'Ontvang een e-mail als jouw favoriete plekken in bloei staan.',
+    sub_placeholder:'jouw@email.com',
+    sub_btn:'Abonneren',
+    sub_success:'Geabonneerd! We laten je weten als het bloeit.',
+    sub_error:'Er ging iets mis. Probeer opnieuw.',
+    rpt_title:'Bloei melden',
+    rpt_sub:'Help de gemeenschap door te delen wat je ziet.',
+    fb_notice_title:'Firebase nog niet verbonden',
+    fb_notice_body:'Stel FIREBASE_ENABLED in op true en voeg je config toe om meldingen op te slaan.',
+    rpt_lbl_location:'Locatie',
+    rpt_lbl_status:'Status',
+    rpt_lbl_photo:"Foto's (optioneel)",
+    rpt_lbl_note:'Notitie',
+    rpt_lbl_name:'Jouw naam (optioneel)',
+    rpt_photo_text:"Klik of sleep foto's hier",
+    rpt_photo_hint:'JPEG / PNG · max 5 MB per foto',
+    rpt_submit:'Melding versturen',
+    rpt_success:'Bedankt! Je melding is verstuurd.',
+    rpt_error:'Verzenden mislukt. Probeer opnieuw.',
+    rpt_lbl_feed:'Recente meldingen',
+    rpt_select_location:'Kies een locatie…',
+    rpt_name_placeholder:'Anoniem',
+    rpt_note_placeholder:'Wat heb je gezien?',
+    about_title:'Over Leuven Bloeit',
+    about_desc:'Leuven Bloeit volgt de bloeistatus in de parken van Leuven.',
+    about_features:[
+      {icon:'🗺️', title:'Interactieve kaart', desc:'Leaflet.js + OpenStreetMap'},
+      {icon:'🌤️', title:'Live weer', desc:'Open-Meteo API, elk uur'},
+      {icon:'📸', title:'Gemeenschapsmeldingen', desc:"Gebruikersfoto's via Firebase"},
+      {icon:'🌿', title:'iNaturalist', desc:'Echte plantwaarnemingen'},
+      {icon:'📅', title:'Bloeikalender', desc:'Jaaroverzicht'},
+      {icon:'📬', title:'Bloeialarmen', desc:'E-mailmeldingen'},
+    ],
+    about_next_title:'Tech stack (gratis)',
+    about_next_desc:'Firebase · Open-Meteo · OpenStreetMap / Leaflet · iNaturalist · GitHub Pages',
+    weather_desc:{0:'Helder',1:'Overwegend helder',2:'Gedeeltelijk bewolkt',3:'Bewolkt',45:'Mistig',48:'IJsmist',51:'Motregen',61:'Lichte regen',63:'Regen',71:'Lichte sneeuw',80:'Buien',95:'Onweer'},
+    time_ago:{just:'Zojuist', min:'min geleden', hr:'uur geleden', day:'dag geleden', days:'dagen geleden'},
+    inat_obs:'waarneming', inat_obs_pl:'waarnemingen',
+  },
+  zh: {
+    tab_map:'地圖', tab_calendar:'花季', tab_report:'回報', tab_about:'關於',
+    season:'🌷 春季盛開',
+    loading:'載入花況資料中…',
+    hero_title:'魯汶正在<em>盛開</em>',
+    hero_sub:'即時花況 · 互動地圖 · 魯汶',
+    stat_peak:'地點盛開中', stat_soon:'即將開放',
+    lbl_spots:'賞花地點',
+    lbl_community:'社群回報',
+    feed_empty:'還沒有回報，成為第一個！',
+    feed_loading:'載入中…',
+    lbl_weather:'今日天氣 · 魯汶',
+    w_temp:'氣溫 °C', w_rain:'降雨機率 %', w_wind:'風速 km/h',
+    weather_source:'資料來源：Open-Meteo API',
+    lbl_inat:'iNaturalist 植物觀測',
+    lbl_week:'本週花況走勢',
+    day_start:'週一', day_today:'今天', day_end:'週日',
+    leg_peak:'盛開中', leg_soon:'即將開放', leg_fading:'漸漸凋謝', leg_ended:'已結束', leg_inat:'iNaturalist', leg_foliage:'楓葉觀賞',
+    status:{peak:'盛開中', soon:'即將開放', fading:'漸漸凋謝', ended:'已結束', foliage:'楓葉觀賞'},
+    popup_status:'狀態', popup_flowers:'花種', popup_best:'最佳時間', popup_hours:'開放時間',
+    popup_gmaps:'在 Google Maps 開啟 →', popup_report:'回報花況 →',
+    cal_title:'魯汶花季日曆', cal_sub:'全年開花時間表',
+    cal_note:'* 開花時間受氣候影響，以實際花況為準。',
+    cal_now_label:'現在',
+    sub_title:'🌸 花季訂閱通知',
+    sub_desc:'當你喜歡的地點盛開時，我們會傳送 Email 通知你。',
+    sub_placeholder:'你的 Email',
+    sub_btn:'訂閱',
+    sub_success:'訂閱成功！花季到來時我們會通知你。',
+    sub_error:'出了點問題，請重試。',
+    rpt_title:'回報花況',
+    rpt_sub:'分享你在現場的觀察，幫助大家掌握最新花況！',
+    fb_notice_title:'Firebase 尚未連結',
+    fb_notice_body:'將 FIREBASE_ENABLED 設為 true 並填入設定，才能儲存回報。目前提交僅在本地預覽。',
+    rpt_lbl_location:'地點',
+    rpt_lbl_status:'花況狀態',
+    rpt_lbl_photo:'上傳照片（可選）',
+    rpt_lbl_note:'備註',
+    rpt_lbl_name:'你的名字（可選）',
+    rpt_photo_text:'點擊或拖曳照片到這裡',
+    rpt_photo_hint:'JPEG / PNG · 每張最大 5 MB',
+    rpt_submit:'提交回報',
+    rpt_success:'謝謝！你的回報已送出。',
+    rpt_error:'提交失敗，請重試。',
+    rpt_lbl_feed:'最新社群回報',
+    rpt_select_location:'選擇地點…',
+    rpt_name_placeholder:'匿名',
+    rpt_note_placeholder:'你看到了什麼？花開幾成？有什麼小提示？',
+    about_title:'關於 Leuven Bloeit',
+    about_desc:'Leuven Bloeit（魯汶盛開）記錄魯汶各公園的即時花況，幫助居民與遊客找到最美的賞花地點。',
+    about_features:[
+      {icon:'🗺️', title:'互動地圖', desc:'Leaflet.js + OpenStreetMap'},
+      {icon:'🌤️', title:'即時天氣', desc:'Open-Meteo API，每小時更新'},
+      {icon:'📸', title:'社群照片回報', desc:'用戶照片透過 Firebase 儲存'},
+      {icon:'🌿', title:'iNaturalist 資料', desc:'魯汶附近真實植物觀測'},
+      {icon:'📅', title:'花季日曆', desc:'全年開花時間表'},
+      {icon:'📬', title:'花季通知', desc:'Email 訂閱提醒'},
+    ],
+    about_next_title:'技術棧（全免費方案）',
+    about_next_desc:'Firebase Firestore + Storage · Open-Meteo · OpenStreetMap / Leaflet · iNaturalist API · GitHub Pages',
+    weather_desc:{0:'晴天',1:'大致晴朗',2:'多雲',3:'陰天',45:'有霧',48:'冰霧',51:'毛毛雨',61:'小雨',63:'有雨',71:'小雪',80:'陣雨',95:'雷雨'},
+    time_ago:{just:'剛剛', min:'分鐘前', hr:'小時前', day:'天前', days:'天前'},
+    inat_obs:'筆觀測', inat_obs_pl:'筆觀測',
+  }
+};
+
+/* ════════════════════════════════════════════════════════════
+   SPOT DATA
+   ════════════════════════════════════════════════════════════ */
+const SPOTS = [
+  {id:1,lat:50.8778,lng:4.6912,icon:'🌸',status:'peak',
+   name:{en:'Botanical Garden',fr:'Jardin botanique',nl:'Kruidtuin',zh:'植物園'},
+   flowers:{en:'Wisteria, roses, camellia, medicinal herbs',fr:'Glycine, roses, camélia, plantes médicinales',nl:'Blauweregen, rozen, camelia, kruiden',zh:'紫藤、玫瑰、山茶花、藥草'},
+   best:{en:'Mid Apr – Mid May',fr:'Mi-avr – Mi-mai',nl:'Half apr – Half mei',zh:'4月中 – 5月中'},
+   hours:{en:'08:00–18:00',fr:'08:00–18:00',nl:'08:00–18:00',zh:'08:00–18:00'},
+   tip:{en:"Belgium's oldest botanical garden (1738). Camellia & crocus bloom early; wisteria peaks in April. Free entry.",fr:'Le plus ancien jardin botanique (1738). Camélia et crocus fleurissent tôt. Entrée gratuite.',nl:'Oudste botanische tuin (1738). Camelia en krokus bloeien vroeg. Gratis.',zh:'比利時最古老植物園（1738年）。山茶花與番紅花早春開放，四月紫藤盛開。免費。'},
+   gmaps:'https://maps.google.com/?q=Kruidtuin+Leuven'},
+  {id:2,lat:50.8769,lng:4.6898,icon:'🌿',status:'peak',
+   name:{en:'Sunken Garden',fr:'Jardin en creux',nl:'Verzonken Tuin',zh:'沉園'},
+   flowers:{en:'Crocus, seasonal perennials, ornamental grasses',fr:'Crocus, vivaces saisonnières, graminées',nl:'Krokus, vaste planten, siergrassen',zh:'番紅花、季節花卉、觀葉植物'},
+   best:{en:'Feb–Oct',fr:'Fév–Oct',nl:'Feb–Okt',zh:'2月–10月'},
+   hours:{en:'Open 24h',fr:'Ouvert 24h/24',nl:'24u open',zh:'全天開放'},
+   tip:{en:'Crocus carpets appear as early as February. Hidden beside the Botanical Garden — perfect for a quiet picnic.',fr:'Tapis de crocus dès février. Caché à côté du jardin botanique.',nl:'Krokustapijten al in februari. Verborgen naast de Kruidtuin.',zh:'二月起番紅花就鋪成花毯，藏在植物園旁，適合野餐。'},
+   gmaps:'https://maps.google.com/?q=Verzonken+Tuin+Leuven'},
+  {id:3,lat:50.8768,lng:4.6937,icon:'🌼',status:'peak',
+   name:{en:'Janseniuspark',fr:'Parc Jansénius',nl:'Janseniuspark',zh:'雅森尼斯公園'},
+   flowers:{en:'Crocus, wildflowers, spring bulbs, narcissus',fr:'Crocus, fleurs sauvages, bulbes, narcisses',nl:'Krokus, wilde bloemen, bollen, narcissen',zh:'番紅花、野花、春季球根、水仙'},
+   best:{en:'Feb–May',fr:'Fév–Mai',nl:'Feb–Mei',zh:'2月–5月'},
+   hours:{en:'Open 24h',fr:'Ouvert 24h/24',nl:'24u open',zh:'全天開放'},
+   tip:{en:'A hidden city gem — crocus and narcissus carpet the lawns in late February. Sometimes a cat wanders through!',fr:'Un joyau caché — crocus et narcisses en fin février. Parfois un chat se promène !',nl:'Een verborgen parel — krokus en narcissen in late februari. Soms loopt er een kat rond!',zh:'二月底番紅花與水仙鋪滿草地，有時有貓咪出沒！'},
+   gmaps:'https://maps.google.com/?q=Janseniuspark+Leuven'},
+  {id:4,lat:50.8813,lng:4.6969,icon:'🌱',status:'fading',
+   name:{en:'Dijle Terraces',fr:'Terrasses de la Dyle',nl:'Dijleterrassen',zh:'迪耶勒河台地'},
+   flowers:{en:'Cherry blossom, riverside wildflowers, willows',fr:'Cerisier en fleurs, fleurs riveraines, saules',nl:'Kersenbloesem, oeverplanten, wilgen',zh:'櫻花、水邊草花、柳枝'},
+   best:{en:'Mar–Mid Apr',fr:'Mar–Mi-avr',nl:'Mrt–Half apr',zh:'3月–4月中'},
+   hours:{en:'Open 24h',fr:'Ouvert 24h/24',nl:'24u open',zh:'全天開放'},
+   tip:{en:'Cherry trees line the riverbank — stunning in late March. Spring flowers now fading.',fr:'Les cerisiers longent la rive — magnifiques fin mars.',nl:'Kerselaarstraat langs de oever — prachtig eind maart.',zh:'河堤櫻花樹列，三月底最美，春花現已漸退。'},
+   gmaps:'https://maps.google.com/?q=Dijleterrassen+Leuven'},
+  {id:5,lat:50.8626,lng:4.6839,icon:'🌷',status:'soon',
+   name:{en:'Arenberg Castle Park',fr:"Parc du Château d'Arenberg",nl:'Kasteelpark Arenberg',zh:'阿倫堡城堡公園'},
+   flowers:{en:'Cherry blossom, roses, peonies, meadow wildflowers',fr:'Cerisier, roses, pivoines, fleurs des prés',nl:'Kersenbloesem, rozen, pioenen, weidebloemen',zh:'櫻花、玫瑰、牡丹、草地野花'},
+   best:{en:'Mar–Jun',fr:'Mar–Juin',nl:'Mrt–Jun',zh:'3月–6月'},
+   hours:{en:'Open 24h',fr:'Ouvert 24h/24',nl:'24u open',zh:'全天開放'},
+   tip:{en:'Cherry blossom in March, then roses and peonies through June. KU Leuven campus — great for picnics.',fr:'Cerisiers en mars, puis roses et pivoines jusqu\'en juin. Campus KU Leuven.',nl:'Kerselaar in maart, dan rozen en pioenen tot juni. KU Leuven campus.',zh:'三月賞櫻，六月玫瑰牡丹接力。魯汶大學校園，適合野餐。'},
+   gmaps:'https://maps.google.com/?q=Kasteelpark+Arenberg+Leuven'},
+  {id:6,lat:50.8643,lng:4.7174,icon:'🌺',status:'soon',
+   name:{en:'Park Abbey',fr:'Abbaye du Parc',nl:'Abdij van Park',zh:'公園修道院'},
+   flowers:{en:'Plum blossom, hydrangea, abbey garden flowers, lakeside wildflowers',fr:'Prunier en fleurs, hortensia, jardin abbatial, fleurs des rives',nl:'Pruimenbloesem, hortensia, abdijtuin, oeverbloemen',zh:'梅花、繡球花、修道院花園、湖邊野花'},
+   best:{en:'Feb–Jun',fr:'Fév–Juin',nl:'Feb–Jun',zh:'2月–6月'},
+   hours:{en:'Tue–Sun 10:00–17:00',fr:'Mar–Dim 10:00–17:00',nl:'Di–Zo 10:00–17:00',zh:'週二–日 10:00–17:00'},
+   tip:{en:'Plum trees bloom as early as February. 12th-century abbey with stunning lakeside gardens in late spring.',fr:'Les pruniers fleurissent dès février. Abbaye du XIIe siècle.',nl:'Pruimenbomen al in februari. 12e-eeuwse abdij met meertuinen.',zh:'梅花二月最早開放。12世紀古修道院，春末湖畔景色動人。'},
+   gmaps:'https://maps.google.com/?q=Park+Abbey+Leuven'},
+  {id:7,lat:50.8744,lng:4.7024,icon:'🌸',status:'fading',
+   name:{en:'Groot Begijnhof',fr:'Grand Béguinage',nl:'Groot Begijnhof',zh:'大貝金霍夫'},
+   flowers:{en:'Cherry blossom, plum blossom, spring bulbs',fr:'Cerisier, prunier, bulbes de printemps',nl:'Kersenbloesem, pruimenbloesem, voorjaarsbollen',zh:'櫻花、梅花、春季球根'},
+   best:{en:'Feb–Apr',fr:'Fév–Avr',nl:'Feb–Apr',zh:'2月–4月'},
+   hours:{en:'Open 24h (outer grounds)',fr:'Ouvert 24h/24 (extérieur)',nl:'24u open (buitenterrein)',zh:'全天開放（外部庭院）'},
+   tip:{en:'UNESCO World Heritage Site. Cherry and plum trees line the cobblestone lanes — magical in early spring.',fr:'Site UNESCO. Cerisiers et pruniers bordent les ruelles pavées — magique au début du printemps.',nl:'UNESCO Werelderfgoed. Kerselaren en pruimenlaarzen langs de kasseien — magisch in het vroege voorjaar.',zh:'UNESCO 世界遺產。石板小巷兩旁種滿梅花與櫻花，早春氛圍夢幻。'},
+   gmaps:'https://maps.google.com/?q=Groot+Begijnhof+Leuven'},
+  {id:8,lat:50.8824,lng:4.7080,icon:'🌸',status:'peak',
+   name:{en:'Leopoldpark',fr:'Parc Léopold',nl:'Leopoldpark',zh:'利奧波德公園'},
+   flowers:{en:'Cherry blossom, camellia, hydrangea, magnolia, spring bulbs',fr:'Cerisier, camélia, hortensia, magnolia, bulbes',nl:'Kersenbloesem, camelia, hortensia, magnolia, bollen',zh:'櫻花、山茶花、繡球花、木蘭、春季球根'},
+   best:{en:'Feb–Apr',fr:'Fév–Avr',nl:'Feb–Apr',zh:'2月–4月'},
+   hours:{en:'Open 24h',fr:'Ouvert 24h/24',nl:'24u open',zh:'全天開放'},
+   tip:{en:'Camellia and magnolia bloom first in February; cherry blossom follows in March. One of the most photogenic spots in Leuven.',fr:'Camélia et magnolia dès février; cerisiers en mars. Un des lieux les plus photogéniques.',nl:'Camelia en magnolia in februari; kersenbloesem in maart. Zeer fotogeniek.',zh:'山茶花與木蘭二月先開，三月接著是滿樹櫻花，是魯汶最上鏡的賞花地點之一。'},
+   gmaps:'https://maps.google.com/?q=Leopoldpark+Leuven'},
+  /* ── AUTUMN FOLIAGE SPOTS ── */
+  {id:9,lat:50.8626,lng:4.6839,icon:'🍁',status:'foliage',
+   name:{en:'Arenberg Castle Park',fr:"Parc du Château d'Arenberg",nl:'Kasteelpark Arenberg',zh:'阿倫堡城堡公園'},
+   flowers:{en:'Maple, oak, beech — peak autumn colour',fr:'Érable, chêne, hêtre — couleurs automnales',nl:'Esdoorn, eik, beuk — herfstkleur',zh:'楓樹、橡樹、山毛櫸 — 秋色最盛'},
+   best:{en:'Late Oct – Mid Nov',fr:'Fin oct – Mi-nov',nl:'Eind okt – Half nov',zh:'10月底 – 11月中'},
+   hours:{en:'Open 24h',fr:'Ouvert 24h/24',nl:'24u open',zh:'全天開放'},
+   tip:{en:'A canopy of red, orange and gold surrounds the 16th-century castle — one of the most dramatic autumn scenes in Leuven.',fr:'Un dais rouge, orange et doré entoure le château du XVIe siècle.',nl:'Een baldakijn van rood, oranje en goud rond het 16e-eeuwse kasteel.',zh:'楓葉火紅、橡樹金黃，16世紀古堡掩映在秋色之中，如畫一般。'},
+   gmaps:'https://maps.google.com/?q=Kasteelpark+Arenberg+Leuven'},
+  {id:10,lat:50.8643,lng:4.7174,icon:'🍂',status:'foliage',
+   name:{en:'Park Abbey',fr:'Abbaye du Parc',nl:'Abdij van Park',zh:'公園修道院'},
+   flowers:{en:'Beech, oak, linden — golden lakeside reflections',fr:'Hêtre, chêne, tilleul — reflets dorés sur le lac',nl:'Beuk, eik, linde — gouden weerspiegeling op het meer',zh:'山毛櫸、橡樹、椴樹 — 湖面金色倒影'},
+   best:{en:'Oct – Nov',fr:'Oct – Nov',nl:'Okt – Nov',zh:'10月 – 11月'},
+   hours:{en:'Tue–Sun 10:00–17:00',fr:'Mar–Dim 10:00–17:00',nl:'Di–Zo 10:00–17:00',zh:'週二–日 10:00–17:00'},
+   tip:{en:'Lakeside trees turn golden in October — their reflection in the water is breathtaking. Combine with a visit to the abbey museum.',fr:'Les arbres au bord du lac deviennent dorés en octobre. Reflet à couper le souffle.',nl:'Bomen aan het meer worden goudkleurig in oktober. Combineer met bezoek aan abdijmuseum.',zh:'十月湖畔樹木轉為金黃，倒映在水面上美不勝收，可順便參觀修道院博物館。'},
+   gmaps:'https://maps.google.com/?q=Park+Abbey+Leuven'},
+  {id:11,lat:50.8778,lng:4.6912,icon:'🍁',status:'foliage',
+   name:{en:'Botanical Garden',fr:'Jardin botanique',nl:'Kruidtuin',zh:'植物園'},
+   flowers:{en:'Japanese maple, ginkgo, scarlet oak — vivid autumn tones',fr:'Érable du Japon, ginkgo, chêne écarlate',nl:'Japanse esdoorn, ginkgo, scharlaken eik',zh:'日本楓、銀杏、猩紅橡 — 秋色濃烈'},
+   best:{en:'Mid Oct – Early Nov',fr:'Mi-oct – Début nov',nl:'Half okt – Begin nov',zh:'10月中 – 11月初'},
+   hours:{en:'08:00–18:00',fr:'08:00–18:00',nl:'08:00–18:00',zh:'08:00–18:00'},
+   tip:{en:'The Japanese maple near the greenhouse is exceptional. Ginkgo fan-leaves carpet the ground in gold by late October.',fr:'L\'érable japonais près de la serre est exceptionnel. Feuilles de ginkgo dorées fin octobre.',nl:'De Japanse esdoorn bij de serre is uitzonderlijk. Ginkgoblaadjes bedekken de grond in goud eind oktober.',zh:'溫室旁的日本楓格外出色。十月底銀杏落葉鋪成金色地毯，是絕佳拍照機會。'},
+   gmaps:'https://maps.google.com/?q=Kruidtuin+Leuven'},
+  {id:12,lat:50.8744,lng:4.7024,icon:'🍂',status:'foliage',
+   name:{en:'Groot Begijnhof',fr:'Grand Béguinage',nl:'Groot Begijnhof',zh:'大貝金霍夫'},
+   flowers:{en:'Virginia creeper, plane tree, linden — cobblestone lanes in autumn gold',fr:'Vigne vierge, platane, tilleul — ruelles en or automnal',nl:'Wilde wingerd, plataan, linde — kasseien in herfstgoud',zh:'爬牆虎、梧桐、椴樹 — 石板巷弄秋金'},
+   best:{en:'Oct – Nov',fr:'Oct – Nov',nl:'Okt – Nov',zh:'10月 – 11月'},
+   hours:{en:'Open 24h (outer grounds)',fr:'Ouvert 24h/24 (extérieur)',nl:'24u open (buitenterrein)',zh:'全天開放（外部庭院）'},
+   tip:{en:'Virginia creeper turns deep crimson on the ancient walls. Walk the cobblestone lanes at golden hour for the most dramatic light.',fr:'La vigne vierge devient cramoisi sur les vieux murs. Promenez-vous à l\'heure dorée.',nl:'Wilde wingerd wordt karmozijnrood op de oude muren. Wandel over kasseien tijdens het gouden uur.',zh:'爬牆虎在古牆上染成深紅，石板巷弄在秋日黃金時刻光線最美，強烈推薦傍晚前往。'},
+   gmaps:'https://maps.google.com/?q=Groot+Begijnhof+Leuven'},
+];
+
+const CALENDAR_DATA = [
+  {icon:'🌸',name:{en:'Plum Blossom',fr:'Prunier',nl:'Pruimenbloesem',zh:'梅花'},start:1,end:2,color:'#F0C8D8'},
+  {icon:'🌸',name:{en:'Camellia',fr:'Camélia',nl:'Camelia',zh:'山茶花'},start:0,end:3,color:'#E87090'},
+  {icon:'💜',name:{en:'Crocus',fr:'Crocus',nl:'Krokus',zh:'番紅花'},start:1,end:3,color:'#C090DC'},
+  {icon:'🌼',name:{en:'Narcissus',fr:'Narcisse',nl:'Narcis',zh:'水仙'},start:2,end:3,color:'#F5E0B8'},
+  {icon:'🌸',name:{en:'Cherry Blossom',fr:'Cerisier',nl:'Kersenbloesem',zh:'櫻花'},start:2,end:3,color:'#F4B8CC'},
+  {icon:'🌷',name:{en:'Tulip',fr:'Tulipe',nl:'Tulp',zh:'鬱金香'},start:3,end:4,color:'#E8A0B0'},
+  {icon:'💜',name:{en:'Wisteria',fr:'Glycine',nl:'Blauweregen',zh:'紫藤'},start:3,end:5,color:'#C4A0DC'},
+  {icon:'🌹',name:{en:'Rose',fr:'Rose',nl:'Roos',zh:'玫瑰'},start:4,end:7,color:'#E06080'},
+  {icon:'🌸',name:{en:'Peony',fr:'Pivoine',nl:'Pioen',zh:'牡丹'},start:4,end:5,color:'#F0A0B8'},
+  {icon:'💐',name:{en:'Lavender',fr:'Lavande',nl:'Lavendel',zh:'薰衣草'},start:5,end:8,color:'#B0A0DC'},
+  {icon:'🌻',name:{en:'Sunflower',fr:'Tournesol',nl:'Zonnebloem',zh:'向日葵'},start:6,end:8,color:'#F0D060'},
+  {icon:'💙',name:{en:'Hydrangea',fr:'Hortensia',nl:'Hortensia',zh:'繡球花'},start:5,end:8,color:'#90B8E8'},
+  {icon:'🌺',name:{en:'Cosmos',fr:'Cosmos',nl:'Cosmea',zh:'大波斯菊'},start:7,end:9,color:'#F0A0C0'},
+  {icon:'🍁',name:{en:'Autumn Foliage',fr:'Feuillage automnal',nl:'Herfstkleur',zh:'楓葉秋色'},start:9,end:10,color:'#D4610A'},
+];
+
+/* ════════════════════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════════════════════ */
+let currentLang = 'en';
+let map, leafletMarkers = {}, inatMarkers = [], inatVisible = true;
+let weatherCode = null;
+let selectedStatus = 'peak';
+let selectedPhotos = []; // {file, dataUrl}
+let communityReports = []; // in-memory when Firebase off
+
+/* ════════════════════════════════════════════════════════════
+   HELPERS
+   ════════════════════════════════════════════════════════════ */
+function t(key) { return LANGS[currentLang][key] || LANGS.en[key] || key; }
+
+function timeAgo(ts) {
+  const diff = (Date.now() - ts) / 1000;
+  const ta = LANGS[currentLang].time_ago;
+  if (diff < 60)  return ta.just;
+  if (diff < 3600) return Math.floor(diff/60) + ' ' + ta.min;
+  if (diff < 86400) return Math.floor(diff/3600) + ' ' + ta.hr;
+  if (diff < 172800) return '1 ' + ta.day;
+  return Math.floor(diff/86400) + ' ' + ta.days;
+}
+
+/* Compress image to max 800px side, returns dataUrl */
+function compressImage(file) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.82));
+    };
+    img.src = url;
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   I18N ENGINE
+   ════════════════════════════════════════════════════════════ */
+function applyLang() {
+  const L = LANGS[currentLang];
+  document.documentElement.lang = currentLang === 'zh' ? 'zh-TW' : currentLang;
+
+  const ids = {
+    'season-badge':'season','hero-sub':'hero_sub',
+    'stat-peak-lbl':'stat_peak','stat-soon-lbl':'stat_soon',
+    'lbl-spots':'lbl_spots','lbl-community':'lbl_community',
+    'feed-empty':'feed_empty','feed-loading-msg':'feed_loading',
+    'lbl-weather':'lbl_weather',
+    'w-temp-lbl':'w_temp','w-rain-lbl':'w_rain','w-wind-lbl':'w_wind',
+    'weather-source':'weather_source','lbl-inat':'lbl_inat','lbl-week':'lbl_week',
+    'day-start':'day_start','day-today':'day_today','day-end':'day_end',
+    'leg-peak':'leg_peak','leg-soon':'leg_soon','leg-fading':'leg_fading',
+    'leg-ended':'leg_ended','leg-inat':'leg_inat','leg-foliage':'leg_foliage',
+    'cal-title':'cal_title','cal-sub':'cal_sub','cal-note':'cal_note',
+    'sub-title':'sub_title','sub-desc':'sub_desc','sub-btn':'sub_btn',
+    'rpt-title':'rpt_title','rpt-sub':'rpt_sub',
+    'fb-notice-title':'fb_notice_title','fb-notice-body':'fb_notice_body',
+    'rpt-lbl-location':'rpt_lbl_location','rpt-lbl-status':'rpt_lbl_status',
+    'rpt-lbl-photo':'rpt_lbl_photo','rpt-lbl-note':'rpt_lbl_note',
+    'rpt-lbl-name':'rpt_lbl_name','photo-drop-text':'rpt_photo_text',
+    'photo-drop-hint':'rpt_photo_hint','rpt-submit':'rpt_submit',
+    'rpt-lbl-feed':'rpt_lbl_feed',
+    'about-title':'about_title','about-desc':'about_desc',
+    'about-next-title':'about_next_title','about-next-desc':'about_next_desc',
+    'loading-sub':'loading',
+  };
+  for (const [id, key] of Object.entries(ids)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = L[key] || '';
+  }
+  document.getElementById('hero-title').innerHTML = L.hero_title;
+  const subEl = document.getElementById('sub-email');
+  if (subEl) subEl.placeholder = L.sub_placeholder;
+  const noteEl = document.getElementById('rpt-note');
+  if (noteEl) noteEl.placeholder = L.rpt_note_placeholder;
+  const nameEl = document.getElementById('rpt-name');
+  if (nameEl) nameEl.placeholder = L.rpt_name_placeholder;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = L[el.dataset.i18n] || ''; });
+
+  const feats = document.getElementById('about-features');
+  if (feats && L.about_features) {
+    feats.innerHTML = L.about_features.map(f =>
+      `<div class="about-card"><div class="about-card-icon">${f.icon}</div><div class="about-card-title">${f.title}</div><div class="about-card-desc">${f.desc}</div></div>`
+    ).join('');
+  }
+
+  buildReportLocationSelect();
+  buildReportStatusGrid();
+  buildSidebar();
+  buildCalendar();
+  buildCalStrip();
+  rebuildMapPopups();
+  renderCommunityFeed();
+  renderReportFeed();
+  if (weatherCode !== null) updateWeatherDesc(weatherCode);
+}
+
+/* ════════════════════════════════════════════════════════════
+   MAP
+   ════════════════════════════════════════════════════════════ */
+function initMap() {
+  map = L.map('map', {center:[50.876,4.700], zoom:14, zoomControl:true, attributionControl:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
+  L.control.attribution({prefix:false}).addTo(map);
+
+  const mc = {peak:'marker-peak', soon:'marker-soon', fading:'marker-fading', ended:'marker-ended', foliage:'marker-foliage'};
+  SPOTS.forEach(spot => {
+    const html = `<div class="marker-wrap"><div class="marker-circle ${mc[spot.status]}">${spot.icon}</div><div class="marker-tip">${spot.name.nl}</div></div>`;
+    const marker = L.marker([spot.lat, spot.lng], {
+      icon: L.divIcon({className:'', html, iconSize:[90,58], iconAnchor:[45,58]})
+    }).addTo(map);
+    marker.bindPopup(makePopup(spot));
+    leafletMarkers[spot.id] = marker;
+  });
+}
+
+function makePopup(spot) {
+  const L = LANGS[currentLang];
+  return `<div class="popup-inner">
+    <div class="popup-header">
+      <div class="popup-icon">${spot.icon}</div>
+      <div><div class="popup-title">${spot.name[currentLang]}</div><div class="popup-subtitle">${spot.name.nl}</div></div>
+    </div>
+    <div class="popup-row"><span class="popup-key">${L.popup_status}</span><span class="popup-val">${L.status[spot.status]}</span></div>
+    <div class="popup-row"><span class="popup-key">${L.popup_flowers}</span><span class="popup-val">${spot.flowers[currentLang]}</span></div>
+    <div class="popup-row"><span class="popup-key">${L.popup_best}</span><span class="popup-val">${spot.best[currentLang]}</span></div>
+    <div class="popup-row"><span class="popup-key">${L.popup_hours}</span><span class="popup-val">${spot.hours[currentLang]}</span></div>
+    <div class="popup-tip">💡 ${spot.tip[currentLang]}</div>
+    <a class="popup-btn" href="${spot.gmaps}" target="_blank">${L.popup_gmaps}</a>
+    <button class="popup-report-btn" onclick="openReportForSpot(${spot.id})">${L.popup_report}</button>
+  </div>`;
+}
+
+function rebuildMapPopups() {
+  SPOTS.forEach(spot => {
+    if (leafletMarkers[spot.id]) leafletMarkers[spot.id].setPopupContent(makePopup(spot));
+  });
+}
+
+function openReportForSpot(spotId) {
+  // Switch to report tab and pre-select the location
+  const reportTab = document.querySelector('[onclick*="report"]');
+  switchTab('report', reportTab);
+  const sel = document.getElementById('rpt-location');
+  if (sel) sel.value = spotId;
+  map.closePopup();
+}
+
+/* ════════════════════════════════════════════════════════════
+   iNATURALIST
+   ════════════════════════════════════════════════════════════ */
+async function fetchInat() {
+  try {
+    const url = 'https://api.inaturalist.org/v1/observations?lat=50.876&lng=4.700&radius=4&taxon_name=Plantae&per_page=30&quality_grade=research&order_by=observed_on&photos=true';
+    const res = await fetch(url);
+    const d = await res.json();
+    const obs = d.results || [];
+
+    // Update badge
+    const badge = document.getElementById('inat-count-badge');
+    const count = d.total_results || obs.length;
+    const L = LANGS[currentLang];
+    badge.textContent = count + ' ' + (count === 1 ? L.inat_obs : L.inat_obs_pl);
+
+    inatMarkers.forEach(m => map.removeLayer(m));
+    inatMarkers = [];
+
+    obs.forEach(ob => {
+      if (!ob.location) return;
+      const [lat, lng] = ob.location.split(',').map(Number);
+      const taxon = ob.taxon?.preferred_common_name || ob.taxon?.name || 'Plant';
+      const photo = ob.photos?.[0]?.url?.replace('square','small') || '';
+      const date = ob.observed_on || '';
+      const user = ob.user?.login || '?';
+      const url2 = `https://www.inaturalist.org/observations/${ob.id}`;
+
+      const icon = L.divIcon({
+        className:'',
+        html: `<div class="marker-inat">🌿</div>`,
+        iconSize:[22,22], iconAnchor:[11,11]
+      });
+      const marker = L.marker([lat,lng], {icon}).addTo(map);
+      marker.bindPopup(`<div class="popup-inner">
+        <div class="popup-header">
+          <div class="popup-icon">🌿</div>
+          <div><div class="popup-title" style="font-size:13px;">${taxon}</div><div class="popup-subtitle">iNaturalist · ${date}</div></div>
+        </div>
+        ${photo ? `<img src="${photo}" style="width:100%;border-radius:8px;margin-bottom:8px;display:block;" loading="lazy">` : ''}
+        <div class="popup-row"><span class="popup-key">Observer</span><span class="popup-val">${user}</span></div>
+        <a class="popup-btn" href="${url2}" target="_blank">View on iNaturalist →</a>
+      </div>`);
+      inatMarkers.push(marker);
+    });
+
+    if (!inatVisible) inatMarkers.forEach(m => map.removeLayer(m));
+  } catch(e) {
+    console.warn('iNaturalist fetch failed:', e);
+  }
+}
+
+function toggleInat(btn) {
+  inatVisible = !inatVisible;
+  btn.classList.toggle('on', inatVisible);
+  inatMarkers.forEach(m => inatVisible ? map.addLayer(m) : map.removeLayer(m));
+}
+
+/* ════════════════════════════════════════════════════════════
+   SIDEBAR
+   ════════════════════════════════════════════════════════════ */
+function buildSidebar() {
+  const list = document.getElementById('flower-list');
+  if (!list) return;
+  const sp = {peak:'pill-peak', soon:'pill-soon', fading:'pill-fading', ended:'pill-ended', foliage:'pill-foliage'};
+  const ib = {peak:'var(--petal-light)', soon:'var(--amber-light)', fading:'var(--green-light)', ended:'#EEEBE6', foliage:'#FDE8CC'};
+  let peak=0, soon=0;
+
+  const springSpots  = SPOTS.filter(s => s.status !== 'foliage');
+  const foliageSpots = SPOTS.filter(s => s.status === 'foliage');
+
+  list.innerHTML = '';
+
+  function makeCard(spot, i, delay) {
+    if (spot.status==='peak') peak++;
+    if (spot.status==='soon') soon++;
+    const card = document.createElement('div');
+    card.className = 'flower-card';
+    card.style.animationDelay = delay + 's';
+    card.innerHTML = `
+      <div class="flower-icon" style="background:${ib[spot.status]}">${spot.icon}</div>
+      <div class="flower-info">
+        <div class="flower-name">${spot.name[currentLang]}</div>
+        <div class="flower-loc">${spot.flowers[currentLang]}</div>
+      </div>
+      <div class="pill ${sp[spot.status]}">${LANGS[currentLang].status[spot.status]}</div>`;
+    card.onclick = () => {
+      document.querySelectorAll('.flower-card').forEach(c=>c.classList.remove('active'));
+      card.classList.add('active');
+      map.setView([spot.lat,spot.lng], 16, {animate:true});
+      leafletMarkers[spot.id].openPopup();
+    };
+    return card;
+  }
+
+  springSpots.forEach((spot,i) => list.appendChild(makeCard(spot, i, i*0.05)));
+
+  if (foliageSpots.length > 0) {
+    const divider = document.createElement('div');
+    divider.style.cssText = 'margin:10px 0 6px;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#A0440A;';
+    divider.setAttribute('id','lbl-foliage-inline');
+    divider.textContent = LANGS[currentLang].leg_foliage || 'Autumn foliage';
+    list.appendChild(divider);
+    foliageSpots.forEach((spot,i) => list.appendChild(makeCard(spot, i, (springSpots.length+i)*0.05)));
+  }
+
+  document.getElementById('stat-peak').textContent = peak;
+  document.getElementById('stat-soon').textContent = soon;
+}
+
+function renderCommunityFeed() {
+  const feed = document.getElementById('community-feed');
+  if (!feed) return;
+  if (communityReports.length === 0) {
+    feed.innerHTML = `<div style="font-size:12px;color:var(--ink-faint);padding:4px 0;">${t('feed_empty')}</div>`;
+    return;
+  }
+  const recent = communityReports.slice(0, 4);
+  feed.innerHTML = recent.map(r => {
+    const spotName = SPOTS.find(s=>s.id===r.spotId)?.name[currentLang] || r.spotId;
+    const thumb = r.photoUrl
+      ? `<div class="report-thumb"><img src="${r.photoUrl}" alt=""></div>`
+      : `<div class="report-thumb">${SPOTS.find(s=>s.id===r.spotId)?.icon||'🌸'}</div>`;
+    const statusLabel = LANGS[currentLang].status[r.status] || r.status;
+    return `<div class="report-card">
+      ${thumb}
+      <div class="report-info">
+        <div class="report-loc">${spotName}</div>
+        <div class="report-meta">${statusLabel} · ${timeAgo(r.ts)} · ${r.name || t('rpt_name_placeholder')}</div>
+        ${r.note ? `<div class="report-note">${r.note}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   WEEKLY STRIP
+   ════════════════════════════════════════════════════════════ */
+function buildCalStrip() {
+  const strip = document.getElementById('cal-strip');
+  if (!strip) return;
+  const days = {en:['M','T','W','T','F','S','S'],fr:['L','M','M','J','V','S','D'],nl:['M','D','W','D','V','Z','Z'],zh:['一','二','三','四','五','六','日']}[currentLang];
+  const vals = [62,70,78,85,88,75,60];
+  const today = new Date().getDay();
+  strip.innerHTML = '';
+  vals.forEach((v,i) => {
+    const isToday = i===((today+6)%7);
+    const col = document.createElement('div');
+    col.className = 'cal-col'+(isToday?' cal-now':'');
+    col.innerHTML = `<div class="cal-bar-wrap" style="height:40px;"><div class="cal-bar-inner" style="height:${v}%;background:${isToday?'var(--petal-dark)':'var(--petal-light)'};"></div></div><div class="cal-month-label">${days[i]}</div>`;
+    strip.appendChild(col);
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   CALENDAR PAGE
+   ════════════════════════════════════════════════════════════ */
+function buildCalendar() {
+  const grid = document.getElementById('calendar-grid');
+  if (!grid) return;
+  const now = new Date().getMonth();
+  const months = {
+    en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    fr:['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'],
+    nl:['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'],
+    zh:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+  }[currentLang];
+
+  let html = `<div style="display:grid;grid-template-columns:130px 1fr;border:1px solid var(--border);border-radius:14px;overflow:hidden;">`;
+  html += `<div style="background:var(--cream);padding:9px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:500;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;">${t('tab_calendar')}</div>`;
+  html += `<div style="background:var(--cream);padding:9px 0;border-bottom:1px solid var(--border);display:flex;">`;
+  months.forEach((m,i) => {
+    const isNow = i===now;
+    html += `<div style="flex:1;text-align:center;font-size:10px;color:${isNow?'var(--petal-dark)':'var(--ink-faint)'};font-weight:${isNow?500:400};">${m}</div>`;
+  });
+  html += `</div>`;
+  CALENDAR_DATA.forEach((item,idx) => {
+    const bg = idx%2===0 ? 'var(--white)' : 'var(--cream)';
+    html += `<div style="background:${bg};padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+      <span style="font-size:17px;">${item.icon}</span>
+      <div style="font-size:12px;font-weight:500;color:var(--ink);">${item.name[currentLang]}</div>
+    </div>`;
+    html += `<div style="background:${bg};padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;">`;
+    months.forEach((_,i) => {
+      const active = i>=item.start && i<=item.end;
+      const isNow = i===now && active;
+      html += `<div style="flex:1;padding:0 2px;">${active?`<div style="height:20px;border-radius:4px;background:${isNow?item.color:'rgba(0,0,0,0.07)'};${isNow?`outline:2px solid ${item.color};`:''}"></div>`:''}</div>`;
+    });
+    html += `</div>`;
+  });
+  html += `</div>`;
+  html += `<div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--ink-muted);">
+    <div style="width:18px;height:4px;border-radius:2px;background:var(--petal-dark);"></div>
+    ${t('cal_now_label')} (${months[now]})
+  </div>`;
+  grid.innerHTML = html;
+}
+
+/* ════════════════════════════════════════════════════════════
+   EMAIL SUBSCRIPTION
+   ════════════════════════════════════════════════════════════ */
+async function subscribeEmail() {
+  const email = document.getElementById('sub-email').value.trim();
+  const msgEl = document.getElementById('sub-msg');
+  if (!email || !email.includes('@')) return;
+
+  if (FIREBASE_ENABLED && db) {
+    try {
+      await db.collection('subscriptions').add({
+        email,
+        lang: currentLang,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      msgEl.textContent = t('sub_success');
+      msgEl.style.color = 'var(--success)';
+      msgEl.style.display = 'block';
+      document.getElementById('sub-email').value = '';
+    } catch(e) {
+      msgEl.textContent = t('sub_error');
+      msgEl.style.color = 'var(--danger)';
+      msgEl.style.display = 'block';
+    }
+  } else {
+    // Demo mode
+    msgEl.textContent = t('sub_success') + ' (demo)';
+    msgEl.style.color = 'var(--success)';
+    msgEl.style.display = 'block';
+    document.getElementById('sub-email').value = '';
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   REPORT FORM
+   ════════════════════════════════════════════════════════════ */
+function buildReportLocationSelect() {
+  const sel = document.getElementById('rpt-location');
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = `<option value="">${t('rpt_select_location')}</option>` +
+    SPOTS.map(s => `<option value="${s.id}">${s.name[currentLang]}</option>`).join('');
+  if (prev) sel.value = prev;
+}
+
+function buildReportStatusGrid() {
+  const grid = document.getElementById('rpt-status-grid');
+  if (!grid) return;
+  const opts = [
+    {val:'peak',    cls:'',          label: LANGS[currentLang].status.peak},
+    {val:'soon',    cls:'s-soon',    label: LANGS[currentLang].status.soon},
+    {val:'fading',  cls:'s-fading',  label: LANGS[currentLang].status.fading},
+    {val:'ended',   cls:'s-ended',   label: LANGS[currentLang].status.ended},
+    {val:'foliage', cls:'s-foliage', label: LANGS[currentLang].status.foliage},
+  ];
+  grid.innerHTML = opts.map(o =>
+    `<div class="status-option ${o.cls}${o.val===selectedStatus?' selected':''}" onclick="selectStatus('${o.val}','${o.cls}',this)">${o.label}</div>`
+  ).join('');
+}
+
+function selectStatus(val, cls, el) {
+  selectedStatus = val;
+  document.querySelectorAll('.status-option').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function onDragOver(e) { e.preventDefault(); document.getElementById('photo-drop').classList.add('dragover'); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('photo-drop').classList.remove('dragover');
+  handlePhotoSelect(e.dataTransfer.files);
+}
+
+async function handlePhotoSelect(files) {
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+    if (file.size > 5 * 1024 * 1024) continue;
+    const dataUrl = await compressImage(file);
+    selectedPhotos.push({file, dataUrl});
+  }
+  renderPhotoPreviews();
+}
+
+function renderPhotoPreviews() {
+  const wrap = document.getElementById('photo-previews');
+  wrap.innerHTML = selectedPhotos.map((p,i) =>
+    `<div class="photo-preview-item">
+      <img src="${p.dataUrl}">
+      <button class="photo-remove" onclick="removePhoto(${i})">✕</button>
+    </div>`
+  ).join('');
+}
+
+function removePhoto(idx) {
+  selectedPhotos.splice(idx, 1);
+  renderPhotoPreviews();
+}
+
+async function submitReport() {
+  const spotId = parseInt(document.getElementById('rpt-location').value);
+  const note   = document.getElementById('rpt-note').value.trim();
+  const name   = document.getElementById('rpt-name').value.trim();
+  const toast  = document.getElementById('rpt-toast');
+  const btn    = document.getElementById('rpt-submit');
+
+  if (!spotId) { document.getElementById('rpt-location').focus(); return; }
+
+  btn.disabled = true;
+
+  const report = {
+    spotId,
+    status: selectedStatus,
+    note,
+    name: name || null,
+    ts: Date.now(),
+    photoUrl: selectedPhotos[0]?.dataUrl || null,
+  };
+
+  if (FIREBASE_ENABLED && db) {
+    try {
+      let photoUrl = null;
+      if (selectedPhotos.length > 0 && storage) {
+        const blob = await fetch(selectedPhotos[0].dataUrl).then(r => r.blob());
+        const ref = storage.ref(`reports/${Date.now()}_${selectedPhotos[0].file.name}`);
+        await ref.put(blob);
+        photoUrl = await ref.getDownloadURL();
+      }
+      await db.collection('reports').add({
+        ...report,
+        photoUrl,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showToast(toast, t('rpt_success'), 'success');
+    } catch(e) {
+      showToast(toast, t('rpt_error'), 'error');
+      btn.disabled = false;
+      return;
+    }
+  } else {
+    // Demo: store locally
+    communityReports.unshift(report);
+    renderCommunityFeed();
+    showToast(toast, t('rpt_success') + ' (demo — Firebase not connected)', 'success');
+  }
+
+  // Reset form
+  document.getElementById('rpt-location').value = '';
+  document.getElementById('rpt-note').value = '';
+  document.getElementById('rpt-name').value = '';
+  selectedPhotos = [];
+  renderPhotoPreviews();
+  selectedStatus = 'peak';
+  buildReportStatusGrid();
+  renderReportFeed();
+  btn.disabled = false;
+}
+
+function showToast(el, msg, type) {
+  el.textContent = msg;
+  el.className = 'form-toast toast-' + type;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+/* ════════════════════════════════════════════════════════════
+   REPORT FEED (right column of Report tab)
+   ════════════════════════════════════════════════════════════ */
+async function loadReportFeed() {
+  if (!FIREBASE_ENABLED || !db) {
+    renderReportFeed();
+    return;
+  }
+  try {
+    const snap = await db.collection('reports')
+      .orderBy('createdAt','desc').limit(20).get();
+    communityReports = snap.docs.map(d => ({
+      ...d.data(),
+      ts: d.data().createdAt?.toMillis() || Date.now()
+    }));
+    renderCommunityFeed();
+    renderReportFeed();
+  } catch(e) {
+    renderReportFeed();
+  }
+}
+
+function renderReportFeed() {
+  const feed = document.getElementById('report-feed-list');
+  if (!feed) return;
+  if (communityReports.length === 0) {
+    feed.innerHTML = `<div style="font-size:13px;color:var(--ink-faint);padding:12px 0;">${t('feed_empty')}</div>`;
+    return;
+  }
+  feed.innerHTML = communityReports.map(r => {
+    const spot = SPOTS.find(s=>s.id===r.spotId);
+    const spotName = spot?.name[currentLang] || '?';
+    const statusLabel = LANGS[currentLang].status[r.status] || r.status;
+    const sp = {peak:'pill-peak', soon:'pill-soon', fading:'pill-fading', ended:'pill-ended'};
+    return `<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);">
+      <div class="report-thumb" style="width:56px;height:56px;flex-shrink:0;">
+        ${r.photoUrl ? `<img src="${r.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">` : `<span style="font-size:24px;">${spot?.icon||'🌸'}</span>`}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">
+          <span style="font-size:13px;font-weight:500;">${spotName}</span>
+          <span class="pill ${sp[r.status]}" style="font-size:10px;padding:2px 7px;">${statusLabel}</span>
+        </div>
+        ${r.note ? `<div style="font-size:12px;color:var(--ink-muted);line-height:1.5;margin-bottom:3px;">${r.note}</div>` : ''}
+        <div style="font-size:11px;color:var(--ink-faint);">${r.name || t('rpt_name_placeholder')} · ${timeAgo(r.ts)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   WEATHER
+   ════════════════════════════════════════════════════════════ */
+async function fetchWeather() {
+  try {
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=50.88&longitude=4.70&current=temperature_2m,precipitation_probability,windspeed_10m,weathercode&timezone=Europe/Brussels');
+    const d = await res.json();
+    const c = d.current;
+    weatherCode = c.weathercode;
+    document.getElementById('hdr-temp').textContent = Math.round(c.temperature_2m)+'°C';
+    document.getElementById('w-temp').textContent = Math.round(c.temperature_2m);
+    document.getElementById('w-rain').textContent = c.precipitation_probability;
+    document.getElementById('w-wind').textContent = Math.round(c.windspeed_10m);
+    updateWeatherDesc(weatherCode);
+  } catch(e) {
+    document.getElementById('hdr-desc').textContent = '—';
+  }
+}
+
+function updateWeatherDesc(code) {
+  const desc = LANGS[currentLang].weather_desc;
+  const keys = Object.keys(desc).map(Number).sort((a,b)=>a-b);
+  let label = desc[0];
+  for (const k of keys) { if (code >= k) label = desc[k]; }
+  document.getElementById('hdr-desc').textContent = label;
+}
+
+/* ════════════════════════════════════════════════════════════
+   TABS & LANG
+   ════════════════════════════════════════════════════════════ */
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-tab').forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(name)) b.classList.add('active');
+    });
+  }
+  if (name==='map') setTimeout(()=>map.invalidateSize(), 80);
+}
+
+function setLang(lang, btn) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyLang();
+}
+
+/* ════════════════════════════════════════════════════════════
+   INIT
+   ════════════════════════════════════════════════════════════ */
+window.addEventListener('load', async () => {
+  initMap();
+  applyLang();
+  fetchWeather();
+  fetchInat();
+  loadReportFeed();
+  // Show/hide Firebase notice
+  document.getElementById('firebase-notice').style.display = FIREBASE_ENABLED ? 'none' : 'block';
+  setTimeout(() => document.getElementById('loading').classList.add('hidden'), 1600);
+});
+</script>
+</body>
+</html>

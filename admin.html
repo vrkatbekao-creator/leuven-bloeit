@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leuven Bloeit — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#FAF6EF; --petal:#E8A0B0; --petal-dark:#C4607A; --petal-light:#F5D0D9;
+  --green:#4A7C59; --green-light:#D4EAD8;
+  --amber:#D4882A; --amber-light:#F5E0B8;
+  --ink:#1E1A16; --ink-muted:#6B5E52; --ink-faint:#BFB5AA;
+  --white:#FFFFFF; --border:rgba(30,26,22,.10);
+  --foliage:#D4610A; --foliage-light:#FDE8CC;
+  --danger-bg:#FAE0E0; --danger:#B03030;
+  --success-bg:#D4EAD8; --success:#2E6640;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--ink); min-height:100vh; }
+
+header {
+  background:var(--ink); color:var(--white);
+  padding:0 28px; height:56px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.admin-logo { font-family:'Playfair Display',serif; font-size:18px; display:flex; align-items:center; gap:10px; }
+.admin-logo span { opacity:.5; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:400; margin-left:4px; }
+.header-actions { display:flex; gap:8px; }
+.btn { padding:7px 16px; border-radius:8px; border:none; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:opacity .15s; }
+.btn:hover { opacity:.85; }
+.btn-primary { background:var(--petal-dark); color:var(--white); }
+.btn-secondary { background:rgba(255,255,255,.12); color:var(--white); }
+.btn-success { background:var(--success); color:var(--white); }
+.btn-danger { background:var(--danger-bg); color:var(--danger); }
+.btn-sm { padding:5px 11px; font-size:12px; }
+
+.main { display:grid; grid-template-columns:380px 1fr; height:calc(100vh - 56px); }
+
+/* ── LEFT: spot list ── */
+.spot-list-col { border-right:1px solid var(--border); background:var(--white); display:flex; flex-direction:column; }
+.col-header { padding:16px 18px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.col-title { font-size:12px; font-weight:500; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; }
+.spot-list { overflow-y:auto; flex:1; }
+.spot-row {
+  display:flex; align-items:center; gap:10px;
+  padding:11px 18px; border-bottom:1px solid var(--border);
+  cursor:pointer; transition:background .12s;
+}
+.spot-row:hover { background:var(--cream); }
+.spot-row.selected { background:var(--petal-light); }
+.spot-emoji { font-size:22px; flex-shrink:0; width:32px; text-align:center; }
+.spot-meta { flex:1; min-width:0; }
+.spot-row-name { font-size:13px; font-weight:500; color:var(--ink); }
+.spot-row-sub { font-size:11px; color:var(--ink-faint); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.spot-row-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.pill { padding:2px 8px; border-radius:8px; font-size:10px; font-weight:500; }
+.pill-peak { background:var(--petal-light); color:var(--petal-dark); }
+.pill-soon { background:var(--amber-light); color:var(--amber); }
+.pill-fading { background:var(--green-light); color:var(--green); }
+.pill-ended { background:#EEEBE6; color:var(--ink-faint); }
+.pill-foliage { background:var(--foliage-light); color:var(--foliage); }
+.drag-handle { color:var(--ink-faint); font-size:14px; cursor:grab; padding:2px 4px; }
+
+/* ── RIGHT: editor ── */
+.editor-col { overflow-y:auto; padding:28px 32px; }
+.editor-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--ink-faint); gap:12px; }
+.editor-empty-icon { font-size:48px; }
+.editor-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:600; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+.editor-title .new-badge { font-family:'DM Sans',sans-serif; font-size:11px; font-weight:500; background:var(--green-light); color:var(--green); border-radius:8px; padding:2px 8px; }
+
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-full { grid-column:1 / -1; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-label { font-size:11px; font-weight:500; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.05em; }
+.form-input, .form-select, .form-textarea {
+  padding:9px 11px; border:1px solid var(--border); border-radius:9px;
+  font-family:'DM Sans',sans-serif; font-size:13px; color:var(--ink);
+  background:var(--white); transition:border .15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { outline:none; border-color:var(--petal-dark); }
+.form-textarea { resize:vertical; min-height:60px; line-height:1.5; }
+.form-hint { font-size:10px; color:var(--ink-faint); }
+
+.section-divider {
+  margin:22px 0 14px;
+  font-size:10px; font-weight:500; text-transform:uppercase;
+  letter-spacing:.07em; color:var(--ink-faint);
+  display:flex; align-items:center; gap:10px;
+}
+.section-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.lang-tabs { display:flex; gap:2px; margin-bottom:12px; background:var(--cream); border:1px solid var(--border); border-radius:10px; padding:3px; width:fit-content; }
+.lang-tab { padding:4px 12px; border-radius:7px; border:none; background:transparent; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; color:var(--ink-muted); cursor:pointer; }
+.lang-tab.active { background:var(--ink); color:var(--white); }
+
+.editor-footer { display:flex; align-items:center; gap:10px; margin-top:24px; padding-top:20px; border-top:1px solid var(--border); }
+.editor-footer .spacer { flex:1; }
+
+/* ── Status picker ── */
+.status-picker { display:flex; gap:7px; flex-wrap:wrap; }
+.status-btn {
+  padding:6px 14px; border-radius:20px; border:1.5px solid var(--border);
+  font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500;
+  cursor:pointer; transition:all .12s; background:transparent;
+}
+.status-btn.active-peak { border-color:var(--petal-dark); background:var(--petal-light); color:var(--petal-dark); }
+.status-btn.active-soon { border-color:var(--amber); background:var(--amber-light); color:var(--amber); }
+.status-btn.active-fading { border-color:var(--green); background:var(--green-light); color:var(--green); }
+.status-btn.active-ended { border-color:var(--ink-faint); background:#EEEBE6; color:var(--ink-faint); }
+.status-btn.active-foliage { border-color:var(--foliage); background:var(--foliage-light); color:var(--foliage); }
+
+/* ── Toast ── */
+#toast {
+  position:fixed; bottom:24px; right:24px; z-index:999;
+  padding:12px 18px; border-radius:10px; font-size:13px; font-weight:500;
+  display:none; animation:slideUp .2s ease;
+}
+.toast-success { background:var(--success-bg); color:var(--success); }
+.toast-error { background:var(--danger-bg); color:var(--danger); }
+@keyframes slideUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+/* ── JSON panel ── */
+#json-panel {
+  display:none; position:fixed; inset:0; z-index:500;
+  background:rgba(30,26,22,.5); align-items:center; justify-content:center;
+}
+#json-panel.open { display:flex; }
+.json-box { background:var(--white); border-radius:16px; width:min(700px,90vw); max-height:80vh; display:flex; flex-direction:column; overflow:hidden; }
+.json-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.json-header h3 { font-size:15px; font-weight:500; }
+.json-body { overflow-y:auto; padding:16px 20px; }
+.json-body pre { font-family:'DM Mono',monospace; font-size:12px; line-height:1.6; color:var(--ink); background:var(--cream); border-radius:8px; padding:14px; white-space:pre-wrap; word-break:break-all; }
+.json-footer { padding:14px 20px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; }
+
+/* ── Map preview mini ── */
+.coord-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.coord-preview { font-size:11px; color:var(--ink-faint); margin-top:4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="admin-logo">🌸 Leuven Bloeit <span>Admin</span></div>
+  <div class="header-actions">
+    <button class="btn btn-secondary" onclick="showJson()">Export JSON</button>
+    <button class="btn btn-primary" onclick="newSpot()">+ Add spot</button>
+  </div>
+</header>
+
+<div class="main">
+  <!-- LEFT: spot list -->
+  <div class="spot-list-col">
+    <div class="col-header">
+      <div class="col-title">All spots (<span id="spot-count">0</span>)</div>
+      <div style="font-size:11px;color:var(--ink-faint);">Click to edit</div>
+    </div>
+    <div class="spot-list" id="spot-list"></div>
+  </div>
+
+  <!-- RIGHT: editor -->
+  <div class="editor-col" id="editor-col">
+    <div class="editor-empty">
+      <div class="editor-empty-icon">🗺️</div>
+      <div style="font-size:15px;font-weight:500;">Select a spot to edit</div>
+      <div style="font-size:13px;">or click <strong>+ Add spot</strong> to create a new one</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- JSON Export Modal -->
+<div id="json-panel">
+  <div class="json-box">
+    <div class="json-header">
+      <h3>spots.json — ready to save</h3>
+      <button class="btn btn-secondary" style="background:var(--cream);color:var(--ink);" onclick="closeJson()">✕</button>
+    </div>
+    <div class="json-body"><pre id="json-output"></pre></div>
+    <div class="json-footer">
+      <button class="btn btn-secondary" style="background:var(--cream);color:var(--ink);border:1px solid var(--border);" onclick="downloadJson()">Download spots.json</button>
+      <button class="btn btn-primary" onclick="copyJson()">Copy to clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════ STATE ════ */
+const STATUS_LIST = ['peak','soon','fading','ended','foliage'];
+const STATUS_LABEL = { peak:'In bloom', soon:'Coming soon', fading:'Fading', ended:'Ended', foliage:'Autumn foliage' };
+const ICONS = ['🌸','🌷','🌼','🌻','🌹','🌺','🌿','🌱','💐','💜','💙','🍁','🍂'];
+const LANGS = ['en','fr','nl','zh'];
+
+let spots = [];
+let selectedId = null;
+let activeLang = 'en';
+let nextId = 1;
+
+/* ════ INIT ════ */
+async function init() {
+  // Try loading from localStorage first (persists edits across sessions)
+  const saved = localStorage.getItem('leuven_spots');
+  if (saved) {
+    try { spots = JSON.parse(saved); }
+    catch(e) { spots = []; }
+  }
+
+  // If empty, try fetching spots.json from same folder
+  if (spots.length === 0) {
+    try {
+      const res = await fetch('./spots.json');
+      if (res.ok) spots = await res.json();
+    } catch(e) {}
+  }
+
+  // If still empty, seed with one example
+  if (spots.length === 0) {
+    spots = [{
+      id:1, lat:50.8778, lng:4.6912, icon:'🌸', status:'peak',
+      name:{en:'Botanical Garden',fr:'Jardin botanique',nl:'Kruidtuin',zh:'植物園'},
+      flowers:{en:'Wisteria, roses',fr:'Glycine, roses',nl:'Rozen',zh:'紫藤、玫瑰'},
+      best:{en:'Apr–May',fr:'Avr–Mai',nl:'Apr–Mei',zh:'4月–5月'},
+      hours:{en:'08:00–18:00',fr:'08:00–18:00',nl:'08:00–18:00',zh:'08:00–18:00'},
+      tip:{en:'Free entry.',fr:'Entrée gratuite.',nl:'Gratis.',zh:'免費入場。'},
+      gmaps:'https://maps.google.com/?q=Kruidtuin+Leuven'
+    }];
+  }
+
+  nextId = Math.max(...spots.map(s=>s.id), 0) + 1;
+  renderList();
+}
+
+/* ════ RENDER LIST ════ */
+function renderList() {
+  const list = document.getElementById('spot-list');
+  document.getElementById('spot-count').textContent = spots.length;
+
+  list.innerHTML = spots.map(spot => {
+    const sel = spot.id === selectedId;
+    return `<div class="spot-row${sel?' selected':''}" onclick="selectSpot(${spot.id})">
+      <div class="spot-emoji">${spot.icon}</div>
+      <div class="spot-meta">
+        <div class="spot-row-name">${spot.name?.en || '—'}</div>
+        <div class="spot-row-sub">${spot.flowers?.en || ''}</div>
+      </div>
+      <div class="spot-row-right">
+        <div class="pill pill-${spot.status}">${STATUS_LABEL[spot.status]||spot.status}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════ SELECT / EDIT ════ */
+function selectSpot(id) {
+  selectedId = id;
+  renderList();
+  const spot = spots.find(s=>s.id===id);
+  if (spot) renderEditor(spot, false);
+}
+
+function newSpot() {
+  const spot = {
+    id: nextId++,
+    lat: 50.876, lng: 4.700,
+    icon: '🌸', status: 'peak',
+    name:{en:'',fr:'',nl:'',zh:''},
+    flowers:{en:'',fr:'',nl:'',zh:''},
+    best:{en:'',fr:'',nl:'',zh:''},
+    hours:{en:'Open 24h',fr:'Ouvert 24h/24',nl:'24u open',zh:'全天開放'},
+    tip:{en:'',fr:'',nl:'',zh:''},
+    gmaps:''
+  };
+  spots.push(spot);
+  selectedId = spot.id;
+  renderList();
+  renderEditor(spot, true);
+}
+
+function renderEditor(spot, isNew) {
+  const col = document.getElementById('editor-col');
+
+  const statusBtns = STATUS_LIST.map(s =>
+    `<button class="status-btn${spot.status===s?' active-'+s:''}" onclick="setStatus(${spot.id},'${s}',this)">${STATUS_LABEL[s]}</button>`
+  ).join('');
+
+  const iconBtns = ICONS.map(ic =>
+    `<span onclick="setIcon(${spot.id},'${ic}',this)" style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;${spot.icon===ic?'background:var(--petal-light);':''}">${ic}</span>`
+  ).join('');
+
+  const langTabsHtml = LANGS.map(l =>
+    `<button class="lang-tab${activeLang===l?' active':''}" onclick="switchLang('${l}',this)">${l.toUpperCase()}</button>`
+  ).join('');
+
+  col.innerHTML = `
+    <div class="editor-title">
+      <span>${spot.icon}</span>
+      <span>${isNew ? 'New spot <span class="new-badge">unsaved</span>' : spot.name?.en || 'Unnamed spot'}</span>
+    </div>
+
+    <div class="section-divider">Location</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Latitude</label>
+        <input class="form-input" type="number" step="0.0001" id="f-lat" value="${spot.lat}" oninput="liveUpdate(${spot.id},'lat',this.value)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Longitude</label>
+        <input class="form-input" type="number" step="0.0001" id="f-lng" value="${spot.lng}" oninput="liveUpdate(${spot.id},'lng',this.value)">
+      </div>
+      <div class="form-group form-full">
+        <div class="coord-preview" id="coord-preview">
+          <a href="https://www.google.com/maps?q=${spot.lat},${spot.lng}" target="_blank" style="color:var(--petal-dark);">📍 View on Google Maps</a>
+          &nbsp;·&nbsp; Tip: right-click on Google Maps → "What's here?" to get exact coordinates
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Google Maps link</label>
+        <input class="form-input" id="f-gmaps" value="${spot.gmaps||''}" placeholder="https://maps.google.com/?q=..." oninput="liveUpdate(${spot.id},'gmaps',this.value)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <div class="status-picker" id="status-picker">${statusBtns}</div>
+      </div>
+    </div>
+
+    <div class="section-divider">Icon</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;background:var(--cream);border-radius:10px;padding:10px;" id="icon-picker">${iconBtns}</div>
+
+    <div class="section-divider">Content</div>
+    <div class="lang-tabs" id="lang-tabs">${langTabsHtml}</div>
+
+    <div class="form-grid" id="lang-fields">
+      ${renderLangFields(spot, activeLang)}
+    </div>
+
+    <div class="editor-footer">
+      <button class="btn btn-danger btn-sm" onclick="deleteSpot(${spot.id})">Delete</button>
+      <div class="spacer"></div>
+      <button class="btn btn-secondary" style="border:1px solid var(--border);color:var(--ink);" onclick="cancelEdit()">Cancel</button>
+      <button class="btn btn-success" onclick="saveSpot(${spot.id})">Save spot</button>
+    </div>
+  `;
+}
+
+function renderLangFields(spot, lang) {
+  return `
+    <div class="form-group form-full">
+      <label class="form-label">Name (${lang})</label>
+      <input class="form-input" id="f-name" value="${spot.name?.[lang]||''}" oninput="liveUpdateLang(${spot.id},'name','${lang}',this.value)">
+    </div>
+    <div class="form-group form-full">
+      <label class="form-label">Flowers / highlights (${lang})</label>
+      <input class="form-input" id="f-flowers" value="${spot.flowers?.[lang]||''}" oninput="liveUpdateLang(${spot.id},'flowers','${lang}',this.value)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Best time (${lang})</label>
+      <input class="form-input" id="f-best" value="${spot.best?.[lang]||''}" placeholder="Apr – May" oninput="liveUpdateLang(${spot.id},'best','${lang}',this.value)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Opening hours (${lang})</label>
+      <input class="form-input" id="f-hours" value="${spot.hours?.[lang]||''}" oninput="liveUpdateLang(${spot.id},'hours','${lang}',this.value)">
+    </div>
+    <div class="form-group form-full">
+      <label class="form-label">Tip / description (${lang})</label>
+      <textarea class="form-textarea" id="f-tip" oninput="liveUpdateLang(${spot.id},'tip','${lang}',this.value)">${spot.tip?.[lang]||''}</textarea>
+    </div>
+  `;
+}
+
+/* ════ LIVE UPDATE ════ */
+function liveUpdate(id, field, value) {
+  const spot = spots.find(s=>s.id===id);
+  if (!spot) return;
+  if (field === 'lat' || field === 'lng') {
+    spot[field] = parseFloat(value) || spot[field];
+    const latVal = parseFloat(document.getElementById('f-lat')?.value) || spot.lat;
+    const lngVal = parseFloat(document.getElementById('f-lng')?.value) || spot.lng;
+    const prev = document.getElementById('coord-preview');
+    if (prev) prev.innerHTML = `<a href="https://www.google.com/maps?q=${latVal},${lngVal}" target="_blank" style="color:var(--petal-dark);">📍 View on Google Maps</a>&nbsp;·&nbsp;Tip: right-click → "What's here?"`;
+  } else {
+    spot[field] = value;
+  }
+}
+
+function liveUpdateLang(id, field, lang, value) {
+  const spot = spots.find(s=>s.id===id);
+  if (!spot) return;
+  if (!spot[field]) spot[field] = {};
+  spot[field][lang] = value;
+}
+
+function setStatus(id, status, btn) {
+  const spot = spots.find(s=>s.id===id);
+  if (!spot) return;
+  spot.status = status;
+  document.querySelectorAll('#status-picker .status-btn').forEach(b => b.className = 'status-btn');
+  btn.className = `status-btn active-${status}`;
+}
+
+function setIcon(id, icon, el) {
+  const spot = spots.find(s=>s.id===id);
+  if (!spot) return;
+  spot.icon = icon;
+  document.querySelectorAll('#icon-picker span').forEach(s => s.style.background = '');
+  el.style.background = 'var(--petal-light)';
+  // Update title
+  const title = document.querySelector('.editor-title span:first-child');
+  if (title) title.textContent = icon;
+}
+
+function switchLang(lang, btn) {
+  activeLang = lang;
+  document.querySelectorAll('#lang-tabs .lang-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const spot = spots.find(s=>s.id===selectedId);
+  if (!spot) return;
+  document.getElementById('lang-fields').innerHTML = renderLangFields(spot, lang);
+}
+
+/* ════ SAVE / DELETE ════ */
+function saveSpot(id) {
+  const spot = spots.find(s=>s.id===id);
+  if (!spot) return;
+  // Persist to localStorage
+  localStorage.setItem('leuven_spots', JSON.stringify(spots));
+  renderList();
+  toast('Spot saved! Export JSON when ready to publish.', 'success');
+}
+
+function deleteSpot(id) {
+  if (!confirm('Delete this spot?')) return;
+  spots = spots.filter(s=>s.id!==id);
+  selectedId = null;
+  localStorage.setItem('leuven_spots', JSON.stringify(spots));
+  renderList();
+  document.getElementById('editor-col').innerHTML = `<div class="editor-empty"><div class="editor-empty-icon">🗺️</div><div style="font-size:15px;font-weight:500;">Spot deleted</div></div>`;
+  toast('Spot deleted.', 'success');
+}
+
+function cancelEdit() {
+  selectedId = null;
+  renderList();
+  document.getElementById('editor-col').innerHTML = `<div class="editor-empty"><div class="editor-empty-icon">🗺️</div><div style="font-size:15px;font-weight:500;">Select a spot to edit</div><div style="font-size:13px;">or click <strong>+ Add spot</strong> to create a new one</div></div>`;
+}
+
+/* ════ JSON EXPORT ════ */
+function showJson() {
+  document.getElementById('json-output').textContent = JSON.stringify(spots, null, 2);
+  document.getElementById('json-panel').classList.add('open');
+}
+
+function closeJson() {
+  document.getElementById('json-panel').classList.remove('open');
+}
+
+function copyJson() {
+  navigator.clipboard.writeText(JSON.stringify(spots, null, 2)).then(() => {
+    toast('Copied to clipboard!', 'success');
+    closeJson();
+  });
+}
+
+function downloadJson() {
+  const blob = new Blob([JSON.stringify(spots, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'spots.json';
+  a.click();
+  toast('spots.json downloaded!', 'success');
+}
+
+/* ════ TOAST ════ */
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast-${type}`;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3500);
+}
+
+/* ════ KEYBOARD SHORTCUTS ════ */
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+    e.preventDefault();
+    if (selectedId) saveSpot(selectedId);
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
+    e.preventDefault();
+    showJson();
+  }
+  if (e.key === 'Escape') closeJson();
+});
+
+init();
+</script>
+</body>
+</html>
