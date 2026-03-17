@@ -492,5 +492,43 @@
       "zh": "一戰紀念碑，紀念「魯汶最後的守衛者」萊昂·施勒斯（1914年）。沿環城大道兩側花卉盛開，北起N3交叉口，南至Kerkhofdreef。"
     },
     "gmaps": "https://maps.google.com/?q=Léon+Schreursvest+Leuven"
+  },
+  {
+    "id": 14,
+    "lat": 50.896,
+    "lng": 4.7,
+    "icon": "🌿",
+    "status": "peak",
+    "name": {
+      "en": "Schoonbergenstraat",
+      "fr": "Rue Schoonbergen",
+      "nl": "Schoonbergenstraat",
+      "zh": "斯洪貝亨街"
+    },
+    "flowers": {
+      "en": "Pink cherry blossom, white plum blossom — lining the embankment",
+      "fr": "Cerisiers roses, pruniers blancs — le long du talus",
+      "nl": "Roze kersenbloesem, witte pruimenbloesem — langs de dijkrand",
+      "zh": "粉色櫻花、白色梅花 — 沿堤岸兩側盛開"
+    },
+    "best": {
+      "en": "Mar",
+      "fr": "Mar",
+      "nl": "Mar",
+      "zh": "Mar"
+    },
+    "hours": {
+      "en": "Open 24h",
+      "fr": "Ouvert 24h/24",
+      "nl": "24u open",
+      "zh": "全天開放"
+    },
+    "tip": {
+      "en": "Cherry and plum trees grow in embankment form along the street — pink and white blossoms side by side in early March. One of Leuven's most photogenic early-spring spots.",
+      "fr": "Cerisiers et pruniers en forme de talus le long de la rue — fleurs roses et blanches côte à côte début mars. L'un des plus beaux sites du début du printemps à Louvain.",
+      "nl": "Kersel- en pruimenbomen groeien in dijkvorm langs de straat — roze en witte bloesems naast elkaar begin maart. Een van de mooiste vroege-lente-plekjes in Leuven.",
+      "zh": "街道兩側的樹木以堤岸形式種植，粉色櫻花與白色梅花並排盛開，三月上旬花開最盛，是魯汶早春最美的拍照地點之一。"
+    },
+    "gmaps": "https://maps.google.com/?q=Schoonbergenstraat+Leuven"
   }
 ]
