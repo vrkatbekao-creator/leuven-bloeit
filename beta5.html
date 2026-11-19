@@ -169,21 +169,26 @@
   .lang-btn:hover { color: #fff; }
   .lang-btn.active { background: #fff; color: #0f172a; }
 
-  /* ── 2. TOP SEARCH & QUICK NAVIGATION BAR ── */
+  /* ── 2. TOP QUICK NAVIGATION & SEARCH STACK (TOOLS TOP, SEARCH BELOW) ── */
   .top-nav-bar {
     position: fixed; top: 16px;
     left: calc(16px + var(--sidebar-w) + 12px);
     right: 16px;
     z-index: 20;
-    display: flex; align-items: center; gap: 8px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
     pointer-events: none;
-    flex-wrap: wrap;
   }
   .top-nav-bar > * { pointer-events: auto; }
 
+  .quick-tools {
+    display: flex; align-items: center; gap: 5px;
+    height: 44px; padding: 4px 7px; border-radius: 99px;
+    max-width: 100%; overflow-x: auto; scrollbar-width: none;
+  }
+  .quick-tools::-webkit-scrollbar { display: none; }
   .search-box {
-    flex: 1 1 240px; max-width: 390px;
-    height: 44px; border-radius: 99px;
+    width: min(380px, calc(100% - 140px)); min-width: 220px;
+    height: 42px; border-radius: 99px;
     display: flex; align-items: center; gap: 8px;
     padding: 0 14px;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -206,10 +211,6 @@
   }
   .search-clear.visible { display: inline-flex; }
 
-  .quick-tools {
-    display: flex; align-items: center; gap: 6px;
-    height: 44px; padding: 4px 6px; border-radius: 99px;
-  }
   .tool-btn {
     border: 1px solid transparent; background: transparent; color: var(--text-sub);
     font-family: inherit; font-size: 12px; font-weight: 500;
@@ -225,40 +226,73 @@
   }
   .tool-divider {
     width: 1px; height: 18px; background: rgba(255,255,255,0.12);
-    margin: 0 2px;
+    margin: 0 2px; flex-shrink: 0;
   }
 
-  /* ── 3. RIGHT-SIDE SEASON SWITCHER RAIL ── */
-  .season-rail {
-    position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
-    z-index: 20; border-radius: 22px; padding: 7px;
-    display: flex; flex-direction: column; gap: 6px;
+  /* ── 3. COLLAPSIBLE SEASON SWITCHER DRAWER ── */
+  .season-drawer-wrap {
+    position: fixed; right: 16px; top: 68px;
+    z-index: 26;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+    pointer-events: none;
+  }
+  .season-drawer-wrap > * { pointer-events: auto; }
+  .season-drawer-trigger {
+    height: 42px; padding: 0 14px; border-radius: 99px;
+    color: #fff; font-family: inherit; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+    border-color: var(--accent);
+    box-shadow: 0 0 18px var(--accent-soft), var(--glass-shadow);
+    transition: transform 0.18s ease, box-shadow 0.2s ease, border-color 0.25s ease;
+  }
+  .season-drawer-trigger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 24px var(--accent-glow), var(--glass-shadow);
+  }
+  .season-drawer-chevron {
+    font-size: 10px; opacity: 0.8; transition: transform 0.22s ease;
+  }
+  .season-drawer-wrap.open .season-drawer-chevron {
+    transform: rotate(180deg);
+  }
+  .season-drawer-panel {
+    width: 224px; border-radius: 18px; padding: 8px;
+    display: flex; flex-direction: column; gap: 5px;
+    transform-origin: top right;
+    transform: translateY(-8px) scale(0.95);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: transform 0.22s cubic-bezier(.22,1,.36,1), opacity 0.18s ease, visibility 0.18s ease;
+  }
+  .season-drawer-wrap.open .season-drawer-panel {
+    transform: translateY(0) scale(1);
+    opacity: 1; visibility: visible; pointer-events: auto;
   }
   .season-btn {
-    width: 68px; padding: 10px 6px; border-radius: 15px;
+    width: 100%; padding: 9px 11px; border-radius: 12px;
     border: 1px solid transparent; background: transparent;
     color: var(--text-sub); font-family: inherit;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    cursor: pointer; transition: all 0.22s cubic-bezier(.22,1,.36,1);
+    display: flex; align-items: center; gap: 10px; text-align: left;
+    cursor: pointer; transition: all 0.18s ease;
     position: relative;
   }
   .season-btn:hover {
     background: rgba(255,255,255,0.09); color: #fff;
-    transform: translateY(-1px);
   }
-  .season-btn .s-ico { font-size: 20px; line-height: 1; transition: transform 0.22s; }
-  .season-btn .s-lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
-  .season-btn .s-sub { font-size: 9.5px; opacity: 0.72; }
+  .season-btn .s-ico { font-size: 19px; line-height: 1; flex-shrink: 0; transition: transform 0.2s; }
+  .season-btn .s-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+  .season-btn .s-lbl { font-size: 12.5px; font-weight: 600; color: inherit; }
+  .season-btn .s-sub { font-size: 10px; opacity: 0.72; }
   .season-btn.active {
     background: var(--accent-soft);
     border-color: var(--accent);
     color: #fff;
-    box-shadow: 0 0 20px var(--accent-glow);
+    box-shadow: 0 0 16px var(--accent-soft);
   }
-  .season-btn.active .s-ico { transform: scale(1.14); }
+  .season-btn.active .s-ico { transform: scale(1.12); }
   .season-kbd {
-    position: absolute; top: 5px; right: 6px;
-    font-size: 8.5px; opacity: 0.45; font-weight: 600;
+    font-size: 10px; font-weight: 600; opacity: 0.55;
+    padding: 2px 6px; border-radius: 6px;
+    background: rgba(255,255,255,0.08);
   }
 
   /* ── 4A. LEFT-SIDE SPOT LIST PANEL ── */
@@ -392,7 +426,7 @@
 
   /* ── 4B. DYNAMIC SPOT DETAIL CARD ── */
   .detail-card {
-    position: fixed; right: 104px; bottom: 38px;
+    position: fixed; right: 56px; bottom: 38px;
     width: 372px; max-width: calc(100vw - 32px);
     z-index: 24; border-radius: 20px;
     overflow: hidden;
@@ -649,7 +683,7 @@
   /* ── RESPONSIVE ── */
   @media (max-width: 960px) {
     :root { --sidebar-w: 286px; }
-    .detail-card { right: 92px; width: 332px; }
+    .detail-card { right: 52px; width: 332px; }
   }
   @media (max-width: 760px) {
     .left-dock {
@@ -662,26 +696,25 @@
     .top-nav-bar {
       top: 108px; left: 12px; right: 12px;
     }
-    .search-box { max-width: none; height: 40px; }
-    .quick-tools { height: 40px; overflow-x: auto; max-width: 100%; }
+    .quick-tools { height: 40px; width: 100%; }
+    .search-box { width: 100%; min-width: 0; height: 40px; }
     .spots-panel {
-      position: fixed; left: 12px; top: 160px; bottom: 74px;
+      position: fixed; left: 12px; top: 204px; bottom: 72px;
       width: min(310px, calc(100vw - 24px));
     }
     .reopen-list-btn {
-      left: 12px; bottom: 74px;
+      left: 12px; bottom: 16px;
     }
-    .season-rail {
-      top: auto; bottom: 14px; right: 50%; left: auto;
-      transform: translateX(50%);
-      flex-direction: row; padding: 5px; border-radius: 99px;
+    .season-drawer-wrap {
+      top: auto; bottom: 16px; right: 12px;
+      flex-direction: column-reverse;
     }
-    .season-btn {
-      width: auto; padding: 7px 12px; flex-direction: row; border-radius: 99px;
+    .season-drawer-panel {
+      transform-origin: bottom right;
+      transform: translateY(8px) scale(0.95);
     }
-    .season-btn .s-sub, .season-kbd { display: none; }
     .detail-card {
-      right: 12px; left: 12px; bottom: 74px; width: auto;
+      right: 12px; left: 12px; bottom: 70px; width: auto;
     }
   }
 
@@ -944,14 +977,8 @@
   </section>
 </div>
 
-<!-- 2. Top Search & Quick Navigation Bar -->
+<!-- 2. Top Navigation Stack (Quick Tools Top, Search Box Below) -->
 <div class="top-nav-bar">
-  <div class="search-box glass">
-    <span class="search-icon">🔍</span>
-    <input id="search-input" class="search-input" type="text" autocomplete="off" placeholder="搜尋景點、花種或關鍵字 (Kruidtuin, 楓葉...)" />
-    <button id="search-clear" class="search-clear" title="Clear">✕</button>
-  </div>
-
   <div class="quick-tools glass">
     <button id="btn-open-calendar" class="tool-btn" title="Flower & Season Calendar">📅 <span data-i18n="btn_calendar">花曆</span></button>
     <button id="btn-open-report" class="tool-btn" title="Community Condition Reports">📣 <span data-i18n="btn_report">回報</span><span id="nav-rpt-count" class="rpt-count-pill" style="display:none;">0</span></button>
@@ -964,35 +991,56 @@
     <div class="tool-divider"></div>
     <button id="btn-toggle-list" class="tool-btn active" title="Show/Hide Spot List">☰ <span data-i18n="btn_list">景點</span></button>
   </div>
+
+  <div class="search-box glass">
+    <span class="search-icon">🔍</span>
+    <input id="search-input" class="search-input" type="text" autocomplete="off" placeholder="搜尋景點、花種或關鍵字 (Kruidtuin, 楓葉...)" />
+    <button id="search-clear" class="search-clear" title="Clear">✕</button>
+  </div>
 </div>
 
-<!-- 3. Right-Side Season Switcher Rail -->
-<nav class="season-rail glass" aria-label="Season switcher">
-  <button class="season-btn active" data-season="spring" title="Spring (Key 1)">
-    <span class="season-kbd">1</span>
-    <span class="s-ico">🌸</span>
-    <span class="s-lbl" data-i18n="s_spring">春</span>
-    <span class="s-sub">Spring</span>
+<!-- 3. Collapsible Season Switcher Drawer -->
+<div id="season-drawer" class="season-drawer-wrap">
+  <button id="season-drawer-trigger" class="season-drawer-trigger glass" aria-expanded="false" aria-controls="season-drawer-panel" title="Switch Season (Keys 1-4)">
+    <span id="drawer-s-ico">🌸</span>
+    <span id="drawer-s-lbl">春 · Spring</span>
+    <span class="season-drawer-chevron">▾</span>
   </button>
-  <button class="season-btn" data-season="summer" title="Summer (Key 2)">
-    <span class="season-kbd">2</span>
-    <span class="s-ico">☀️</span>
-    <span class="s-lbl" data-i18n="s_summer">夏</span>
-    <span class="s-sub">Summer</span>
-  </button>
-  <button class="season-btn" data-season="autumn" title="Autumn (Key 3)">
-    <span class="season-kbd">3</span>
-    <span class="s-ico">🍁</span>
-    <span class="s-lbl" data-i18n="s_autumn">秋</span>
-    <span class="s-sub">Autumn</span>
-  </button>
-  <button class="season-btn" data-season="winter" title="Winter (Key 4)">
-    <span class="season-kbd">4</span>
-    <span class="s-ico">❄️</span>
-    <span class="s-lbl" data-i18n="s_winter">冬</span>
-    <span class="s-sub">Winter</span>
-  </button>
-</nav>
+  <nav id="season-drawer-panel" class="season-drawer-panel glass" aria-label="Season switcher">
+    <button class="season-btn active" data-season="spring" title="Spring (Key 1)">
+      <span class="s-ico">🌸</span>
+      <span class="s-text">
+        <span class="s-lbl" data-i18n="s_spring">春</span>
+        <span class="s-sub">Spring · Sakura</span>
+      </span>
+      <span class="season-kbd">1</span>
+    </button>
+    <button class="season-btn" data-season="summer" title="Summer (Key 2)">
+      <span class="s-ico">☀️</span>
+      <span class="s-text">
+        <span class="s-lbl" data-i18n="s_summer">夏</span>
+        <span class="s-sub">Summer · Shimmer</span>
+      </span>
+      <span class="season-kbd">2</span>
+    </button>
+    <button class="season-btn" data-season="autumn" title="Autumn (Key 3)">
+      <span class="s-ico">🍁</span>
+      <span class="s-text">
+        <span class="s-lbl" data-i18n="s_autumn">秋</span>
+        <span class="s-sub">Autumn · Maples</span>
+      </span>
+      <span class="season-kbd">3</span>
+    </button>
+    <button class="season-btn" data-season="winter" title="Winter (Key 4)">
+      <span class="s-ico">❄️</span>
+      <span class="s-text">
+        <span class="s-lbl" data-i18n="s_winter">冬</span>
+        <span class="s-sub">Winter · Snow</span>
+      </span>
+      <span class="season-kbd">4</span>
+    </button>
+  </nav>
+</div>
 
 <button id="reopen-list-btn" class="reopen-list-btn glass">☰ <span data-i18n="btn_open_list">展開景點清單</span></button>
 
@@ -2727,11 +2775,28 @@
     document.getElementById('pill-icon').textContent = cfg.icon;
     document.getElementById('pill-text').textContent = L(cfg.pillLabel);
     document.getElementById('load-emblem').textContent = cfg.icon;
+    updateSeasonDrawerTrigger();
 
     applyMapSeasonTheme(seasonKey);
     renderSpotsList();
     renderMarkers();
     if (state.selectedSpotId) renderDetailCard();
+  }
+
+  function setSeasonDrawerOpen(open) {
+    const wrap = document.getElementById('season-drawer');
+    const trig = document.getElementById('season-drawer-trigger');
+    if (!wrap || !trig) return;
+    wrap.classList.toggle('open', open);
+    trig.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  function updateSeasonDrawerTrigger() {
+    const cfg = SEASON_CONFIG[state.season];
+    const ico = document.getElementById('drawer-s-ico');
+    const lbl = document.getElementById('drawer-s-lbl');
+    if (ico) ico.textContent = cfg.icon;
+    if (lbl) lbl.textContent = L(cfg.pillLabel);
   }
 
   function cycleDensity() {
@@ -2766,6 +2831,7 @@
     document.getElementById('search-input').placeholder = T('search_ph');
     document.getElementById('load-sub').textContent = T('load_sub');
     document.getElementById('pill-text').textContent = L(SEASON_CONFIG[state.season].pillLabel);
+    updateSeasonDrawerTrigger();
     const subEmail = document.getElementById('sub-email');
     if (subEmail) subEmail.placeholder = T('sub_ph');
     const rptNote = document.getElementById('rpt-note');
@@ -3218,9 +3284,23 @@
      12. UI EVENT BINDINGS & INITIALIZATION
      ════════════════════════════════════════════════════════════ */
   function bindEvents() {
-    // Season buttons
+    // Season drawer trigger & buttons
+    const drawerWrap = document.getElementById('season-drawer');
+    const drawerTrig = document.getElementById('season-drawer-trigger');
+    drawerTrig.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setSeasonDrawerOpen(!drawerWrap.classList.contains('open'));
+    });
     document.querySelectorAll('.season-btn').forEach(btn => {
-      btn.addEventListener('click', () => setSeason(btn.dataset.season));
+      btn.addEventListener('click', () => {
+        setSeason(btn.dataset.season);
+        setSeasonDrawerOpen(false);
+      });
+    });
+    document.addEventListener('click', (e) => {
+      if (drawerWrap.classList.contains('open') && !drawerWrap.contains(e.target)) {
+        setSeasonDrawerOpen(false);
+      }
     });
 
     // Language buttons
@@ -3302,6 +3382,7 @@
       }
       if (e.key === 'Escape') {
         if (document.querySelector('.modal-backdrop.open')) closeModals();
+        else if (drawerWrap.classList.contains('open')) setSeasonDrawerOpen(false);
         else closeDetailCard();
         return;
       }
