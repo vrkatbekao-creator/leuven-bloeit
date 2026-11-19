@@ -1,0 +1,2433 @@
+{
+  "meta": {
+    "project": "Leuven Seizoenen",
+    "subtitle": "Four Seasons in Leuven",
+    "center": [
+      4.7009,
+      50.8798
+    ],
+    "defaultCamera": {
+      "center": [
+        4.7005,
+        50.8772
+      ],
+      "zoom": 14.25,
+      "pitch": 56,
+      "bearing": -18
+    },
+    "version": "5.0"
+  },
+  "spots": [
+    {
+      "id": "kruidtuin",
+      "icon": "🌸",
+      "lat": 50.8778,
+      "lng": 4.6912,
+      "category": {
+        "zh": "植物園 · 花木",
+        "en": "Botanical Garden",
+        "nl": "Botanische Tuin",
+        "fr": "Jardin botanique"
+      },
+      "name": {
+        "nl": "Kruidtuin",
+        "en": "Botanical Garden",
+        "fr": "Jardin botanique",
+        "zh": "魯汶植物園"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn"
+      ],
+      "primarySeason": "spring",
+      "best": {
+        "zh": "4月中 – 5月中 · 10月底銀杏楓紅",
+        "en": "Mid Apr – Mid May · Late Oct foliage",
+        "nl": "Half apr – Half mei · Eind okt herfst",
+        "fr": "Mi-avr – Mi-mai · Fin oct feuillage"
+      },
+      "hours": {
+        "zh": "08:00–18:00（免費）",
+        "en": "08:00–18:00 (Free)",
+        "nl": "08:00–18:00 (Gratis)",
+        "fr": "08:00–18:00 (Gratuit)"
+      },
+      "highlights": {
+        "zh": "紫藤、山茶花、玫瑰、日本楓、銀杏",
+        "en": "Wisteria, camellia, roses, Japanese maple, ginkgo",
+        "nl": "Blauweregen, camelia, rozen, Japanse esdoorn, ginkgo",
+        "fr": "Glycine, camélia, roses, érable du Japon, ginkgo"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "比利時最古老植物園（1738年）。山茶花與番紅花早春率先甦醒，四月紫藤與花木盛放，花瓣隨微風飄落池面。",
+          "en": "Belgium's oldest botanical garden (1738). Camellia and crocus bloom early, followed by wisteria and drifting spring petals in April.",
+          "nl": "Oudste botanische tuin van België (1738). Camelia en krokus bloeien vroeg; blauweregen piekt in april.",
+          "fr": "Le plus ancien jardin botanique de Belgique (1738). Camélias et glycines illuminent le printemps."
+        },
+        "summer": {
+          "zh": "百年老樹交織出沁涼綠蔭，藥草花圃與玻璃溫室外的水蓮池生機盎然，是午後靜坐閱讀的絕佳角落。",
+          "en": "Lush summer shade under century-old trees, vibrant medicinal herb beds, and sunlit water lilies beside the greenhouse.",
+          "nl": "Weelderige schaduw onder oude bomen, geurige kruidentuinen en waterlelies in de zomerzon.",
+          "fr": "Ombre fraîche sous les arbres centenaires, jardin d'herbes aromatiques et nénuphars en fleurs."
+        },
+        "autumn": {
+          "zh": "溫室旁的日本楓轉為火紅，十月底銀杏扇葉鋪成金色地毯，古典拱門在秋陽下層次分明。",
+          "en": "The Japanese maple near the greenhouse turns blazing scarlet while ginkgo leaves carpet the paths in gold by late October.",
+          "nl": "De Japanse esdoorn bij de serre kleurt vuurrood en ginkgoblaadjes vormen een gouden tapijt eind oktober.",
+          "fr": "L'érable japonais près de la serre s'embrase tandis que les feuilles de ginkgo dorent les allées fin octobre."
+        },
+        "winter": {
+          "zh": "戶外枝枒沉睡時，步入免費開放的玻璃溫室即可欣賞熱帶蘭花與仙人掌，感受寒冬中的暖意。",
+          "en": "While outdoor beds rest under winter frost, step inside the heated glasshouse for tropical orchids and palms.",
+          "nl": "Terwijl de buitentuin rust, bieden de verwarmde serres tropische warmte en orchideeën.",
+          "fr": "Pendant le repos hivernal, la serre chauffée abrite orchidées tropicales et plantes exotiques."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 175,
+        "seasons": [
+          "spring",
+          "autumn"
+        ],
+        "intensity": 1.4
+      },
+      "camera": {
+        "zoom": 16.7,
+        "pitch": 60,
+        "bearing": -24
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/Kruidtuin%2C_Leuven_%28July_2020%29.jpg/960px-Kruidtuin%2C_Leuven_%28July_2020%29.jpg",
+        "motif": "botanical",
+        "palette": [
+          "#f9a8d4",
+          "#86efac",
+          "#1e293b"
+        ],
+        "credit": "Wikimedia Commons · Kruidtuin Leuven"
+      },
+      "gmaps": "https://maps.google.com/?q=Kruidtuin+Leuven",
+      "tags": [
+        "kruidtuin",
+        "botanical",
+        "sakura",
+        "wisteria",
+        "ginkgo",
+        "植物園",
+        "櫻花",
+        "紫藤",
+        "楓葉"
+      ],
+      "legacyIds": [
+        1,
+        11
+      ]
+    },
+    {
+      "id": "arenberg",
+      "icon": "🍁",
+      "lat": 50.8626,
+      "lng": 4.6839,
+      "category": {
+        "zh": "文藝復興城堡 · 林蔭公園",
+        "en": "Castle & Parkland",
+        "nl": "Kasteel & Park",
+        "fr": "Château & Parc"
+      },
+      "name": {
+        "nl": "Kasteelpark Arenberg",
+        "en": "Arenberg Castle Park",
+        "fr": "Parc du Château d'Arenberg",
+        "zh": "阿倫堡城堡公園"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn"
+      ],
+      "primarySeason": "autumn",
+      "best": {
+        "zh": "3月–6月賞花 · 10月底–11月中楓紅",
+        "en": "Mar–Jun blooms · Late Oct – Mid Nov autumn",
+        "nl": "Mrt–Jun bloesem · Eind okt – Half nov herfst",
+        "fr": "Mar–Juin fleurs · Fin oct – Mi-nov automne"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "楓樹、橡樹、山毛櫸、林蔭大道、櫻花與玫瑰",
+        "en": "Maple, oak, beech canopy, riverside walks, cherry & roses",
+        "nl": "Esdoorn, eik, beuk, dreven langs de Dijle, kerselaar & rozen",
+        "fr": "Érables, chênes, hêtres, allées ombragées, cerisiers & roses"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "三月櫻花沿著草坡與河畔綻放，隨後玫瑰與牡丹一路接力至六月，KU Leuven 理工校區草坪最適合春日野餐。",
+          "en": "Cherry blossoms brighten the grounds in March, followed by roses and peonies through June across the KU Leuven campus lawns.",
+          "nl": "Kersenbloesem in maart, daarna rozen en pioenen tot juni op de groene campus van KU Leuven.",
+          "fr": "Cerisiers en fleurs dès mars, suivis de roses et pivoines jusqu'en juin autour du campus."
+        },
+        "summer": {
+          "zh": "高聳的百年梧桐林蔭大道隔絕暑氣，沿著戴勒河畔漫步或單車騎行，是魯汶夏日最舒心的綠色廊道。",
+          "en": "Towering shaded avenues and cool breezes along the Dijle river make Arenberg Park the ultimate summer cycling and walking escape.",
+          "nl": "Statige schaduwrijke dreven en een frisse bries langs de Dijle — ideaal voor zomerse wandelingen.",
+          "fr": "Allées ombragées majestueuses et brise fraîche de la Dyle pour des balades estivales inoubliables."
+        },
+        "autumn": {
+          "zh": "楓葉火紅、橡樹與山毛櫸一片金黃，16 世紀紅磚古堡掩映在漫天落葉之中，是魯汶最具戲劇張力的秋景。",
+          "en": "A dramatic canopy of crimson maple, amber oak, and golden beech wraps the 16th-century castle in Leuven's finest autumn spectacle.",
+          "nl": "Een baldakijn van rood, oranje en goud omringt het 16e-eeuwse kasteel — de mooiste herfstplek van Leuven.",
+          "fr": "Un dais rouge, orange et doré enveloppe le château du XVIe siècle dans un décor automnal grandiose."
+        },
+        "winter": {
+          "zh": "晨霜與薄雪勾勒城堡尖塔與枯枝線條，清冷冬空下呈現古典油畫般的寧靜莊嚴。",
+          "en": "Frost-dusted lawns and crisp snow accentuate the Renaissance turrets and quiet riverside bridges.",
+          "nl": "Ochtendrijp en sneeuw benadrukken de elegante kasteeltorens en stille bruggen langs de Dijle.",
+          "fr": "Givre matinal et neige légère soulignent les tourelles Renaissance et les ponts paisibles."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 240,
+        "seasons": [
+          "autumn",
+          "spring",
+          "summer"
+        ],
+        "intensity": 1.55
+      },
+      "camera": {
+        "zoom": 15.9,
+        "pitch": 62,
+        "bearing": 34
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/Castle_Arenberg%2C_Katholieke_Universiteit_Leuven_adj.jpg/960px-Castle_Arenberg%2C_Katholieke_Universiteit_Leuven_adj.jpg",
+        "motif": "castle",
+        "palette": [
+          "#f59e0b",
+          "#dc2626",
+          "#1f2937"
+        ],
+        "credit": "Wikimedia Commons · Kasteel van Arenberg"
+      },
+      "gmaps": "https://maps.google.com/?q=Kasteelpark+Arenberg+Leuven",
+      "tags": [
+        "arenberg",
+        "castle",
+        "maple",
+        "autumn",
+        "summer",
+        "ku leuven",
+        "城堡",
+        "楓葉",
+        "林蔭"
+      ],
+      "legacyIds": [
+        5,
+        9
+      ]
+    },
+    {
+      "id": "vaartkom",
+      "icon": "☀️",
+      "lat": 50.8878,
+      "lng": 4.7031,
+      "category": {
+        "zh": "運河水岸 · 創意生活區",
+        "en": "Canal Waterfront",
+        "nl": "Waterfront & Vaart",
+        "fr": "Quais & Canal"
+      },
+      "name": {
+        "nl": "Vaartkom",
+        "en": "Vaartkom Waterfront",
+        "fr": "Bassin du Vaartkom",
+        "zh": "瓦爾特科姆運河區"
+      },
+      "seasons": [
+        "summer",
+        "spring"
+      ],
+      "primarySeason": "summer",
+      "best": {
+        "zh": "5月–9月夏日水岸露台",
+        "en": "May – Sep sunny waterfront",
+        "nl": "Mei – Sep zonnige terrassen",
+        "fr": "Mai – Sep terrasses au bord de l'eau"
+      },
+      "hours": {
+        "zh": "水岸步道全天開放",
+        "en": "Waterfront open 24h",
+        "nl": "Kaaien 24u toegankelijk",
+        "fr": "Quais ouverts 24h/24"
+      },
+      "highlights": {
+        "zh": "運河木棧道、Sluispark、百年啤酒廠、水岸咖啡露台",
+        "en": "Canal promenade, Sluispark, historic breweries, sunlit terraces",
+        "nl": "Vaartpromenade, Sluispark, oude brouwerijen, zonnige terrassen",
+        "fr": "Promenade du canal, Sluispark, brasseries historiques, terrasses"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "春陽初暖時水岸咖啡露台陸續重開，沿著運河單車道與 Sluispark 綠帶散步清爽宜人。",
+          "en": "Waterfront cafés reopen in warm spring sun along the canal promenade and Sluispark greenway.",
+          "nl": "In de lente openen de terrassen langs het water en nodigt het Sluispark uit tot flaneren.",
+          "fr": "Les terrasses au bord du canal rouvrent sous le soleil printanier le long du Sluispark."
+        },
+        "summer": {
+          "zh": "魯汶最具活力的夏日水岸！歷史紅磚筒倉與現代建築倒映在清澈運河上，微風伴隨日光在碼頭階梯與精釀啤酒露台閃爍。",
+          "en": "Leuven's liveliest summer hangout — historic silos meet sunlit canal decks, breezy waterfront steps, and craft-beer terraces.",
+          "nl": "De zomerse hotspot van Leuven: historische silo's, verfrissende watertrappen en bruisende terrassen aan de vaart.",
+          "fr": "Le cœur estival de Louvain : anciens silos réhabilités, quais ensoleillés et terrasses animées au bord du canal."
+        },
+        "autumn": {
+          "zh": "低斜秋陽映照紅磚工業遺址與運河水面，傍晚時分金橘色倒影格外迷人。",
+          "en": "Golden autumn light reflects brick brewery facades onto the calm canal basin at dusk.",
+          "nl": "Zacht herfstlicht weerspiegelt de bakstenen brouwerijgevels in het kalme water van de vaart.",
+          "fr": "La lumière dorée d'automne reflète les façades industrielles en brique sur le bassin paisible."
+        },
+        "winter": {
+          "zh": "清冷河岸倒映著工業風餐廳與烘焙坊的溫暖燈火，走進歷史筒倉空間品嚐熱飲格外療癒。",
+          "en": "Crisp winter air contrasts with warm glowing cafés tucked inside restored canal-side warehouses.",
+          "nl": "Heldere winterlucht en warme lichtjes in de gezellige horecazaken langs de oude pakhuizen.",
+          "fr": "Air vif d'hiver et lumières chaleureuses des cafés aménagés dans les anciens entrepôts."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 210,
+        "seasons": [
+          "summer"
+        ],
+        "intensity": 1.35
+      },
+      "camera": {
+        "zoom": 16.2,
+        "pitch": 58,
+        "bearing": 24
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/View_of_Vaartkom%2C_Leuven_8_September_2017.jpg/960px-View_of_Vaartkom%2C_Leuven_8_September_2017.jpg",
+        "motif": "waterfront",
+        "palette": [
+          "#34d399",
+          "#38bdf8",
+          "#0f172a"
+        ],
+        "credit": "Wikimedia Commons · Vaartkom Leuven"
+      },
+      "gmaps": "https://maps.google.com/?q=Vaartkom+Leuven",
+      "tags": [
+        "vaartkom",
+        "canal",
+        "waterfront",
+        "summer",
+        "sluispark",
+        "運河",
+        "水岸",
+        "夏日",
+        "露台"
+      ]
+    },
+    {
+      "id": "groot-begijnhof",
+      "icon": "❄️",
+      "lat": 50.8712,
+      "lng": 4.6968,
+      "category": {
+        "zh": "UNESCO 世界遺產 · 歷史街區",
+        "en": "UNESCO Historic Quarter",
+        "nl": "UNESCO Werelderfgoed",
+        "fr": "Patrimoine UNESCO"
+      },
+      "name": {
+        "nl": "Groot Begijnhof",
+        "en": "Groot Begijnhof",
+        "fr": "Grand Béguinage",
+        "zh": "大貝金霍夫"
+      },
+      "seasons": [
+        "spring",
+        "autumn",
+        "winter"
+      ],
+      "primarySeason": "winter",
+      "best": {
+        "zh": "早春賞花 · 秋季爬牆虎 · 冬日雪景燈火",
+        "en": "Early spring · Autumn crimson · Winter snow & lanterns",
+        "nl": "Vroege lente · Herfstgoud · Winterse kasseien & lantaarns",
+        "fr": "Début printemps · Automne pourpre · Neige & lanternes d'hiver"
+      },
+      "hours": {
+        "zh": "全天開放（外部庭院）",
+        "en": "Open 24h (outer grounds)",
+        "nl": "24u open (buitenterrein)",
+        "fr": "Ouvert 24h/24 (extérieur)"
+      },
+      "highlights": {
+        "zh": "13世紀石板小巷、紅磚山牆、戴勒河雙拱橋、爬牆虎與冬夜街燈",
+        "en": "13th-century cobblestone lanes, Dijle bridges, Virginia creeper & lanterns",
+        "nl": "13e-eeuwse kasseisteegjes, Dijlebrugjes, wilde wingerd & lantaarns",
+        "fr": "Ruelles pavées du XIIIe siècle, ponts sur la Dyle, vigne vierge & lanternes"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "UNESCO 世界遺產。石板小巷兩旁梅花與櫻花綻放，寧靜庭院與古老磚牆交織出夢幻早春氛圍。",
+          "en": "UNESCO World Heritage Site where cherry and plum blossoms soften 13th-century brick facades and car-free lanes.",
+          "nl": "UNESCO Werelderfgoed waar kersen- en pruimenbloesems de rustige kasseisteegjes betoveren.",
+          "fr": "Site UNESCO où cerisiers et pruniers adoucissent les ruelles pavées et façades en brique."
+        },
+        "summer": {
+          "zh": "濃綠藤蔓垂掛在古老拱橋上，戴勒河流水潺潺，走進巷弄瞬間遠離城市喧囂。",
+          "en": "Quiet ivy-draped courtyards and cool stone bridges over the Dijle offer peaceful summer refuge.",
+          "nl": "Groene binnentuinen en koele brugjes over de Dijle bieden zomerse stilte in hartje stad.",
+          "fr": "Cours verdoyantes et ponts de pierre frais sur la Dyle offrent un havre de paix estival."
+        },
+        "autumn": {
+          "zh": "爬牆虎在百年古牆上染成深紅，石板巷弄在秋日黃金時刻光影極具戲劇張力，強烈推薦傍晚前往。",
+          "en": "Virginia creeper turns deep crimson across ancient walls — walk the cobblestone lanes at golden hour for magical light.",
+          "nl": "Wilde wingerd kleurt karmozijnrood op de oude muren — betoverend in het herfstige gouden uur.",
+          "fr": "La vigne vierge vire au pourpre profond sur les murs anciens, sublime à l'heure dorée."
+        },
+        "winter": {
+          "zh": "細雪輕覆陡峭紅磚屋頂與古老石橋，暮色降臨點起溫暖街燈時，整座會院化作童話般的冬夜散步路線。",
+          "en": "Soft snow blankets steep gabled roofs while warm wrought-iron lanterns glow over cobblestone alleys — pure winter magic.",
+          "nl": "Zachte sneeuw op steile puntgevels en warm lantaarnlicht in de smalle steegjes — een sprookjesachtige winterwandeling.",
+          "fr": "Une neige fine couvre les toits à pignons tandis que les lanternes illuminent les pavés dans une atmosphère féerique."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 185,
+        "seasons": [
+          "winter",
+          "autumn",
+          "spring"
+        ],
+        "intensity": 1.45
+      },
+      "camera": {
+        "zoom": 16.9,
+        "pitch": 62,
+        "bearing": -38
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Leuven-Groot-Begijnhof.jpg/960px-Leuven-Groot-Begijnhof.jpg",
+        "motif": "beguinage",
+        "palette": [
+          "#7dd3fc",
+          "#fca5a5",
+          "#1e1b4b"
+        ],
+        "credit": "Wikimedia Commons · Groot Begijnhof Leuven"
+      },
+      "gmaps": "https://maps.google.com/?q=Groot+Begijnhof+Leuven",
+      "tags": [
+        "begijnhof",
+        "unesco",
+        "winter",
+        "snow",
+        "autumn",
+        "大貝金霍夫",
+        "世界遺產",
+        "石板路",
+        "冬日"
+      ],
+      "legacyIds": [
+        7,
+        12
+      ]
+    },
+    {
+      "id": "abdij-van-park",
+      "icon": "🌺",
+      "lat": 50.8643,
+      "lng": 4.7174,
+      "category": {
+        "zh": "古修道院 · 湖畔濕地",
+        "en": "Historic Abbey & Ponds",
+        "nl": "Abdij & Vijvers",
+        "fr": "Abbaye & Étangs"
+      },
+      "name": {
+        "nl": "Abdij van Park",
+        "en": "Park Abbey",
+        "fr": "Abbaye du Parc",
+        "zh": "公園修道院"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn",
+        "winter"
+      ],
+      "primarySeason": "summer",
+      "best": {
+        "zh": "四季皆美 · 春花、夏湖、秋影、冬雪步道",
+        "en": "All-season · Spring plum, summer ponds, autumn gold, winter walks",
+        "nl": "Vier seizoenen · Lente, zomervijvers, herfstgoud & winterwandeling",
+        "fr": "Quatre saisons · Fleurs, étangs d'été, reflets d'automne & balade d'hiver"
+      },
+      "hours": {
+        "zh": "園區全天開放 · 博物館 週二–日 10:00–17:00",
+        "en": "Grounds 24h · Museum Tue–Sun 10:00–17:00",
+        "nl": "Domein 24u · Museum Di–Zo 10:00–17:00",
+        "fr": "Domaine 24h/24 · Musée Mar–Dim 10:00–17:00"
+      },
+      "highlights": {
+        "zh": "12世紀諾伯特會修道院、連綿湖泊倒影、古磨坊與長距離散步環線",
+        "en": "12th-century abbey, reflective ponds, historic watermill & scenic trails",
+        "nl": "12e-eeuwse abdij, spiegelende vijvers, watermolen & wandelpaden",
+        "fr": "Abbaye du XIIe siècle, étangs miroirs, moulin historique & sentiers"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "梅花二月率先開放，春末繡球花與修道院花園百花盛放，搭配湖畔晨霧景色動人。",
+          "en": "Plum trees bloom as early as February, leading into lush abbey gardens and lakeside wildflowers in late spring.",
+          "nl": "Pruimenbomen bloeien al in februari, gevolgd door weelderige abdijtuinen en oeverbloemen.",
+          "fr": "Pruniers dès février, suivis des jardins abbatiaux et fleurs des rives à la fin du printemps."
+        },
+        "summer": {
+          "zh": "潔白修道院高牆倒映在翠綠湖水與蘆葦之間，騎車繞湖或在修道院啤酒館露台小憩最能感受慢活夏日。",
+          "en": "Whitewashed abbey walls mirror in emerald reed-lined ponds — ideal for sunlit cycling loops and brasserie terraces.",
+          "nl": "Witte abdijmuren weerspiegelen in groene vijvers — heerlijk voor zomerse fietstochten en een terrasje.",
+          "fr": "Les murs blancs de l'abbaye se reflètent dans les étangs verdoyants, idéal à vélo sous le soleil d'été."
+        },
+        "autumn": {
+          "zh": "十月湖畔山毛櫸、橡樹與椴樹轉為一片金黃，水面金色倒影美不勝收。",
+          "en": "Beech, oak, and linden trees blaze gold along the abbey lakes in October, casting mirror reflections across the water.",
+          "nl": "Beuk, eik en linde kleuren goud langs de vijvers in oktober met adembenemende weerspiegelingen.",
+          "fr": "Hêtres, chênes et tilleuls s'embrasent en octobre et illuminent la surface des étangs."
+        },
+        "winter": {
+          "zh": "白雪覆蓋開闊草坡與靜止湖面，修道院鐘樓在澄澈冷藍冬空下宛如畫卷，是最佳冬日散步路線。",
+          "en": "Snow-dusted meadows and misty winter ponds frame the abbey spire along Leuven's most serene winter walking loop.",
+          "nl": "Besneeuwde weiden en stille wintervijvers vormen het decor voor een rustgevende winterwandeling.",
+          "fr": "Prairies enneigées et étangs brumeux composent la plus poétique des promenades hivernales."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 230,
+        "seasons": [
+          "summer",
+          "autumn",
+          "winter"
+        ],
+        "intensity": 1.35
+      },
+      "camera": {
+        "zoom": 15.8,
+        "pitch": 58,
+        "bearing": -52
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ca/Abdij_van_Park_Leuven_46.jpg/960px-Abdij_van_Park_Leuven_46.jpg",
+        "motif": "abbey",
+        "palette": [
+          "#6ee7b7",
+          "#fcd34d",
+          "#1e293b"
+        ],
+        "credit": "Wikimedia Commons · Abdij van Park"
+      },
+      "gmaps": "https://maps.google.com/?q=Park+Abbey+Leuven",
+      "tags": [
+        "abbey",
+        "abdij",
+        "park",
+        "lake",
+        "winter",
+        "autumn",
+        "summer",
+        "修道院",
+        "湖畔",
+        "散步"
+      ],
+      "legacyIds": [
+        6,
+        10
+      ]
+    },
+    {
+      "id": "sint-donatuspark",
+      "icon": "🌳",
+      "lat": 50.8756,
+      "lng": 4.7024,
+      "category": {
+        "zh": "城市公園 · 中世紀古城牆",
+        "en": "City Park & Medieval Wall",
+        "nl": "Stadspark & Ringmuur",
+        "fr": "Parc municipal & Remparts"
+      },
+      "name": {
+        "nl": "Sint-Donatuspark",
+        "en": "St. Donatus Park",
+        "fr": "Parc Saint-Donat",
+        "zh": "聖多納圖斯公園"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn"
+      ],
+      "primarySeason": "autumn",
+      "best": {
+        "zh": "春季櫻花水仙 · 秋季楓紅大道",
+        "en": "Spring blossoms · Autumn maple avenues",
+        "nl": "Lentebloesem · Herfstkleuren langs de ringmuur",
+        "fr": "Fleurs de printemps · Érables d'automne"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "英式景觀池塘、中世紀古城牆塔樓、春季櫻花與秋季紅楓",
+        "en": "English-style pond, medieval city wall towers, spring cherry & autumn maples",
+        "nl": "Engelse landschapstuin, middeleeuwse stadsmuur, lente- en herfstbomen",
+        "fr": "Étang anglais, tours des remparts médiévaux, cerisiers & érables"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "嫩粉櫻花與黃水仙沿池塘與古城塔綻放，是市中心最受歡迎的春季散步與野餐綠洲。",
+          "en": "Daffodils and pink cherry branches frame the pond and medieval wall towers right in the city center.",
+          "nl": "Narcissen en kersenbloesem omringen de vijver en de middeleeuwse torens in het stadscentrum.",
+          "fr": "Jonquilles et cerisiers en fleurs encadrent l'étang et les tours médiévales au cœur de la ville."
+        },
+        "summer": {
+          "zh": "開闊草坪與百年大樹綠蔭聚集曬太陽與野餐的學生與居民，洋溢自在的魯汶夏日氣息。",
+          "en": "Broad shaded lawns and lively picnic blankets capture Leuven's relaxed university-town summer vibe.",
+          "nl": "Ruime schaduwrijke grasvelden waar studenten en Leuvenaars genieten van lange zomerdagen.",
+          "fr": "Grandes pelouses ombragées où étudiants et habitants profitent des longues journées d'été."
+        },
+        "autumn": {
+          "zh": "高大楓樹與栗樹在古石城牆邊化作紅金浪潮，落葉鋪滿蜿蜒小徑，秋意極為濃厚。",
+          "en": "Tall maples and chestnuts erupt in fiery orange and gold beside the medieval stone ramparts.",
+          "nl": "Hoge esdoorns en kastanjes vormen een warme zee van herfstkleuren langs de oude stadsmuur.",
+          "fr": "Érables et marronniers embrasent les allées sinueuses au pied des remparts médiévaux."
+        },
+        "winter": {
+          "zh": "薄雪點綴古城牆垛口與長椅，在熱鬧市中心旁留下一處安靜的冬日白雪公園。",
+          "en": "Fresh snow outlines the medieval wall battlements and quiet benches just steps from the shopping streets.",
+          "nl": "Verse sneeuw tekent de oude ringmuur scherp af voor een verstilde winterwandeling in de stad.",
+          "fr": "La neige souligne les créneaux des remparts pour une parenthèse hivernale paisible en centre-ville."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 170,
+        "seasons": [
+          "spring",
+          "autumn"
+        ],
+        "intensity": 1.45
+      },
+      "camera": {
+        "zoom": 16.9,
+        "pitch": 60,
+        "bearing": 18
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Leuven_Sint-Donatuspark_II.jpg/960px-Leuven_Sint-Donatuspark_II.jpg",
+        "motif": "park",
+        "palette": [
+          "#f59e0b",
+          "#f472b6",
+          "#1e293b"
+        ],
+        "credit": "Wikimedia Commons · Sint-Donatuspark"
+      },
+      "gmaps": "https://maps.google.com/?q=Sint-Donatuspark+Leuven",
+      "tags": [
+        "sint-donatuspark",
+        "stadspark",
+        "park",
+        "autumn",
+        "spring",
+        "maple",
+        "公園",
+        "古城牆",
+        "楓葉",
+        "櫻花"
+      ]
+    },
+    {
+      "id": "grote-markt",
+      "icon": "🏛️",
+      "lat": 50.8791,
+      "lng": 4.7011,
+      "category": {
+        "zh": "哥德式地標 · 歷史核心",
+        "en": "Gothic Landmark & Square",
+        "nl": "Historisch Centrum",
+        "fr": "Place Historique"
+      },
+      "name": {
+        "nl": "Stadhuis & Grote Markt",
+        "en": "Town Hall & Main Square",
+        "fr": "Hôtel de Ville & Grand-Place",
+        "zh": "魯汶市政廳與大廣場"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn",
+        "winter"
+      ],
+      "primarySeason": "winter",
+      "best": {
+        "zh": "12月 Wintertijd 節慶燈飾 · 全年地標",
+        "en": "Dec Wintertijd lights · Iconic year-round",
+        "nl": "Dec Wintertijd · Heel het jaar door",
+        "fr": "Déc Wintertijd · Emblématique toute l'année"
+      },
+      "hours": {
+        "zh": "廣場全天開放",
+        "en": "Square open 24h",
+        "nl": "Plein 24u open",
+        "fr": "Place ouverte 24h/24"
+      },
+      "highlights": {
+        "zh": "15世紀哥德式市政廳（236座雕像）、聖彼得教堂、冬日節慶燈海",
+        "en": "15th-c. Gothic Town Hall (236 statues), St. Peter's Church, Wintertijd lights",
+        "nl": "15e-eeuws gotisch Stadhuis (236 beelden), Sint-Pieterskerk, Wintertijd",
+        "fr": "Hôtel de Ville gothique (236 statues), Église Saint-Pierre, illuminations d'hiver"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "明媚春光映照市政廳精細石雕尖塔，廣場露台與春季市集洋溢輕快氛圍。",
+          "en": "Crisp spring sunlight highlights the intricate Gothic stonework as flower markets return to the square.",
+          "nl": "Fris lentelicht laat de fijne gotische gevelbeelden stralen boven de gezellige terrassen.",
+          "fr": "La lumière printanière sublime les sculptures gothiques tandis que les terrasses s'animent."
+        },
+        "summer": {
+          "zh": "街頭音樂、露天市集與啤酒節讓廣場熱鬧非凡，歐洲夏日白晝一路延續至深夜。",
+          "en": "Long golden evenings bring street music, summer festivals, and bustling outdoor cafés beneath the spires.",
+          "nl": "Lange zomeravonden vol straatmuziek, festivals en levendige terrassen onder de torens.",
+          "fr": "Longues soirées d'été animées par la musique, les marchés et les terrasses sous les flèches."
+        },
+        "autumn": {
+          "zh": "低斜金色秋陽灑落哥德式砂岩立面，建築浮雕與陰影展現深邃戲劇感。",
+          "en": "Low amber autumn sun casts dramatic shadows across the ornate sandstone facade and 236 statues.",
+          "nl": "Lage gouden herfstzon werpt diepe schaduwen over de rijke zandstenen gevel.",
+          "fr": "Le soleil rasant d'automne sculpte d'ombres dorées les 236 statues de la façade."
+        },
+        "winter": {
+          "zh": "巨型聖誕樹與 Wintertijd 暖金燈飾照亮哥德式尖塔，白雪紛飛時清冷藍白與節慶暖燈對比最為動人。",
+          "en": "Towering Christmas lights and Wintertijd warm golden glow transform the Gothic square under gentle winter snow.",
+          "nl": "Magische kerstverlichting tijdens Wintertijd laat het gotische stadhuis schitteren in de sneeuw.",
+          "fr": "Les illuminations dorées de Wintertijd subliment la Grand-Place gothique sous les flocons."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 155,
+        "seasons": [
+          "winter"
+        ],
+        "intensity": 1.4
+      },
+      "camera": {
+        "zoom": 17.2,
+        "pitch": 64,
+        "bearing": -16
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Leuven_Grote_markt_en_stadhuis.jpg/960px-Leuven_Grote_markt_en_stadhuis.jpg",
+        "motif": "townhall",
+        "palette": [
+          "#fde68a",
+          "#7dd3fc",
+          "#0f172a"
+        ],
+        "credit": "Wikimedia Commons · Stadhuis & Grote Markt"
+      },
+      "gmaps": "https://maps.google.com/?q=Grote+Markt+Leuven",
+      "tags": [
+        "stadhuis",
+        "grote markt",
+        "town hall",
+        "winter",
+        "christmas",
+        "市政廳",
+        "大廣場",
+        "冬日",
+        "聖誕"
+      ]
+    },
+    {
+      "id": "verzonken-tuin",
+      "icon": "🌿",
+      "lat": 50.8769,
+      "lng": 4.6898,
+      "category": {
+        "zh": "秘境花園 · 植物園旁",
+        "en": "Hidden Garden",
+        "nl": "Verborgen Tuin",
+        "fr": "Jardin caché"
+      },
+      "name": {
+        "nl": "Verzonken Tuin",
+        "en": "Sunken Garden",
+        "fr": "Jardin en creux",
+        "zh": "沉園"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn"
+      ],
+      "primarySeason": "spring",
+      "best": {
+        "zh": "2月–10月（早春番紅花毯）",
+        "en": "Feb–Oct (Early crocus carpets)",
+        "nl": "Feb–Okt (Vroege krokustapijten)",
+        "fr": "Fév–Oct (Tapis de crocus)"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "番紅花、季節多年生花卉、觀賞芒草",
+        "en": "Crocus carpets, seasonal perennials, ornamental grasses",
+        "nl": "Krokus, vaste planten, siergrassen",
+        "fr": "Crocus, vivaces saisonnières, graminées"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "二月起番紅花便鋪成紫白花毯，靜靜藏在植物園旁，最適合獨享寧靜春日野餐。",
+          "en": "Crocus carpets appear as early as February — hidden right beside the Botanical Garden for quiet spring picnics.",
+          "nl": "Krokustapijten verschijnen al in februari, verborgen naast de Kruidtuin.",
+          "fr": "Tapis de crocus dès février, caché juste à côté du jardin botanique."
+        },
+        "summer": {
+          "zh": "多年生宿根花卉與觀葉草叢隨風搖曳，低窪地形自然隔絕街道車聲。",
+          "en": "Swaying ornamental grasses and sunlit perennials create a serene sunken green amphitheater.",
+          "nl": "Zwierende siergrassen en zomerbloemen in een stille, verzonken groene oase.",
+          "fr": "Graminées ondulantes et vivaces fleuries dans une oasis verdoyante en contrebas."
+        },
+        "autumn": {
+          "zh": "觀賞芒草抽穗轉為金褐色，與周邊紅黃落葉構成溫柔低調的秋日構圖。",
+          "en": "Feathery grasses catch warm amber autumn sunlight alongside fallen leaves.",
+          "nl": "Siergrassen vangen het warme herfstlicht tussen de vallende bladeren.",
+          "fr": "Les graminées dorées captent la lumière douce d'automne."
+        },
+        "winter": {
+          "zh": "冬霜凝結在枯黃芒草穗上，呈現極簡靜謐的北歐式庭園線條。",
+          "en": "Delicate hoarfrost coats the ornamental grasses in minimalist winter calm.",
+          "nl": "Rijp op de siergrassen zorgt voor een verstild winterbeeld.",
+          "fr": "Le givre dessine les silhouettes minimalistes des graminées hivernales."
+        }
+      },
+      "emitter": {
+        "enabled": false,
+        "radius": 110,
+        "seasons": [
+          "spring"
+        ],
+        "intensity": 1
+      },
+      "camera": {
+        "zoom": 17.2,
+        "pitch": 58,
+        "bearing": -32
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/%27Kruidtuin_Leuven%27_%285913103914%29.jpg/960px-%27Kruidtuin_Leuven%27_%285913103914%29.jpg",
+        "motif": "botanical",
+        "palette": [
+          "#c084fc",
+          "#86efac",
+          "#1e293b"
+        ],
+        "credit": "Wikimedia Commons · Kruidtuin / Verzonken Tuin"
+      },
+      "gmaps": "https://maps.google.com/?q=Verzonken+Tuin+Leuven",
+      "tags": [
+        "sunken",
+        "verzonken",
+        "crocus",
+        "garden",
+        "沉園",
+        "番紅花",
+        "花園"
+      ],
+      "legacyIds": [
+        2
+      ]
+    },
+    {
+      "id": "janseniuspark",
+      "icon": "🌼",
+      "lat": 50.8768,
+      "lng": 4.6937,
+      "category": {
+        "zh": "秘境小公園 · 春花草坪",
+        "en": "Hidden Pocket Park",
+        "nl": "Verborgen Stadsparkje",
+        "fr": "Jardin secret"
+      },
+      "name": {
+        "nl": "Janseniuspark",
+        "en": "Janseniuspark",
+        "fr": "Parc Jansénius",
+        "zh": "雅森尼斯公園"
+      },
+      "seasons": [
+        "spring",
+        "summer"
+      ],
+      "primarySeason": "spring",
+      "best": {
+        "zh": "2月–5月（番紅花與水仙）",
+        "en": "Feb–May (Crocus & narcissus)",
+        "nl": "Feb–Mei (Krokus & narcissen)",
+        "fr": "Fév–Mai (Crocus & narcisses)"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "番紅花、水仙、春季球根野花、古塔與悠閒貓咪",
+        "en": "Crocus, narcissus, wildflowers, historic Jansenius Tower & wandering cats",
+        "nl": "Krokus, narcissen, wilde bloemen, Janseniustoren & buurkatten",
+        "fr": "Crocus, narcisses, fleurs sauvages, tour Jansénius & chats flâneurs"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "藏在老城巷弄裡的寶石！二月底番紅花與水仙鋪滿草地，古磚塔旁偶爾還有悠閒貓咪出沒。",
+          "en": "A hidden city gem — crocus and narcissus carpet the lawns in late February, with an occasional friendly cat wandering past.",
+          "nl": "Een verborgen parel met krokussen en narcissen in late februari — soms loopt er een kat rond!",
+          "fr": "Un joyau caché couvert de crocus et narcisses dès fin février — parfois fréquenté par un chat curieux."
+        },
+        "summer": {
+          "zh": "戴勒河支流穿過濃密綠蔭與古塔腳下，是市中心最涼爽私密的閱讀長椅。",
+          "en": "Shady benches beside the historic tower and flowing Dijle stream offer cool summer quiet.",
+          "nl": "Schaduwrijke bankjes bij de oude toren en de Dijle voor een koele zomerse pauze.",
+          "fr": "Bancs ombragés près de la tour historique et de la Dyle pour une pause fraîcheur."
+        },
+        "autumn": {
+          "zh": "金黃落葉飄落於古老磚塔與小橋間，靜謐無聲。",
+          "en": "Golden leaves drift quietly around the medieval tower and riverbend.",
+          "nl": "Gouden bladeren dwarrelen stil rond de oude toren aan het water.",
+          "fr": "Les feuilles dorées tourbillonnent paisiblement autour de la tour ancienne."
+        },
+        "winter": {
+          "zh": "雪後清冷靜謐，僅聞流水輕響。",
+          "en": "Hushed under winter frost with only the soft sound of the stream.",
+          "nl": "Verstild onder winterrijp met enkel het zachte ruisen van de Dijle.",
+          "fr": "Calme hivernal bercé uniquement par le murmure de l'eau."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 115,
+        "seasons": [
+          "spring"
+        ],
+        "intensity": 1.1
+      },
+      "camera": {
+        "zoom": 17.3,
+        "pitch": 58,
+        "bearing": 14
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/Leuven_-_Janseniuspark_-_In_Motion%2C_In_Learning%2C_In_Changing_%28Elif_Erkan%29.jpg/960px-Leuven_-_Janseniuspark_-_In_Motion%2C_In_Learning%2C_In_Changing_%28Elif_Erkan%29.jpg",
+        "motif": "park",
+        "palette": [
+          "#fde047",
+          "#f9a8d4",
+          "#1e293b"
+        ],
+        "credit": "Wikimedia Commons · Janseniuspark Leuven"
+      },
+      "gmaps": "https://maps.google.com/?q=Janseniuspark+Leuven",
+      "tags": [
+        "jansenius",
+        "crocus",
+        "narcissus",
+        "cat",
+        "spring",
+        "雅森尼斯",
+        "水仙",
+        "番紅花"
+      ],
+      "legacyIds": [
+        3
+      ]
+    },
+    {
+      "id": "dijleterrassen",
+      "icon": "🌱",
+      "lat": 50.8813,
+      "lng": 4.6969,
+      "category": {
+        "zh": "水岸露台 · 櫻花河堤",
+        "en": "Riverside Terraces",
+        "nl": "Rivieroever & Terrassen",
+        "fr": "Terrasses riveraines"
+      },
+      "name": {
+        "nl": "Dijleterrassen",
+        "en": "Dijle Terraces",
+        "fr": "Terrasses de la Dyle",
+        "zh": "迪耶勒河台地"
+      },
+      "seasons": [
+        "spring",
+        "summer"
+      ],
+      "primarySeason": "spring",
+      "best": {
+        "zh": "3月–4月中河堤櫻花 · 夏日水岸乘涼",
+        "en": "Mar–Mid Apr cherry bank · Summer riverside",
+        "nl": "Mrt–Half apr kersenbloesem · Zomer aan de Dijle",
+        "fr": "Mar–Mi-avr cerisiers · Été au bord de l'eau"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "河堤櫻花樹列、垂柳、親水木造台地",
+        "en": "Riverside cherry trees, weeping willows, timber water terraces",
+        "nl": "Kersenbomen langs de oever, treurwilgen, houten waterterrassen",
+        "fr": "Cerisiers en fleurs, saules pleureurs, terrasses en bois sur l'eau"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "三月底河堤櫻花樹列沿著戴勒河盛放，粉嫩花瓣飄落水面隨流漂去，浪漫至極。",
+          "en": "Cherry trees line the riverbank in late March, showering pink petals onto the gently flowing Dijle.",
+          "nl": "Kersenbomen langs de Dijleoever bloeien prachtig eind maart met dwarrelende blaadjes op het water.",
+          "fr": "Les cerisiers bordent la Dyle fin mars, semant leurs pétales roses au fil de l'eau."
+        },
+        "summer": {
+          "zh": "親水木階與垂柳綠蔭帶來天然清涼，是當地人買杯咖啡臨水發呆的夏日小秘境。",
+          "en": "Timber steps right above the flowing river and dappled willow shade create a breezy summer hangout.",
+          "nl": "Houten trappen vlak boven het water en wilgenschaduw maken dit een geliefde zomerplek.",
+          "fr": "Gradins en bois au ras de l'eau et ombre fraîche des saules pour savourer l'été."
+        },
+        "autumn": {
+          "zh": "河岸垂柳與灌木泛起金黃，倒映於蜿蜒水巷之中。",
+          "en": "Golden willow leaves shimmer across the narrow historic waterway.",
+          "nl": "Gouden wilgenbladeren spiegelen zich in het kabbelende water.",
+          "fr": "Les feuilles dorées des saules se reflètent dans le cours d'eau."
+        },
+        "winter": {
+          "zh": "冬日薄霧沿河面升起，紅磚水岸呈現簡潔冷冽的古城剪影。",
+          "en": "Crisp morning mist drifts over the river past brick townhouses.",
+          "nl": "Ochtendnevel zweeft zacht over de Dijle langs de bakstenen gevels.",
+          "fr": "Une brume légère glisse sur la rivière au pied des façades en brique."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 135,
+        "seasons": [
+          "spring",
+          "summer"
+        ],
+        "intensity": 1.25
+      },
+      "camera": {
+        "zoom": 17.2,
+        "pitch": 58,
+        "bearing": -28
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Leuven%2C_Lei_vanaf_Dijleterras_A.jpg/960px-Leuven%2C_Lei_vanaf_Dijleterras_A.jpg",
+        "motif": "river",
+        "palette": [
+          "#f9a8d4",
+          "#2dd4bf",
+          "#0f172a"
+        ],
+        "credit": "Wikimedia Commons · Dijleterrassen Leuven"
+      },
+      "gmaps": "https://maps.google.com/?q=Dijleterrassen+Leuven",
+      "tags": [
+        "dijle",
+        "terrassen",
+        "cherry",
+        "river",
+        "spring",
+        "summer",
+        "戴勒河",
+        "迪耶勒河",
+        "櫻花",
+        "水岸"
+      ],
+      "legacyIds": [
+        4
+      ]
+    },
+    {
+      "id": "leopoldpark",
+      "icon": "🌸",
+      "lat": 50.8824,
+      "lng": 4.708,
+      "category": {
+        "zh": "賞花公園 · 春季熱點",
+        "en": "Blossom Park",
+        "nl": "Bloesempark",
+        "fr": "Parc fleuri"
+      },
+      "name": {
+        "nl": "Leopoldpark",
+        "en": "Leopoldpark",
+        "fr": "Parc Léopold",
+        "zh": "利奧波德公園"
+      },
+      "seasons": [
+        "spring",
+        "summer"
+      ],
+      "primarySeason": "spring",
+      "best": {
+        "zh": "2月–4月（木蘭、山茶、櫻花接力）",
+        "en": "Feb–Apr (Magnolia, camellia & cherry)",
+        "nl": "Feb–Apr (Magnolia, camelia & kerselaar)",
+        "fr": "Fév–Avr (Magnolia, camélia & cerisier)"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "櫻花、山茶花、木蘭、繡球花、春季球根花海",
+        "en": "Cherry blossom, magnolia, camellia, hydrangea & spring bulbs",
+        "nl": "Kersenbloesem, magnolia, camelia, hortensia & voorjaarsbollen",
+        "fr": "Cerisiers, magnolias, camélias, hortensias & bulbes"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "二月山茶花與木蘭率先揭開序幕，三月滿樹櫻花盛放，是魯汶最上鏡的春日賞花公園之一。",
+          "en": "Camellia and magnolia bloom first in February, followed by clouds of cherry blossom in March — one of Leuven's most photogenic spots.",
+          "nl": "Camelia en magnolia openen het seizoen in februari, gevolgd door weelderige kersenbloesem in maart.",
+          "fr": "Camélias et magnolias dès février, puis nuages de fleurs de cerisier en mars — un lieu très photogénique."
+        },
+        "summer": {
+          "zh": "茂密繡球花與綠樹成蔭，緊鄰火車站步行可達，適合旅途中小歇片刻。",
+          "en": "Blooming hydrangeas and lush canopy just minutes from Leuven Station.",
+          "nl": "Bloeiende hortensia's en groene schaduw op wandelafstand van het station.",
+          "fr": "Hortensias en fleurs et fraîcheur ombragée à deux pas de la gare."
+        },
+        "autumn": {
+          "zh": "柔和秋色點綴公園步道，落葉鋪滿草坪。",
+          "en": "Soft golden foliage colors the curved park walkways.",
+          "nl": "Zachte herfstkleuren sieren de kronkelende parkpaden.",
+          "fr": "Douces teintes dorées le long des allées du parc."
+        },
+        "winter": {
+          "zh": "冬日枝頭靜待早春二月的山茶花苞悄然綻放。",
+          "en": "Quiet winter branches waiting for February's very first camellia buds.",
+          "nl": "Rustige wintertakken in afwachting van de vroege cameliaknoppen.",
+          "fr": "Branches silencieuses attendant les tout premiers boutons de camélia."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 145,
+        "seasons": [
+          "spring"
+        ],
+        "intensity": 1.4
+      },
+      "camera": {
+        "zoom": 17,
+        "pitch": 60,
+        "bearing": -12
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/Dijlepark_in_Leuven_-_2017.jpg/960px-Dijlepark_in_Leuven_-_2017.jpg",
+        "motif": "park",
+        "palette": [
+          "#f472b6",
+          "#fbcfe8",
+          "#1e293b"
+        ],
+        "credit": "Wikimedia Commons · Leuven Parklands"
+      },
+      "gmaps": "https://maps.google.com/?q=Leopoldpark+Leuven",
+      "tags": [
+        "leopoldpark",
+        "cherry",
+        "magnolia",
+        "camellia",
+        "spring",
+        "利奧波德",
+        "櫻花",
+        "木蘭"
+      ],
+      "legacyIds": [
+        8
+      ]
+    },
+    {
+      "id": "leon-schreurs",
+      "icon": "🌸",
+      "lat": 50.8714125,
+      "lng": 4.7125096,
+      "category": {
+        "zh": "櫻花大道 · 歷史紀念碑",
+        "en": "Blossom Boulevard",
+        "nl": "Bloesemlaan & Monument",
+        "fr": "Boulevard fleuri"
+      },
+      "name": {
+        "nl": "Herdenkingsmonument Léon Schreurs",
+        "en": "Léon Schreurs Boulevard",
+        "fr": "Boulevard Léon Schreurs",
+        "zh": "萊昂·施魯爾斯紀念碑大道"
+      },
+      "seasons": [
+        "spring",
+        "autumn"
+      ],
+      "primarySeason": "spring",
+      "best": {
+        "zh": "3月沿環城大道櫻花盛開",
+        "en": "Mar cherry blossom boulevard",
+        "nl": "Mrt kersenbloesem langs de vest",
+        "fr": "Mar boulevard de cerisiers"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "環城櫻花行道樹列（N3 交叉口至 Kerkhofdreef）、一戰歷史紀念碑",
+        "en": "Cherry blossom avenue (N3 to Kerkhofdreef) & 1914 WWI Memorial",
+        "nl": "Kersenbloesem langs de vest (N3 tot Kerkhofdreef) & WO I monument",
+        "fr": "Allée de cerisiers du carrefour N3 à Kerkhofdreef & mémorial 1914"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "紀念「魯汶最後守衛者」萊昂·施魯爾斯的一戰紀念碑。三月沿環城大道兩側櫻花盛放，形成粉紅花廊。",
+          "en": "WWI memorial to Léon Schreurs ('last defender of Leuven', 1914). Cherry blossoms line the entire boulevard from N3 south to Kerkhofdreef.",
+          "nl": "WO I-monument langs een prachtige roze kersenbloesemlaan van het N3-kruispunt tot de Kerkhofdreef.",
+          "fr": "Mémorial de 1914 bordé de cerisiers en fleurs tout le long du boulevard jusqu'à Kerkhofdreef."
+        },
+        "summer": {
+          "zh": "茂盛綠葉大道遮蔽南城環線，適合單車通行。",
+          "en": "Shady green boulevard linking the southern ring towards Park Abbey.",
+          "nl": "Groene laan op de route tussen stadscentrum en Abdij van Park.",
+          "fr": "Boulevard ombragé reliant le centre-ville à l'Abbaye du Parc."
+        },
+        "autumn": {
+          "zh": "櫻花樹葉轉為暖橘與酒紅，為環城林蔭添上秋日色彩。",
+          "en": "Cherry foliage turns copper and crimson along the eastern ring boulevard.",
+          "nl": "Kersenbladeren kleuren koper en rood langs de ringlaan.",
+          "fr": "Les feuillages des cerisiers prennent des teintes cuivrées et pourpres."
+        },
+        "winter": {
+          "zh": "冬日清冷靜肅，紀念碑在枝影下顯得格外莊重。",
+          "en": "Quiet winter stillness frames the historic stone memorial.",
+          "nl": "Stille winterrust rond het historische herdenkingsmonument.",
+          "fr": "Sérénité hivernale autour du monument commémoratif."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 145,
+        "seasons": [
+          "spring"
+        ],
+        "intensity": 1.3
+      },
+      "camera": {
+        "zoom": 16.5,
+        "pitch": 58,
+        "bearing": 140
+      },
+      "visual": {
+        "image": "https://upload.wikimedia.org/wikipedia/commons/1/10/Leuven_L%C3%A9on_Schreursvest_zonder_nummer_monument_-_170885_-_onroerenderfgoed.jpg",
+        "motif": "boulevard",
+        "palette": [
+          "#f9a8d4",
+          "#cbd5e1",
+          "#1e293b"
+        ],
+        "credit": "Onroerend Erfgoed · Léon Schreursvest"
+      },
+      "gmaps": "https://maps.google.com/?q=Léon+Schreursvest+Leuven",
+      "tags": [
+        "schreurs",
+        "boulevard",
+        "cherry",
+        "spring",
+        "紀念碑",
+        "櫻花",
+        "大道"
+      ],
+      "legacyIds": [
+        13
+      ]
+    },
+    {
+      "id": "schoonbergenstraat",
+      "icon": "🌸",
+      "lat": 50.8967106,
+      "lng": 4.7382893,
+      "category": {
+        "zh": "花堤秘境 · 早春櫻梅",
+        "en": "Blossom Embankment",
+        "nl": "Bloesemdijk",
+        "fr": "Talus fleuri"
+      },
+      "name": {
+        "nl": "Schoonbergenstraat",
+        "en": "Schoonbergenstraat",
+        "fr": "Rue Schoonbergen",
+        "zh": "斯洪貝亨街花堤"
+      },
+      "seasons": [
+        "spring"
+      ],
+      "primarySeason": "spring",
+      "best": {
+        "zh": "3月上旬粉櫻白梅並排盛放",
+        "en": "Early Mar pink cherry & white plum",
+        "nl": "Begin mrt roze kers & witte pruim",
+        "fr": "Début mar cerisiers roses & pruniers blancs"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "堤岸式種植粉色櫻花與白色梅花交錯花牆",
+        "en": "Pink cherry & white plum blossoms growing side-by-side along the embankment",
+        "nl": "Roze kersenbloesem en witte pruimenbloesem zij aan zij op het talud",
+        "fr": "Cerisiers roses et pruniers blancs côte à côte le long du talus"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "街道兩側以堤岸形式種植，三月上旬粉色櫻花與白色梅花並排盛開，如雪般的花瓣雨是早春最夢幻的拍照秘境。",
+          "en": "Cherry and plum trees rise in embankment form along the lane — pink and white blossoms side by side in early March.",
+          "nl": "Kersen- en pruimenbomen groeien in dijkvorm — roze en witte bloesems naast elkaar begin maart.",
+          "fr": "Cerisiers et pruniers forment un talus fleuri rose et blanc dès début mars — un joyau photographique."
+        },
+        "summer": {
+          "zh": "濃綠樹牆覆蓋斜坡，形成涼爽寧靜的郊區小徑。",
+          "en": "Dense green tree embankments shade this quiet residential hillside lane.",
+          "nl": "Groene begroeide bermen zorgen voor schaduw langs deze rustige straat.",
+          "fr": "Talus verdoyant et ombragé le long d'une ruelle paisible."
+        },
+        "autumn": {
+          "zh": "堤岸枝葉轉為柔和暖黃，遠離市區人潮。",
+          "en": "Gentle golden foliage lines the hillside embankment.",
+          "nl": "Zachte herfsttinten kleuren de bomen op het talud.",
+          "fr": "Douces nuances dorées sur les arbres du talus."
+        },
+        "winter": {
+          "zh": "銀白枝椏靜候早春三月粉白雙色花海再度甦醒。",
+          "en": "Frosted silhouettes awaiting March's dramatic pink-and-white bloom.",
+          "nl": "Wintersilhouetten wachtend op de uitbundige maartbloesem.",
+          "fr": "Silhouettes givrées prêtes à refleurir dès les premiers jours de mars."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 160,
+        "seasons": [
+          "spring"
+        ],
+        "intensity": 1.5
+      },
+      "camera": {
+        "zoom": 16.5,
+        "pitch": 60,
+        "bearing": -42
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/Gif_sur_Yvette_Avenue_du_General_Leclerc01.jpg/960px-Gif_sur_Yvette_Avenue_du_General_Leclerc01.jpg",
+        "motif": "boulevard",
+        "palette": [
+          "#f472b6",
+          "#f8fafc",
+          "#1e293b"
+        ],
+        "credit": "Wikimedia Commons · Cherry Blossom Avenue"
+      },
+      "gmaps": "https://maps.google.com/?q=Schoonbergenstraat+Leuven",
+      "tags": [
+        "schoonbergen",
+        "cherry",
+        "plum",
+        "spring",
+        "斯洪貝亨",
+        "櫻花",
+        "梅花",
+        "堤岸"
+      ],
+      "legacyIds": [
+        14
+      ]
+    },
+    {
+      "id": "ladeuzeplein",
+      "icon": "🔔",
+      "lat": 50.8781,
+      "lng": 4.7075,
+      "category": {
+        "zh": "大學地標 · 鐘樓廣場",
+        "en": "University Library & Square",
+        "nl": "Universiteitsbibliotheek & Plein",
+        "fr": "Bibliothèque & Place"
+      },
+      "name": {
+        "nl": "Ladeuzeplein & Bibliotheek",
+        "en": "KU Leuven Library & Ladeuzeplein",
+        "fr": "Bibliothèque KU Leuven & Ladeuzeplein",
+        "zh": "魯汶大學圖書館與廣場"
+      },
+      "seasons": [
+        "spring",
+        "autumn",
+        "winter"
+      ],
+      "primarySeason": "winter",
+      "best": {
+        "zh": "12月聖誕市集 · 全年登鐘樓俯瞰魯汶",
+        "en": "Dec Christmas Market · Year-round Bell Tower",
+        "nl": "Dec Kerstmarkt · Beiaardtoren heel het jaar",
+        "fr": "Déc Marché de Noël · Tour panoramique"
+      },
+      "hours": {
+        "zh": "廣場全天 · 鐘樓 10:00–17:00",
+        "en": "Square 24h · Tower 10:00–17:00",
+        "nl": "Plein 24u · Toren 10:00–17:00",
+        "fr": "Place 24h/24 · Tour 10:00–17:00"
+      },
+      "highlights": {
+        "zh": "佛蘭德斯新文藝復興鐘樓、巨型甲蟲雕塑《圖騰》、聖誕市集",
+        "en": "Neo-Renaissance Carillon Tower, Jan Fabre's Totem sculpture & Christmas Market",
+        "nl": "Beiaardtoren, kunstwerk Totem van Jan Fabre & Leuvense Kerstmarkt",
+        "fr": "Carillon néo-Renaissance, sculpture Totem de Jan Fabre & Marché de Noël"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "春光中登上 289 階圖書館鐘樓，俯瞰滿城紅瓦屋頂與綻放的粉白花樹，聆聽悠揚鐘琴樂聲。",
+          "en": "Climb the 289 steps of the library bell tower for sweeping spring views over blooming parks and tiled roofs.",
+          "nl": "Beklim de bibliotheektoren voor een panoramisch lentezicht over bloeiende stadsparken en rode daken.",
+          "fr": "Montez les 289 marches du carillon pour admirer les parcs fleuris et les toits de Louvain au printemps."
+        },
+        "summer": {
+          "zh": "夏日廣場舉辦露天市集、畢業典禮與音樂會，《圖騰》巨型甲蟲在藍天下閃耀金屬翠綠光澤。",
+          "en": "Summer fairs, open-air concerts, and sunlit terraces energize Leuven's grandest academic square.",
+          "nl": "Zomermarkten, concerten en gezellige drukte onder de schitterende groene kever van Totem.",
+          "fr": "Marchés estivaux, concerts en plein air et effervescence étudiante autour de la sculpture Totem."
+        },
+        "autumn": {
+          "zh": "開學季帶來青春氣息，廣場周邊行道樹轉為金黃，襯托溫潤紅磚與白石鐘樓。",
+          "en": "Autumn brings the buzz of the new academic year and golden foliage framing the warm brick facade.",
+          "nl": "De start van het academiejaar en gouden herfstbladeren geven het plein een warme gloed.",
+          "fr": "La rentrée universitaire et les feuillages dorés réchauffent la façade néo-Renaissance."
+        },
+        "winter": {
+          "zh": "十二月搖身一變為著名的魯汶聖誕市集（Leuvense Kerstmarkt），木屋燈串、熱紅酒與飄雪共織冬夜童話。",
+          "en": "In December, the square transforms into the beloved Leuven Christmas Market with wooden chalets, glühwein, and twinkling lights.",
+          "nl": "In december schittert hier de gezellige Leuvense Kerstmarkt vol lichtjes, chalets en winterse warmte.",
+          "fr": "En décembre, le célèbre Marché de Noël de Louvain illumine toute la place sous les flocons."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 175,
+        "seasons": [
+          "winter",
+          "autumn"
+        ],
+        "intensity": 1.4
+      },
+      "camera": {
+        "zoom": 16.8,
+        "pitch": 62,
+        "bearing": 46
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Ladeuzeplein_Leuven.jpg/960px-Ladeuzeplein_Leuven.jpg",
+        "credit": "Wikimedia Commons · Ladeuzeplein Leuven",
+        "motif": "townhall",
+        "palette": [
+          "#f59e0b",
+          "#7dd3fc",
+          "#0f172a"
+        ]
+      },
+      "gmaps": "https://maps.google.com/?q=Ladeuzeplein+Leuven",
+      "tags": [
+        "ladeuzeplein",
+        "library",
+        "bibliotheek",
+        "totem",
+        "christmas",
+        "winter",
+        "圖書館",
+        "鐘樓",
+        "聖誕市集"
+      ]
+    },
+    {
+      "id": "oude-markt",
+      "icon": "🍻",
+      "lat": 50.8781,
+      "lng": 4.6994,
+      "category": {
+        "zh": "人文廣場 · 露天餐酒露台",
+        "en": "Historic Square & Terraces",
+        "nl": "Historisch Plein & Terrassen",
+        "fr": "Place Historique & Terrasses"
+      },
+      "name": {
+        "nl": "Oude Markt",
+        "en": "Old Market Square",
+        "fr": "Vieux Marché (Oude Markt)",
+        "zh": "老廣場（世界最長吧台）"
+      },
+      "seasons": [
+        "summer",
+        "spring",
+        "winter"
+      ],
+      "primarySeason": "summer",
+      "best": {
+        "zh": "5月–9月夏日露天露台 · 12月冬夜酒館燈火",
+        "en": "May–Sep outdoor terraces · Cozy winter cafés",
+        "nl": "Mei–Sep zomerse terrassen · Gezellige wintercafés",
+        "fr": "Mai–Sep terrasses d'été · Cafés chaleureux d'hiver"
+      },
+      "hours": {
+        "zh": "廣場全天開放（餐酒館營業至深夜）",
+        "en": "Open 24h (Cafés open late)",
+        "nl": "Plein 24u open (Horeca tot laat)",
+        "fr": "Ouvert 24h/24 (Cafés tard le soir)"
+      },
+      "highlights": {
+        "zh": "綿延數十家傳統啤酒館與咖啡露台、佛蘭德斯古典山牆立面",
+        "en": "\"The longest bar in the world\" — dozens of cafés lining Flemish gabled facades",
+        "nl": "\"De langste toog ter wereld\" met tientallen terrassen en historische gevels",
+        "fr": "« Le plus long comptoir du monde » bordé de façades historiques à pignons"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "春暖花開之際，廣場重新擺滿陽傘與戶外座，是感受魯汶大學城活力的最佳窗口。",
+          "en": "Sunny spring afternoons fill the cobblestone square with outdoor umbrellas and lively student chatter.",
+          "nl": "Zodra de lentezon schijnt lopen de kasseien vol met terrassen en bruisend stadsleven.",
+          "fr": "Dès les beaux jours de printemps, les terrasses envahissent la place pavée."
+        },
+        "summer": {
+          "zh": "享有「世界最長吧台」美譽！盛夏傍晚微風輕拂、華燈初上，整條廣場化作不夜露天精釀啤酒露台。",
+          "en": "Known as \"the longest bar in the world\" — long summer evenings glow with packed outdoor terraces and Belgian craft beer.",
+          "nl": "Zomeravonden op de langste toog ter wereld zijn onovertroffen met volle terrassen tot diep in de nacht.",
+          "fr": "Les soirées d'été transforment toute la place en une immense terrasse conviviale et animée."
+        },
+        "autumn": {
+          "zh": "微涼秋夜坐在暖燈露台品嚐修道院啤酒，欣賞廣場兩側溫暖燈光照映的山牆屋頂。",
+          "en": "Crisp autumn evenings under terrace heaters with Trappist beer and golden-lit historic gables.",
+          "nl": "Gezellige herfstavonden onder terrasverwarmers met zicht op de verlichte trapgevels.",
+          "fr": "Soirées d'automne chaleureuses en terrasse chauffée face aux pignons illuminés."
+        },
+        "winter": {
+          "zh": "窗內燭光與串燈在冷冽雪夜中閃耀，成為冬日漫步老城後最溫暖療癒的歇腳處。",
+          "en": "Candlelit cafés and fairy lights glow warmly across the cobblestones on crisp winter nights.",
+          "nl": "Kaarslicht en gezellige cafés bieden warme beschutting tijdens koude winteravonden.",
+          "fr": "Lumières féeriques et cafés chaleureux offrent un refuge convivial par nuit d'hiver."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 130,
+        "seasons": [
+          "summer",
+          "winter"
+        ],
+        "intensity": 1.15
+      },
+      "camera": {
+        "zoom": 17.3,
+        "pitch": 60,
+        "bearing": 10
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Leuven-Oude-Markt.jpg/960px-Leuven-Oude-Markt.jpg",
+        "credit": "Wikimedia Commons · Oude Markt Leuven",
+        "motif": "townhall",
+        "palette": [
+          "#22c55e",
+          "#fbbf24",
+          "#0f172a"
+        ]
+      },
+      "gmaps": "https://maps.google.com/?q=Oude+Markt+Leuven",
+      "tags": [
+        "oude markt",
+        "bar",
+        "terrace",
+        "beer",
+        "summer",
+        "老廣場",
+        "啤酒",
+        "露台",
+        "夏日"
+      ]
+    },
+    {
+      "id": "keizersberg",
+      "icon": "⛰️",
+      "lat": 50.8886,
+      "lng": 4.6963,
+      "category": {
+        "zh": "山頂修道院 · 城市全景公園",
+        "en": "Hilltop Abbey & Viewpoint Park",
+        "nl": "Abdij & Panoramapark",
+        "fr": "Abbaye & Parc Panoramique"
+      },
+      "name": {
+        "nl": "Abdij Keizersberg & Park",
+        "en": "Keizersberg Abbey & Park",
+        "fr": "Abbaye du Mont-César & Parc",
+        "zh": "凱澤斯貝格山頂公園"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn",
+        "winter"
+      ],
+      "primarySeason": "winter",
+      "best": {
+        "zh": "晚秋與冬日視野最通透 · 春夏綠蔭步道",
+        "en": "Late autumn & winter clearest skyline views",
+        "nl": "Late herfst & winter helderste uitzicht over Leuven",
+        "fr": "Fin automne & hiver panoramas les plus dégagés"
+      },
+      "hours": {
+        "zh": "山頂公園全天開放",
+        "en": "Park open 24h",
+        "nl": "Park 24u open",
+        "fr": "Parc ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "居高臨下俯瞰魯汶天際線、19世紀本篤會修道院、巨大聖母雕像與古堡遺蹟",
+        "en": "Unbeatable skyline panorama over Leuven, 19th-c. Benedictine Abbey & medieval castle ruins",
+        "nl": "Beste uitzicht over de skyline van Leuven, benedictijnenabdij en middeleeuwse burchtresten",
+        "fr": "Vue panoramique imprenable sur Louvain, abbaye bénédictine et vestiges médiévaux"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "沿石階登上小山丘，嫩綠樹梢與修道院紅磚圍牆相映，遠眺春日綻放的北城與運河區。",
+          "en": "Climb the wooded hillside stairs past fresh spring foliage for elevated views over northern Leuven and Vaartkom.",
+          "nl": "Wandel de groene helling op tussen fris lentegroen voor een prachtig uitzicht over de Vaartkom.",
+          "fr": "Grimpez les sentiers verdoyants jusqu'à l'abbaye pour dominer Louvain et le bassin du Vaartkom."
+        },
+        "summer": {
+          "zh": "濃密山丘林蔭帶來涼爽微風，是當地人晨跑、野餐與欣賞魯汶日落的私房高地。",
+          "en": "Breezy wooded slopes and quiet meadows make Keizersberg a beloved sunset and jogging spot.",
+          "nl": "Een rustige groene heuvel om te joggen, picknicken en de zonsondergang over de stad te bekijken.",
+          "fr": "Colline boisée paisible idéale pour admirer le coucher du soleil sur les clochers de la ville."
+        },
+        "autumn": {
+          "zh": "漫山紅黃秋葉環繞城堡般的修道院，落葉紛飛時山丘步道層次豐富。",
+          "en": "Fiery autumn foliage surrounds the fortress-like abbey as leaves drift down the hillside paths.",
+          "nl": "Warme herfsttinten rond de burchtachtige abdij terwijl het zicht op de stad steeds ruimer wordt.",
+          "fr": "Feuillages flamboyants autour de l'abbaye fortifiée dominant les toits d'automne."
+        },
+        "winter": {
+          "zh": "枯枝落盡後視野最為開闊通透！在清冷白雪中登頂，可將整座覆雪魯汶古城尖塔一覽無遺。",
+          "en": "Once winter bares the trees, Keizersberg reveals its clearest panoramic vista across snow-dusted Leuven spires.",
+          "nl": "In de winter zonder bladeren biedt de Keizersberg het allerbeste, helderste panorama over Leuven.",
+          "fr": "En hiver, sans feuillage, le sommet offre la vue panoramique la plus spectaculaire sur toute la ville."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 190,
+        "seasons": [
+          "winter",
+          "autumn"
+        ],
+        "intensity": 1.3
+      },
+      "camera": {
+        "zoom": 16,
+        "pitch": 64,
+        "bearing": 155
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Keizersberg_Abbey.JPG/960px-Keizersberg_Abbey.JPG",
+        "credit": "Wikimedia Commons · Abdij van Keizersberg",
+        "motif": "abbey",
+        "palette": [
+          "#38bdf8",
+          "#f59e0b",
+          "#0f172a"
+        ]
+      },
+      "gmaps": "https://maps.google.com/?q=Abdij+Keizersberg+Leuven",
+      "tags": [
+        "keizersberg",
+        "abbey",
+        "viewpoint",
+        "panorama",
+        "winter",
+        "凱澤斯貝格",
+        "全景",
+        "修道院",
+        "冬日"
+      ]
+    },
+    {
+      "id": "klein-begijnhof",
+      "icon": "🏡",
+      "lat": 50.8849,
+      "lng": 4.6988,
+      "category": {
+        "zh": "隱密古巷 · 13世紀白牆會院",
+        "en": "Hidden 13th-c. Beguinage",
+        "nl": "Verborgen 13e-eeuws Begijnhof",
+        "fr": "Petit Béguinage historique"
+      },
+      "name": {
+        "nl": "Klein Begijnhof",
+        "en": "Small Beguinage",
+        "fr": "Petit Béguinage",
+        "zh": "小貝金霍夫"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn",
+        "winter"
+      ],
+      "primarySeason": "winter",
+      "best": {
+        "zh": "四季靜謐秘境 · 紅白小屋與冬日燈火",
+        "en": "Serene year-round · Cobblestones & winter twilight",
+        "nl": "Rustige parel in elk seizoen",
+        "fr": "Joyau paisible toute l'année"
+      },
+      "hours": {
+        "zh": "街道全天開放（請保持安靜）",
+        "en": "Open 24h (Quiet residential lane)",
+        "nl": "24u toegankelijk (stille woonbuurt)",
+        "fr": "Accessible 24h/24 (quartier calme)"
+      },
+      "highlights": {
+        "zh": "單條中世紀石板靜巷、紅磚白牆修女小屋、緊鄰聖格特魯德修道院",
+        "en": "One-lane cobblestone sanctuary of restored 13th-c. houses beside St. Gertrude's Abbey",
+        "nl": "Schilderachtig kasseistraatje met witgekalkte en bakstenen huisjes bij de Sint-Geertruiabdij",
+        "fr": "Ruelle pavée pittoresque bordée de maisons historiques près de l'abbaye Sainte-Gertrude"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "比大貝金霍夫更幽靜的秘境！窗台盆花與門前爬藤在春天綻放，漫步其間宛如走入時光膠囊。",
+          "en": "Quieter than the Great Beguinage — spring flower boxes and climbing roses brighten its single medieval cobblestone street.",
+          "nl": "Stiller dan het Groot Begijnhof: bloembakken en klimplanten brengen dit middeleeuwse straatje tot leven.",
+          "fr": "Plus secret que le Grand Béguinage, ses façades s'ornent de fleurs printanières dans un silence absolu."
+        },
+        "summer": {
+          "zh": "石板小巷在夏日午後格外涼爽寧靜，光影灑落在古典拱門與白牆之間。",
+          "en": "Sunlit whitewashed facades and cool cobblestone shade provide a peaceful midday retreat.",
+          "nl": "Zonnige witgekalkte gevels en koele rust op wandelafstand van het centrum.",
+          "fr": "Façades blanchies au soleil et fraîcheur des pavés loin de l'agitation urbaine."
+        },
+        "autumn": {
+          "zh": "暖金斜陽映照古老紅磚與攀牆紅葉，成為攝影師私藏的秋日構圖角。",
+          "en": "Amber autumn sun illuminates warm brick doorways and turning ivy leaves.",
+          "nl": "Zacht herfstlicht op oude baksteen en verkleurende klimop — een fotogenieke parel.",
+          "fr": "Lumière rasante d'automne sur les vieilles briques et le lierre rougissant."
+        },
+        "winter": {
+          "zh": "雪花輕落於整齊排列的 17 世紀小屋屋瓦，暮色中點點暖窗燈火充滿北歐靜謐感。",
+          "en": "Dustings of snow on historic gabled roofs and warm glowing windows create timeless winter tranquility.",
+          "nl": "Sneeuw op de oude daken en warme raamlichtjes maken het Klein Begijnhof sprookjesachtig in de winter.",
+          "fr": "Neige fine sur les toits anciens et fenêtres illuminées dans un calme hivernal intemporel."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 120,
+        "seasons": [
+          "winter",
+          "spring"
+        ],
+        "intensity": 1.15
+      },
+      "camera": {
+        "zoom": 17.3,
+        "pitch": 60,
+        "bearing": -26
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Klein_Begijnhof_Leuven_03.jpg/960px-Klein_Begijnhof_Leuven_03.jpg",
+        "credit": "Wikimedia Commons · Klein Begijnhof Leuven",
+        "motif": "beguinage",
+        "palette": [
+          "#7dd3fc",
+          "#f9a8d4",
+          "#1e1b4b"
+        ]
+      },
+      "gmaps": "https://maps.google.com/?q=Klein+Begijnhof+Leuven",
+      "tags": [
+        "klein begijnhof",
+        "beguinage",
+        "hidden",
+        "winter",
+        "小貝金霍夫",
+        "秘境",
+        "歷史街區"
+      ]
+    },
+    {
+      "id": "abdij-van-vlierbeek",
+      "icon": "🍏",
+      "lat": 50.8936,
+      "lng": 4.7346,
+      "category": {
+        "zh": "古修道院 · 果園鄉村秘境",
+        "en": "12th-c. Abbey & Orchards",
+        "nl": "12e-eeuwse Abdij & Boomgaard",
+        "fr": "Abbaye du XIIe & Vergers"
+      },
+      "name": {
+        "nl": "Abdij van Vlierbeek",
+        "en": "Vlierbeek Abbey",
+        "fr": "Abbaye de Vlierbeek",
+        "zh": "弗利爾貝克修道院"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn"
+      ],
+      "primarySeason": "spring",
+      "best": {
+        "zh": "春季果園花海 · 夏秋修道院酒館露台",
+        "en": "Spring blooming orchards · Summer & autumn courtyard",
+        "nl": "Bloeiende boomgaard in lente · Zomer- & herfstterras",
+        "fr": "Vergers en fleurs au printemps · Cour en été et automne"
+      },
+      "hours": {
+        "zh": "園區全天開放",
+        "en": "Grounds open 24h",
+        "nl": "Domein 24u open",
+        "fr": "Domaine ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "1125年本篤會修道院、新古典中庭、百年果園與傳統酒館 In den Rozenkrans",
+        "en": "Self-contained historic abbey village with orchards, neoclassical courtyard & tavern In den Rozenkrans",
+        "nl": "Sfeervol abdijdorp met boomgaarden, neoklassieke binnenplaats en herberg In den Rozenkrans",
+        "fr": "Village abbatial hors du temps avec vergers, cour néoclassique et taverne In den Rozenkrans"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "修道院百年蘋果與梨樹果園在春天開滿粉白花海，如世外桃源般的鄉村寧靜氛圍。",
+          "en": "Historic abbey orchards burst into pink and white fruit blossoms around the peaceful neoclassical courtyard.",
+          "nl": "De abdijboomgaarden staan prachtig in bloesem rond de sfeervolle historische binnenplaats.",
+          "fr": "Les vergers de l'abbaye s'épanouissent en nuages de fleurs blanches et roses au printemps."
+        },
+        "summer": {
+          "zh": "在老樹遮蔭的修道院酒館 In den Rozenkrans 戶外庭院小酌精釀啤酒，享受最道地的佛蘭德斯夏日。",
+          "en": "Relax with a local beer on the leafy terrace of In den Rozenkrans inside the tranquil abbey walls.",
+          "nl": "Geniet van een streekbier op het schaduwrijke terras van In den Rozenkrans binnen de abdijmuren.",
+          "fr": "Savourez une bière locale sur la terrasse verdoyante de la taverne In den Rozenkrans."
+        },
+        "autumn": {
+          "zh": "果園豐收、周邊林帶染上金黃與琥珀色，騎單車串聯公園修道院與此處是最經典秋遊路線。",
+          "en": "Ripe autumn orchards and golden surrounding trails make Vlierbeek an idyllic cycling destination.",
+          "nl": "Rijpe herfstboomgaarden en gouden wandelpaden vormen een idyllische herfstbestemming.",
+          "fr": "Vergers dorés et sentiers d'automne font de Vlierbeek une escapade à vélo idyllique."
+        },
+        "winter": {
+          "zh": "冬霧籠罩修道院穹頂教堂與靜謐廣場，推開古老酒館木門即可享受暖爐熱飲。",
+          "en": "Winter mist wraps the domed abbey church while the cozy tavern welcomes walkers inside.",
+          "nl": "Winterse stilte rond de koepelkerk met warme gezelligheid in de oude abdijherberg.",
+          "fr": "Brume hivernale autour de l'église à coupole et chaleur réconfortante à la taverne."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 195,
+        "seasons": [
+          "spring",
+          "autumn"
+        ],
+        "intensity": 1.35
+      },
+      "camera": {
+        "zoom": 16,
+        "pitch": 58,
+        "bearing": -35
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Abdij_van_Vlierbeek_-_Nieuwe_abtskwartier.jpg/960px-Abdij_van_Vlierbeek_-_Nieuwe_abtskwartier.jpg",
+        "credit": "Wikimedia Commons · Abdij van Vlierbeek",
+        "motif": "abbey",
+        "palette": [
+          "#f9a8d4",
+          "#86efac",
+          "#1e293b"
+        ]
+      },
+      "gmaps": "https://maps.google.com/?q=Abdij+van+Vlierbeek+Leuven",
+      "tags": [
+        "vlierbeek",
+        "abbey",
+        "orchard",
+        "kessel-lo",
+        "spring",
+        "修道院",
+        "果園",
+        "弗利爾貝克"
+      ]
+    },
+    {
+      "id": "kessel-lo",
+      "icon": "🚣",
+      "lat": 50.8955,
+      "lng": 4.7245,
+      "category": {
+        "zh": "湖畔生態公園 · 夏日遊憩",
+        "en": "Lakeside Recreation Park",
+        "nl": "Provinciedomein & Vijvers",
+        "fr": "Domaine Provincial & Lacs"
+      },
+      "name": {
+        "nl": "Provinciedomein Kessel-Lo",
+        "en": "Provincial Domain Kessel-Lo",
+        "fr": "Domaine Provincial de Kessel-Lo",
+        "zh": "凱塞爾洛省立公園"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn"
+      ],
+      "primarySeason": "summer",
+      "best": {
+        "zh": "6月–8月湖畔划船與戲水 · 秋季環湖楓林",
+        "en": "Jun–Aug boating & swimming · Autumn lakeside",
+        "nl": "Jun–Aug roeibootjes & plonsbad · Herfstwandeling",
+        "fr": "Juin–Août barques & baignade · Balade d'automne"
+      },
+      "hours": {
+        "zh": "每日 08:00–日落（免費入園）",
+        "en": "Daily 08:00–sunset (Free entry)",
+        "nl": "Dagelijks 08:00–zonsondergang (Gratis)",
+        "fr": "Tous les jours 08:00–coucher du soleil (Gratuit)"
+      },
+      "highlights": {
+        "zh": "廣闊生態湖泊、划船與天鵝船、夏日戶外戲水池、大片綠地步道",
+        "en": "Expansive lakes with rowboats, outdoor summer pool, nature trails & eco-gardens",
+        "nl": "Grote roeivijvers, zomerzwembad, eco-tuinen en uitgebreide wandelpaden",
+        "fr": "Grands étangs avec barques, bassin d'été en plein air, jardins écologiques et sentiers"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "水鳥群聚湖畔、木棧道兩旁野花與櫻花初開，是親子踏青與環湖散步的清爽首選。",
+          "en": "Waterfowl return to the ponds and fresh blooms line the wooden boardwalks for relaxed spring strolls.",
+          "nl": "Watervogels en voorjaarsbloei langs de houten vlonderpaden rond de grote vijvers.",
+          "fr": "Oiseaux aquatiques et floraisons printanières le long des passerelles en bois."
+        },
+        "summer": {
+          "zh": "魯汶人氣最高的夏日度假綠洲！在陽光閃耀的湖面划小船、踩腳踏船，或在草坪與戲水池盡情消暑。",
+          "en": "Leuven's top summer playground — rent a rowboat on sparkling lakes, cool off at the outdoor pool, or lounge on sunlit lawns.",
+          "nl": "Dé zomerbestemming van Leuven: roeien op de vijver, zwemmen in openlucht en ontspannen op de zonneweides.",
+          "fr": "Le paradis estival de Louvain : balades en barque sur les lacs, baignade en plein air et vastes pelouses."
+        },
+        "autumn": {
+          "zh": "環湖高大落葉林化為金橘與深紅，倒映在平靜寬闊的湖面上，氣氛悠閒開闊。",
+          "en": "Wide lake reflections catch fiery orange and golden woodland colors all around the perimeter loop.",
+          "nl": "Brede vijvers weerspiegelen het rijke oranje en goud van de omringende bomen.",
+          "fr": "Les grands étangs reflètent les teintes dorées et cuivrées des bois environnants."
+        },
+        "winter": {
+          "zh": "冬日湖畔少了人潮更顯遼闊靜謐，適合清晨慢跑與觀賞水鳥棲息。",
+          "en": "Quiet, misty lakeside paths offer crisp winter walks and peaceful birdwatching.",
+          "nl": "Stille, verfrissende winterwandelingen rond de verstilde vijvers.",
+          "fr": "Sentiers paisibles au bord des lacs brumeux pour une marche vivifiante en hiver."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 240,
+        "seasons": [
+          "summer",
+          "autumn"
+        ],
+        "intensity": 1.4
+      },
+      "camera": {
+        "zoom": 15.6,
+        "pitch": 56,
+        "bearing": 28
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Abdij_van_Vlierbeek_-_boomgaard.jpg/960px-Abdij_van_Vlierbeek_-_boomgaard.jpg",
+        "credit": "Wikimedia Commons · Kessel-Lo Greenbelt",
+        "motif": "waterfront",
+        "palette": [
+          "#22c55e",
+          "#38bdf8",
+          "#0f172a"
+        ]
+      },
+      "gmaps": "https://maps.google.com/?q=Provinciedomein+Kessel-Lo",
+      "tags": [
+        "kessel-lo",
+        "provinciedomein",
+        "lake",
+        "summer",
+        "boating",
+        "凱塞爾洛",
+        "湖畔",
+        "夏日",
+        "划船"
+      ]
+    },
+    {
+      "id": "heverleebos",
+      "icon": "🌲",
+      "lat": 50.8381,
+      "lng": 4.6835,
+      "category": {
+        "zh": "千年古森林 · 藍鈴花與秋楓",
+        "en": "Ancient Forest & Arboretum",
+        "nl": "Oerbos & Arboretum",
+        "fr": "Forêt Ancienne & Arboretum"
+      },
+      "name": {
+        "nl": "Heverleebos",
+        "en": "Heverlee Forest (Brabant)",
+        "fr": "Forêt d'Heverlee",
+        "zh": "海弗萊古森林"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn",
+        "winter"
+      ],
+      "primarySeason": "autumn",
+      "best": {
+        "zh": "4月林間野生藍鈴花 · 10–11月世界級秋楓森林",
+        "en": "Apr wild bluebells · Oct–Nov spectacular autumn canopy",
+        "nl": "Apr boshyacinten · Okt–Nov ongeëvenaarde herfstpracht",
+        "fr": "Avr jacinthes sauvages · Oct–Nov forêt flamboyante"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "超過 2,000 公頃布拉班特古森林、參天山毛櫸大道、樹木園與 Zoet Water 湖泊",
+        "en": "2,000+ ha ancient Brabant beech & oak forest, stately drèves, Arboretum & nearby Zoet Water ponds",
+        "nl": "Deel van het uitgestrekte Brabantse Woud met statige beukendreven, arboretum en Zoet Water",
+        "fr": "Vaste forêt ancienne de hêtres et chênes majestueux, arboretum et sentiers de randonnée"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "四月林下綻放成片野生藍鈴花（森林風信子）與新抽嫩芽的山毛櫸，宛如精靈秘境。",
+          "en": "April blankets parts of the woodland floor in wild purple bluebells beneath fresh translucent beech leaves.",
+          "nl": "In april toveren wilde boshyacinten en jong beukenblad het bos om tot een sprookjeslandschap.",
+          "fr": "En avril, les jacinthes sauvages tapissent le sous-bois sous le vert tendre des jeunes hêtres."
+        },
+        "summer": {
+          "zh": "高聳樹冠隔絕酷暑，筆直林蔭大道與單車徑是魯汶炎夏最涼爽的深呼吸森林。",
+          "en": "Cool deep-green shade along miles of straight cathedral-like forest avenues — ideal for summer hikes and cycling.",
+          "nl": "Heerlijke koelte onder het hoge bladerdak voor lange zomerse wandelingen en fietstochten.",
+          "fr": "Fraîcheur profonde sous les voûtes de hêtres pour randonner et pédaler à l'abri du soleil."
+        },
+        "autumn": {
+          "zh": "比利時頂級賞秋森林！漫天美國紅橡、山毛櫸與楓樹將無邊林海染成深紅、焦糖與金黃，落葉深可沒踝。",
+          "en": "World-class autumn photography — towering beeches, American red oaks, and maples ignite into a breathtaking sea of gold and crimson.",
+          "nl": "Wereldklasse herfstbos: majestueuze beuken en Amerikaanse eiken kleuren vurig rood, koper en goud.",
+          "fr": "Un décor d'automne spectaculaire : chênes rouges, hêtres et érables forment une cathédrale de feu."
+        },
+        "winter": {
+          "zh": "白霜與飛雪覆蓋筆直參天林道，萬籟俱寂的銀白古林展現極致北歐冬境。",
+          "en": "Crisp, silent frost-kissed trails beneath soaring snow-dusted beech trunks.",
+          "nl": "Verstilde, berijpte bosdreven onder hoge winterse beukenbomen.",
+          "fr": "Allées silencieuses givrées sous les troncs majestueux des hêtres en hiver."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 340,
+        "seasons": [
+          "autumn",
+          "winter",
+          "spring"
+        ],
+        "intensity": 1.7
+      },
+      "camera": {
+        "zoom": 14.8,
+        "pitch": 60,
+        "bearing": -25
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Arboretum_Heverleebos_ANB.jpg/960px-Arboretum_Heverleebos_ANB.jpg",
+        "credit": "Wikimedia Commons · Arboretum Heverleebos",
+        "motif": "park",
+        "palette": [
+          "#ea580c",
+          "#fbbf24",
+          "#1f2937"
+        ]
+      },
+      "gmaps": "https://maps.google.com/?q=Heverleebos+Leuven",
+      "tags": [
+        "heverleebos",
+        "forest",
+        "meerdaalwoud",
+        "bluebells",
+        "autumn",
+        "oak",
+        "森林",
+        "楓葉",
+        "藍鈴花"
+      ]
+    },
+    {
+      "id": "dijlepark",
+      "icon": "🌿",
+      "lat": 50.8738,
+      "lng": 4.6969,
+      "category": {
+        "zh": "隱密水岸公園 · 池塘拱橋",
+        "en": "Secret Riverside Oasis",
+        "nl": "Verborgen Oase aan de Dijle",
+        "fr": "Oasis Secrète sur la Dyle"
+      },
+      "name": {
+        "nl": "Dijlepark",
+        "en": "Dijlepark",
+        "fr": "Parc de la Dyle",
+        "zh": "戴勒河秘境公園"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn"
+      ],
+      "primarySeason": "spring",
+      "best": {
+        "zh": "春季蛙鳴新綠與垂柳 · 夏日靜謐林蔭池塘",
+        "en": "Spring willow blooms & frog chorus · Cool summer shade",
+        "nl": "Lentegroen & kikkers · Stille zomeroase",
+        "fr": "Printemps verdoyant · Havres d'ombre en été"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "緊鄰大貝金霍夫的 19 世紀英式秘境庭園、垂柳池塘與如畫小橋",
+        "en": "Romantic 19th-c. English pocket park near Groot Begijnhof with weeping willows & footbridge",
+        "nl": "Romantisch 19e-eeuws parkje vlak bij het Groot Begijnhof met treurwilgen en vijverbrugje",
+        "fr": "Petit parc anglais romantique près du Grand Béguinage avec saules pleureurs et passerelle"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "魯汶最知名的隱藏版秘境！春天的垂柳抽芽垂映池塘，夜晚還能聽見熱鬧的池畔蛙鳴。",
+          "en": "One of Leuven's best-kept secrets — spring brings tender willow fronds over the pond and a lively chorus of frogs.",
+          "nl": "Een van de best bewaarde geheimen van Leuven: frisse treurwilgen boven de vijver en luidruchtige lentekikkers.",
+          "fr": "L'un des secrets les mieux gardés de Louvain, où saules pleureurs et chant des grenouilles célèbrent le printemps."
+        },
+        "summer": {
+          "zh": "濃密樹冠與戴勒河流水讓小公園比市區涼爽數度，遠離學生人潮的靜謐閱讀角落。",
+          "en": "Dense weeping willows and flowing water keep this tiny park blissfully cool and serene.",
+          "nl": "Dichte schaduw en kabbelend water maken dit parkje een heerlijke koele schuilplaats in de zomer.",
+          "fr": "Ombre dense et eau vive offrent une fraîcheur délicieuse loin de l'agitation estivale."
+        },
+        "autumn": {
+          "zh": "金黃落葉飄浮在靜謐池面與拱橋周圍，是連接大貝金霍夫的絕美秋日秘徑。",
+          "en": "Golden leaves drift across the tranquil pond and little bridge linking straight to the Beguinage.",
+          "nl": "Gouden bladeren drijven zacht op de vijver langs het sfeervolle brugje.",
+          "fr": "Les feuilles dorées flottent doucement sur l'étang autour du petit pont romantique."
+        },
+        "winter": {
+          "zh": "薄霜覆蓋木橋與池畔草坡，宛如老城中央的靜止水墨畫。",
+          "en": "Frosty willow silhouettes reflect softly in the quiet winter pond.",
+          "nl": "Winterse treurwilgen weerspiegelen stil in de koude parkvijver.",
+          "fr": "Les silhouettes givrées des saules se mirent dans l'étang paisible."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 130,
+        "seasons": [
+          "spring",
+          "summer"
+        ],
+        "intensity": 1.25
+      },
+      "camera": {
+        "zoom": 17.3,
+        "pitch": 59,
+        "bearing": -18
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Dijlepark_Leuven_-_panoramio.jpg/960px-Dijlepark_Leuven_-_panoramio.jpg",
+        "credit": "Wikimedia Commons · Dijlepark Leuven",
+        "motif": "river",
+        "palette": [
+          "#f9a8d4",
+          "#34d399",
+          "#0f172a"
+        ]
+      },
+      "gmaps": "https://maps.google.com/?q=Dijlepark+Leuven",
+      "tags": [
+        "dijlepark",
+        "hidden",
+        "pond",
+        "willow",
+        "spring",
+        "戴勒河公園",
+        "秘境",
+        "垂柳"
+      ]
+    },
+    {
+      "id": "sluispark",
+      "icon": "💧",
+      "lat": 50.8867,
+      "lng": 4.7,
+      "category": {
+        "zh": "現代水岸公園 · 運河綠廊",
+        "en": "Modern Canal-side Park",
+        "nl": "Modern Stadspark aan de Vaart",
+        "fr": "Parc Urbain Contemporain"
+      },
+      "name": {
+        "nl": "Sluispark",
+        "en": "Sluispark",
+        "fr": "Parc Sluispark",
+        "zh": "運河水閘公園"
+      },
+      "seasons": [
+        "spring",
+        "summer"
+      ],
+      "primarySeason": "summer",
+      "best": {
+        "zh": "5月–9月陽光草坡與親水階梯",
+        "en": "May–Sep sunny lawns & water steps",
+        "nl": "Mei–Sep zonnige grasvelden & watertrappen",
+        "fr": "Mai–Sep pelouses ensoleillées & gradins d'eau"
+      },
+      "hours": {
+        "zh": "全天開放",
+        "en": "Open 24h",
+        "nl": "24u open",
+        "fr": "Ouvert 24h/24"
+      },
+      "highlights": {
+        "zh": "Vaartkom 新生代親水公園、開闊陽光草坪、現代水岸階梯與紅磚工業景觀",
+        "en": "Contemporary urban green hub in Vaartkom with water steps, sunlit lawns & industrial heritage backdrop",
+        "nl": "Eigentijds stadspark in de Vaartkom met waterpartijen, zonneweides en industrieel erfgoed",
+        "fr": "Espace vert contemporain du quartier Vaartkom mêlant gradins d'eau et patrimoine industriel"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "重見天日的戴勒河支流貫穿草坡，春日午後處處是野餐、散步與喝外帶咖啡的年輕人。",
+          "en": "Spring sunshine warms the grassy riverbanks as locals gather with takeaway coffee from nearby Vaartkom roasters.",
+          "nl": "De lentezon lokt buurtbewoners en studenten naar de groene oevers met koffie uit de Vaartkom.",
+          "fr": "Les premiers soleils de printemps animent les berges verdoyantes au cœur du nouveau quartier Vaartkom."
+        },
+        "summer": {
+          "zh": "夏日最受歡迎的親水綠洲！在陽光草坪與現代水岸階梯戲水納涼，完美融合工業古蹟與現代設計。",
+          "en": "A vibrant summer community hub — cool water features, sunny picnic terraces, and breezy evening hangouts.",
+          "nl": "Een levendige zomerplek met verfrissende watertrappen en gezellige avonden aan het water.",
+          "fr": "Lieu de rencontre estival par excellence avec jeux d'eau, pelouses ensoleillées et soirées douces."
+        },
+        "autumn": {
+          "zh": "現代景觀植栽轉為暖金芒草色調，與紅磚舊倉庫相得益彰。",
+          "en": "Ornamental grasses turn golden against historic brick canal warehouses.",
+          "nl": "Siergrassen kleuren goud tegen de achtergrond van oude bakstenen pakhuizen.",
+          "fr": "Les graminées dorées contrastent élégamment avec les entrepôts en brique."
+        },
+        "winter": {
+          "zh": "開闊俐落的線條在冬日冷藍天光下呈現北歐現代公園美學。",
+          "en": "Crisp winter skies highlight the clean modern geometry of this canal-side park.",
+          "nl": "Heldere winterlucht benadrukt het strakke moderne ontwerp van het park.",
+          "fr": "La lumière claire d'hiver souligne les lignes contemporaines du parc."
+        }
+      },
+      "emitter": {
+        "enabled": true,
+        "radius": 150,
+        "seasons": [
+          "summer",
+          "spring"
+        ],
+        "intensity": 1.25
+      },
+      "camera": {
+        "zoom": 16.8,
+        "pitch": 58,
+        "bearing": 30
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/Sluispark%2C_Leuven.jpg/960px-Sluispark%2C_Leuven.jpg",
+        "credit": "Wikimedia Commons · Sluispark Leuven",
+        "motif": "waterfront",
+        "palette": [
+          "#22c55e",
+          "#38bdf8",
+          "#0f172a"
+        ]
+      },
+      "gmaps": "https://maps.google.com/?q=Sluispark+Leuven",
+      "tags": [
+        "sluispark",
+        "vaartkom",
+        "park",
+        "water",
+        "summer",
+        "水閘公園",
+        "運河",
+        "夏日"
+      ]
+    },
+    {
+      "id": "m-leuven",
+      "icon": "🎨",
+      "lat": 50.8787,
+      "lng": 4.7048,
+      "category": {
+        "zh": "藝術博物館 · 城市屋頂露台",
+        "en": "Art Museum & Rooftop Terrace",
+        "nl": "Kunstmuseum & Dakterras",
+        "fr": "Musée d'Art & Toit-Terrasse"
+      },
+      "name": {
+        "nl": "M Leuven",
+        "en": "M Leuven Museum",
+        "fr": "M Leuven (Musée)",
+        "zh": "M 魯汶藝術博物館"
+      },
+      "seasons": [
+        "spring",
+        "summer",
+        "autumn",
+        "winter"
+      ],
+      "primarySeason": "winter",
+      "best": {
+        "zh": "冬日室內看展首選 · 夏日屋頂露台眺望老城",
+        "en": "Cozy winter culture · Summer rooftop terrace views",
+        "nl": "Ideale winteruitstap · Zomers dakterras over de stad",
+        "fr": "Refuge culturel en hiver · Toit-terrasse en été"
+      },
+      "hours": {
+        "zh": "週四–二 11:00–18:00（週四至 22:00，週三休）",
+        "en": "Thu–Tue 11:00–18:00 (Thu till 22:00, closed Wed)",
+        "nl": "Do–Di 11:00–18:00 (Do tot 22:00, wo gesloten)",
+        "fr": "Jeu–Mar 11:00–18:00 (Jeu jusqu'à 22:00, fermé mer)"
+      },
+      "highlights": {
+        "zh": "比利時建築師 Stéphane Beel 融合歷史與極簡當代設計、哥德大師 Dirk Bouts 典藏、免費屋頂全景露台",
+        "en": "Contemporary architecture fused with historic courtyard, Gothic masterworks (Dirk Bouts) & rooftop skyline terrace",
+        "nl": "Hedendaagse architectuur rond een historische binnentuin, topstukken van Dirk Bouts & panoramisch dakterras",
+        "fr": "Architecture contemporaine et cour historique, chefs-d'œuvre de Dirk Bouts & toit-terrasse panoramique"
+      },
+      "seasonDescriptions": {
+        "spring": {
+          "zh": "純白極簡中庭在春日陽光下光影俐落，步上屋頂露台可將老城尖塔與綠意一覽無遺。",
+          "en": "Crisp spring light plays across the minimalist white courtyard and scenic rooftop terrace.",
+          "nl": "Fris lentelicht op de minimalistische binnentuin en het zonnige dakterras.",
+          "fr": "Lumière printanière sur la cour minimaliste et le toit-terrasse surplombant les toits."
+        },
+        "summer": {
+          "zh": "週四夜間開館與夏日屋頂露台活動讓 M Leuven 成為結合藝術、音樂與日落美景的文化地標。",
+          "en": "Thursday late-night openings and summer rooftop evenings combine contemporary art with golden city sunsets.",
+          "nl": "Zomerse donderdagavonden op het dakterras verenigen kunst, muziek en zonsondergang.",
+          "fr": "Nocturnes du jeudi et soirées estivales sur le toit-terrasse entre art et coucher de soleil."
+        },
+        "autumn": {
+          "zh": "秋雨微涼時最適合漫步於古今交錯的展廳，從大片落地窗欣賞魯汶秋日屋瓦。",
+          "en": "Step inside from crisp autumn showers to explore Gothic sculptures and contemporary exhibitions.",
+          "nl": "De perfecte herfstbestemming voor kunstliefhebbers, met grote ramen op de stad.",
+          "fr": "Refuge artistique idéal les jours d'automne entre maîtres anciens et art contemporain."
+        },
+        "winter": {
+          "zh": "冬日必訪的溫暖文化殿堂！欣賞佛蘭德斯古典傑作與當代特展，再登上雪後屋頂露台俯瞰銀白魯汶。",
+          "en": "A warm cultural haven on chilly winter days — pair world-class exhibitions with snowy rooftop skyline views.",
+          "nl": "Een warme culturele ontdekking in de winter, met uitzicht over de besneeuwde daken van Leuven.",
+          "fr": "Un écrin culturel chaleureux en hiver, prolongé par une vue imprenable sur les toits enneigés."
+        }
+      },
+      "emitter": {
+        "enabled": false,
+        "radius": 110,
+        "seasons": [
+          "winter"
+        ],
+        "intensity": 1
+      },
+      "camera": {
+        "zoom": 17.2,
+        "pitch": 62,
+        "bearing": -40
+      },
+      "visual": {
+        "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Museum_M_Leuven_100.jpg/960px-Museum_M_Leuven_100.jpg",
+        "credit": "Wikimedia Commons · M Leuven",
+        "motif": "townhall",
+        "palette": [
+          "#38bdf8",
+          "#f8fafc",
+          "#0f172a"
+        ]
+      },
+      "gmaps": "https://maps.google.com/?q=M+Leuven",
+      "tags": [
+        "m leuven",
+        "museum",
+        "art",
+        "rooftop",
+        "winter",
+        "博物館",
+        "藝術",
+        "屋頂露台",
+        "冬日"
+      ]
+    }
+  ]
+}

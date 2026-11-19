@@ -1,0 +1,3376 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Leuven Seizoenen — 魯汶四季 3D 互動地圖 (Beta 5)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-firestore-compat.min.js"></script>
+
+<style>
+  :root {
+    --glass-bg: rgba(15, 20, 30, 0.72);
+    --glass-bg-strong: rgba(12, 16, 25, 0.84);
+    --glass-border: rgba(255, 255, 255, 0.13);
+    --glass-border-hover: rgba(255, 255, 255, 0.26);
+    --glass-shadow: 0 14px 38px rgba(7, 10, 18, 0.36);
+    --text-main: #f8fafc;
+    --text-sub: rgba(226, 232, 240, 0.78);
+    --text-muted: rgba(148, 163, 184, 0.78);
+    --accent: #f48fb1;
+    --accent-soft: rgba(244, 143, 177, 0.18);
+    --accent-glow: rgba(244, 143, 177, 0.42);
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 9px;
+    --sidebar-w: 326px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    font-family: 'Plus Jakarta Sans', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-main);
+    background: #dbe3ec;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── FULLSCREEN 3D MAP ── */
+  #map {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    z-index: 1;
+  }
+
+  /* Seasonal atmospheric horizon tint (non-interactive, responds to pitch) */
+  #atmosphere-veil {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none;
+    transition: background 0.9s ease, opacity 0.4s ease;
+    background: linear-gradient(180deg, rgba(253, 214, 228, 0.34) 0%, rgba(253, 214, 228, 0.08) 26%, rgba(255,255,255,0) 56%);
+    opacity: 0.9;
+  }
+
+  /* Frosted glass utility */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* ── LOADING OVERLAY ── */
+  #loading-screen {
+    position: fixed; inset: 0; z-index: 1000;
+    background: radial-gradient(circle at 30% 25%, #1e2436 0%, #0d111a 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; transition: opacity 0.55s ease, visibility 0.55s ease;
+  }
+  #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .load-emblem {
+    width: 54px; height: 54px; border-radius: 50%;
+    background: rgba(244, 143, 177, 0.16);
+    border: 1px solid rgba(244, 143, 177, 0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; animation: pulseLoad 1.8s ease-in-out infinite;
+  }
+  @keyframes pulseLoad {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244,143,177,.35); }
+    50% { transform: scale(1.06); box-shadow: 0 0 24px 6px rgba(244,143,177,.18); }
+  }
+  .load-title {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 28px; letter-spacing: 0.02em; color: #fff;
+  }
+  .load-sub { font-size: 12.5px; color: var(--text-sub); }
+  .load-bar {
+    width: 170px; height: 2.5px; background: rgba(255,255,255,0.12);
+    border-radius: 99px; overflow: hidden; margin-top: 4px;
+  }
+  .load-bar-fill {
+    width: 45%; height: 100%; background: var(--accent);
+    border-radius: 99px; animation: slideBar 1.2s ease-in-out infinite;
+  }
+  @keyframes slideBar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(260%); }
+  }
+
+  /* ── 1. LEFT DOCK (BRAND CARD + SPOT LIST, ZERO OVERLAP) ── */
+  .left-dock {
+    position: fixed; top: 16px; left: 16px; bottom: 16px;
+    width: var(--sidebar-w); z-index: 20;
+    display: flex; flex-direction: column; gap: 10px;
+    pointer-events: none;
+  }
+  .brand-card {
+    width: 100%; flex-shrink: 0; pointer-events: auto;
+    border-radius: var(--radius-lg);
+    padding: 15px 16px 13px;
+    transition: border-color 0.35s ease;
+  }
+  .brand-top {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+  }
+  .brand-title-wrap { min-width: 0; }
+  .brand-title {
+    font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 600;
+    line-height: 1.15; letter-spacing: 0.01em; color: #fff;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .brand-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+    flex-shrink: 0; transition: background 0.35s, box-shadow 0.35s;
+  }
+  .brand-sub {
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); margin-top: 3px;
+  }
+  .brand-desc {
+    font-size: 12px; line-height: 1.5; color: var(--text-sub);
+    margin-top: 9px;
+  }
+  .brand-meta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .season-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 99px;
+    background: var(--accent-soft);
+    border: 1px solid rgba(255,255,255,0.12);
+    font-size: 11.5px; font-weight: 500; color: #fff;
+    transition: background 0.35s ease;
+  }
+  .weather-mini {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11.5px; color: var(--text-sub);
+  }
+  .lang-switch {
+    display: flex; gap: 2px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 99px; padding: 2px; flex-shrink: 0;
+  }
+  .lang-btn {
+    border: none; background: transparent; color: var(--text-muted);
+    font-family: inherit; font-size: 10.5px; font-weight: 600;
+    padding: 3px 6.5px; border-radius: 99px; cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .lang-btn:hover { color: #fff; }
+  .lang-btn.active { background: #fff; color: #0f172a; }
+
+  /* ── 2. TOP SEARCH & QUICK NAVIGATION BAR ── */
+  .top-nav-bar {
+    position: fixed; top: 16px;
+    left: calc(16px + var(--sidebar-w) + 12px);
+    right: 16px;
+    z-index: 20;
+    display: flex; align-items: center; gap: 8px;
+    pointer-events: none;
+    flex-wrap: wrap;
+  }
+  .top-nav-bar > * { pointer-events: auto; }
+
+  .search-box {
+    flex: 1 1 240px; max-width: 390px;
+    height: 44px; border-radius: 99px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft), var(--glass-shadow);
+  }
+  .search-icon { font-size: 14px; opacity: 0.7; flex-shrink: 0; }
+  .search-input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: #fff; font-family: inherit; font-size: 13px; min-width: 0;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-clear {
+    border: none; background: rgba(255,255,255,0.12); color: #fff;
+    width: 20px; height: 20px; border-radius: 50%;
+    font-size: 11px; cursor: pointer; display: none;
+    align-items: center; justify-content: center;
+  }
+  .search-clear.visible { display: inline-flex; }
+
+  .quick-tools {
+    display: flex; align-items: center; gap: 6px;
+    height: 44px; padding: 4px 6px; border-radius: 99px;
+  }
+  .tool-btn {
+    border: 1px solid transparent; background: transparent; color: var(--text-sub);
+    font-family: inherit; font-size: 12px; font-weight: 500;
+    height: 34px; padding: 0 11px; border-radius: 99px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+    white-space: nowrap; transition: all 0.18s ease;
+  }
+  .tool-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .tool-btn.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .tool-divider {
+    width: 1px; height: 18px; background: rgba(255,255,255,0.12);
+    margin: 0 2px;
+  }
+
+  /* ── 3. RIGHT-SIDE SEASON SWITCHER RAIL ── */
+  .season-rail {
+    position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
+    z-index: 20; border-radius: 22px; padding: 7px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .season-btn {
+    width: 68px; padding: 10px 6px; border-radius: 15px;
+    border: 1px solid transparent; background: transparent;
+    color: var(--text-sub); font-family: inherit;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; transition: all 0.22s cubic-bezier(.22,1,.36,1);
+    position: relative;
+  }
+  .season-btn:hover {
+    background: rgba(255,255,255,0.09); color: #fff;
+    transform: translateY(-1px);
+  }
+  .season-btn .s-ico { font-size: 20px; line-height: 1; transition: transform 0.22s; }
+  .season-btn .s-lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
+  .season-btn .s-sub { font-size: 9.5px; opacity: 0.72; }
+  .season-btn.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  .season-btn.active .s-ico { transform: scale(1.14); }
+  .season-kbd {
+    position: absolute; top: 5px; right: 6px;
+    font-size: 8.5px; opacity: 0.45; font-weight: 600;
+  }
+
+  /* ── 4A. LEFT-SIDE SPOT LIST PANEL ── */
+  .spots-panel {
+    width: 100%; flex: 1; min-height: 0;
+    pointer-events: auto;
+    border-radius: var(--radius-lg);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(.22,1,.36,1), opacity 0.25s ease;
+  }
+  .spots-panel.collapsed {
+    transform: translateX(calc(-100% - 28px));
+    opacity: 0; pointer-events: none;
+  }
+  .spots-header {
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.09);
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .spots-heading {
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-sub);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .spots-count {
+    font-size: 11px; padding: 1px 7px; border-radius: 99px;
+    background: rgba(255,255,255,0.1); color: #fff;
+  }
+  .filter-toggle {
+    display: flex; gap: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px; padding: 2px;
+  }
+  .filter-chip {
+    border: none; background: transparent; color: var(--text-muted);
+    font-family: inherit; font-size: 11px; font-weight: 500;
+    padding: 4px 9px; border-radius: 99px; cursor: pointer;
+    transition: all 0.16s;
+  }
+  .filter-chip.active { background: var(--accent); color: #0b101b; font-weight: 600; }
+
+  .spots-list {
+    flex: 1; overflow-y: auto; padding: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.2) transparent;
+  }
+  .spots-list::-webkit-scrollbar { width: 5px; }
+  .spots-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 99px; }
+
+  .spot-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 10px; border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    cursor: pointer; margin-bottom: 5px;
+    transition: all 0.18s ease;
+    position: relative;
+  }
+  .spot-item:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.12);
+  }
+  .spot-item.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .spot-item.off-season { opacity: 0.56; }
+  .spot-item.off-season:hover { opacity: 0.92; }
+
+  .spot-avatar {
+    width: 46px; height: 46px; border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.14);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; flex-shrink: 0;
+    position: relative; overflow: hidden;
+  }
+  .spot-avatar img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.25s ease;
+  }
+  .spot-item:hover .spot-avatar img { transform: scale(1.08); }
+  .spot-avatar-badge {
+    position: absolute; right: 2px; bottom: 2px;
+    width: 18px; height: 18px; border-radius: 6px;
+    background: rgba(12,16,25,0.78);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; line-height: 1;
+  }
+  .spot-item.in-season .spot-avatar {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .spot-body { flex: 1; min-width: 0; }
+  .spot-name-row {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .spot-name {
+    font-size: 13px; font-weight: 600; color: #fff;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .spot-rec-badge {
+    font-size: 9.5px; font-weight: 600; padding: 1.5px 6px;
+    border-radius: 99px; background: var(--accent); color: #0f172a;
+    flex-shrink: 0;
+  }
+  .spot-cat {
+    font-size: 11px; color: var(--text-muted); margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .spot-seasons {
+    display: flex; gap: 3px; margin-top: 5px;
+  }
+  .mini-season {
+    font-size: 11px; opacity: 0.4; filter: grayscale(0.4);
+    transition: all 0.2s;
+  }
+  .mini-season.match { opacity: 1; filter: none; transform: scale(1.1); }
+
+  .spots-footer {
+    padding: 8px 14px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 10.5px; color: var(--text-muted);
+  }
+  .perf-dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #34d399; margin-right: 5px;
+  }
+
+  /* ── 4B. DYNAMIC SPOT DETAIL CARD ── */
+  .detail-card {
+    position: fixed; right: 104px; bottom: 38px;
+    width: 372px; max-width: calc(100vw - 32px);
+    z-index: 24; border-radius: 20px;
+    overflow: hidden;
+    transform: translateY(22px) scale(0.97);
+    opacity: 0; pointer-events: none;
+    transition: transform 0.28s cubic-bezier(.22,1,.36,1), opacity 0.22s ease;
+  }
+  .detail-card.open {
+    transform: translateY(0) scale(1);
+    opacity: 1; pointer-events: auto;
+  }
+  .detail-hero {
+    position: relative; height: 186px; width: 100%;
+    overflow: hidden; background: #121826;
+  }
+  .detail-hero img, .detail-hero svg {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.55s ease;
+  }
+  .detail-card.open .detail-hero:hover img { transform: scale(1.04); }
+  .detail-photo-credit {
+    position: absolute; right: 10px; top: 46px;
+    font-size: 9.5px; color: rgba(255,255,255,0.78);
+    background: rgba(10,14,22,0.52); backdrop-filter: blur(6px);
+    padding: 2px 7px; border-radius: 99px;
+    border: 1px solid rgba(255,255,255,0.12);
+    max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .detail-hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(10,14,22,0.18) 0%, rgba(10,14,22,0.12) 42%, rgba(10,14,22,0.84) 100%);
+  }
+  .detail-close {
+    position: absolute; top: 10px; right: 10px;
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(12,16,25,0.62); backdrop-filter: blur(8px);
+    color: #fff; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.16s;
+  }
+  .detail-close:hover { background: rgba(255,255,255,0.2); }
+  .detail-hero-badges {
+    position: absolute; top: 10px; left: 12px;
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .hero-badge {
+    font-size: 10.5px; font-weight: 600;
+    padding: 3px 9px; border-radius: 99px;
+    background: rgba(12,16,25,0.68); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.16); color: #fff;
+  }
+  .detail-hero-title-wrap {
+    position: absolute; left: 14px; right: 14px; bottom: 11px;
+  }
+  .detail-title {
+    font-family: 'Playfair Display', 'Noto Sans TC', serif;
+    font-size: 19px; font-weight: 600; color: #fff; line-height: 1.2;
+  }
+  .detail-subtitle {
+    font-size: 11.5px; color: rgba(255,255,255,0.78); margin-top: 2px;
+  }
+
+  .detail-body { padding: 13px 15px 15px; }
+  .detail-season-tabs {
+    display: flex; gap: 5px; margin-bottom: 10px;
+  }
+  .d-stab {
+    flex: 1; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04); color: var(--text-muted);
+    font-family: inherit; font-size: 11px; font-weight: 500;
+    padding: 5px 4px; border-radius: 9px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 3px;
+    transition: all 0.16s;
+  }
+  .d-stab:hover { color: #fff; background: rgba(255,255,255,0.1); }
+  .d-stab.active {
+    background: var(--accent-soft); border-color: var(--accent); color: #fff;
+  }
+  .d-stab.best::after {
+    content: ''; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent); display: inline-block;
+  }
+
+  .detail-desc {
+    font-size: 12.5px; line-height: 1.62; color: #e2e8f0;
+    margin-bottom: 11px;
+  }
+  .detail-meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
+    margin-bottom: 12px;
+  }
+  .meta-box {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 7px 9px;
+  }
+  .meta-k { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .meta-v { font-size: 11.5px; color: #f8fafc; margin-top: 2px; line-height: 1.35; }
+
+  .detail-actions {
+    display: flex; gap: 7px;
+  }
+  .act-btn {
+    flex: 1; height: 36px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.08); color: #fff;
+    font-family: inherit; font-size: 12px; font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    transition: all 0.16s;
+  }
+  .act-btn:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.28); }
+  .act-btn.primary {
+    background: var(--accent); color: #0b101b; border-color: transparent; font-weight: 600;
+  }
+  .act-btn.primary:hover { filter: brightness(1.08); }
+  .act-btn.orbiting {
+    background: var(--accent-soft); border-color: var(--accent); color: #fff;
+  }
+
+  /* ── CUSTOM 3D MAP MARKERS ── */
+  .spot-marker {
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer; user-select: none;
+    transition: opacity 0.28s ease, transform 0.22s ease;
+  }
+  .spot-marker.dimmed { opacity: 0.42; }
+  .spot-marker.dimmed:hover { opacity: 0.95; }
+  .marker-pin {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(15, 20, 30, 0.84);
+    border: 2px solid rgba(255, 255, 255, 0.86);
+    box-shadow: 0 6px 18px rgba(10, 14, 24, 0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; position: relative;
+    transition: transform 0.2s cubic-bezier(.22,1,.36,1), border-color 0.25s, box-shadow 0.25s;
+  }
+  .spot-marker.in-season .marker-pin {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft), 0 8px 20px rgba(10,14,24,0.38);
+  }
+  .spot-marker.selected .marker-pin {
+    transform: scale(1.24);
+    background: var(--accent);
+    border-color: #fff;
+    box-shadow: 0 0 0 6px var(--accent-glow), 0 10px 26px rgba(10,14,24,0.45);
+  }
+  .spot-marker:hover .marker-pin { transform: scale(1.16); }
+  .marker-stem {
+    width: 2px; height: 10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0));
+  }
+  .marker-label {
+    margin-top: 2px; padding: 2.5px 8px; border-radius: 99px;
+    background: rgba(12, 16, 25, 0.78);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.16);
+    color: #fff; font-size: 11px; font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.22);
+    transition: all 0.2s;
+  }
+  .spot-marker.selected .marker-label {
+    background: #fff; color: #0f172a; font-weight: 600;
+  }
+
+  /* ── iNATURALIST 3D MARKERS & DARK GLASS POPUP ── */
+  .inat-marker {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(16, 85, 52, 0.88);
+    border: 2px solid rgba(134, 239, 172, 0.92);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22), 0 4px 12px rgba(0, 0, 0, 0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; cursor: pointer; user-select: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .inat-marker:hover {
+    transform: scale(1.22);
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.36), 0 6px 16px rgba(0, 0, 0, 0.45);
+  }
+  .inat-count-pill {
+    font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px;
+    background: rgba(34, 197, 94, 0.28); color: #bbf7d0;
+    border: 1px solid rgba(134, 239, 172, 0.45); margin-left: 2px;
+  }
+  .maplibregl-popup { z-index: 30; }
+  .maplibregl-popup-content {
+    background: rgba(13, 18, 29, 0.92) !important;
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 16px !important;
+    padding: 0 !important;
+    overflow: hidden;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.48) !important;
+    color: #f8fafc;
+    font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+    width: 248px;
+  }
+  .maplibregl-popup-tip { border-top-color: rgba(13, 18, 29, 0.92) !important; }
+  .maplibregl-popup-close-button {
+    color: #fff !important; font-size: 16px !important;
+    width: 26px; height: 26px; top: 6px !important; right: 6px !important;
+    background: rgba(12, 16, 25, 0.65) !important;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  }
+  .inat-pop-img {
+    width: 100%; height: 132px; object-fit: cover; display: block; background: #0f172a;
+  }
+  .inat-pop-body { padding: 11px 13px 13px; }
+  .inat-pop-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 600; color: #86efac;
+    background: rgba(34, 197, 94, 0.16); border: 1px solid rgba(134, 239, 172, 0.3);
+    padding: 2px 7px; border-radius: 99px; margin-bottom: 6px;
+  }
+  .inat-pop-title { font-size: 14px; font-weight: 600; color: #fff; line-height: 1.25; }
+  .inat-pop-sci { font-size: 11px; font-style: italic; color: var(--text-muted); margin-top: 2px; }
+  .inat-pop-meta {
+    display: flex; justify-content: space-between; gap: 6px;
+    font-size: 11px; color: var(--text-sub);
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+  }
+  .inat-pop-link {
+    display: block; width: 100%; margin-top: 9px; padding: 7px 10px;
+    border-radius: 9px; text-align: center; text-decoration: none;
+    background: #22c55e; color: #052e16; font-size: 11.5px; font-weight: 600;
+    transition: filter 0.15s;
+  }
+  .inat-pop-link:hover { filter: brightness(1.1); }
+
+  /* MapLibre attribution subtle styling */
+  .maplibregl-ctrl-attrib {
+    background: rgba(15, 20, 30, 0.56) !important;
+    color: rgba(255,255,255,0.72) !important;
+    backdrop-filter: blur(8px);
+    border-radius: 10px 0 0 0;
+    font-size: 10px !important;
+  }
+  .maplibregl-ctrl-attrib a { color: rgba(255,255,255,0.85) !important; }
+  .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right { z-index: 10; }
+
+  /* Floating sidebar reopen button when collapsed */
+  .reopen-list-btn {
+    position: fixed; left: 16px; bottom: 20px; z-index: 21;
+    height: 40px; padding: 0 14px; border-radius: 99px;
+    color: #fff; font-family: inherit; font-size: 12.5px; font-weight: 500;
+    cursor: pointer; display: none; align-items: center; gap: 6px;
+  }
+  .reopen-list-btn.visible { display: inline-flex; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 960px) {
+    :root { --sidebar-w: 286px; }
+    .detail-card { right: 92px; width: 332px; }
+  }
+  @media (max-width: 760px) {
+    .left-dock {
+      top: 12px; left: 12px; right: 12px; bottom: auto; width: auto;
+    }
+    .brand-card {
+      width: 100%; padding: 10px 13px;
+    }
+    .brand-desc { display: none; }
+    .top-nav-bar {
+      top: 108px; left: 12px; right: 12px;
+    }
+    .search-box { max-width: none; height: 40px; }
+    .quick-tools { height: 40px; overflow-x: auto; max-width: 100%; }
+    .spots-panel {
+      position: fixed; left: 12px; top: 160px; bottom: 74px;
+      width: min(310px, calc(100vw - 24px));
+    }
+    .reopen-list-btn {
+      left: 12px; bottom: 74px;
+    }
+    .season-rail {
+      top: auto; bottom: 14px; right: 50%; left: auto;
+      transform: translateX(50%);
+      flex-direction: row; padding: 5px; border-radius: 99px;
+    }
+    .season-btn {
+      width: auto; padding: 7px 12px; flex-direction: row; border-radius: 99px;
+    }
+    .season-btn .s-sub, .season-kbd { display: none; }
+    .detail-card {
+      right: 12px; left: 12px; bottom: 74px; width: auto;
+    }
+  }
+
+  /* ── 5. FROSTED GLASS MODALS (CALENDAR & COMMUNITY REPORT) ── */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 60;
+    background: rgba(6, 10, 18, 0.56);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 0.24s ease, visibility 0.24s ease;
+  }
+  .modal-backdrop.open {
+    opacity: 1; visibility: visible; pointer-events: auto;
+  }
+  .modal-shell {
+    width: min(860px, 100%);
+    max-height: min(86vh, 780px);
+    border-radius: 22px;
+    background: rgba(13, 18, 29, 0.90);
+    backdrop-filter: blur(22px) saturate(145%);
+    -webkit-backdrop-filter: blur(22px) saturate(145%);
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.55);
+    display: flex; flex-direction: column; overflow: hidden;
+    transform: translateY(16px) scale(0.98);
+    transition: transform 0.26s cubic-bezier(.22,1,.36,1);
+  }
+  .modal-backdrop.open .modal-shell { transform: translateY(0) scale(1); }
+  .modal-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .modal-title {
+    font-family: 'Playfair Display', 'Noto Sans TC', serif;
+    font-size: 22px; font-weight: 600; color: #fff;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .modal-sub { font-size: 12.5px; color: var(--text-sub); margin-top: 3px; }
+  .modal-close {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.08); color: #fff;
+    font-size: 15px; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.16s;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.2); }
+  .modal-body {
+    flex: 1; overflow-y: auto; padding: 18px 22px 22px;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent;
+  }
+
+  /* Calendar Table */
+  .cal-table {
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px; overflow: hidden;
+    background: rgba(255,255,255,0.03);
+  }
+  .cal-row {
+    display: grid; grid-template-columns: 152px repeat(12, 1fr);
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    transition: background 0.15s;
+  }
+  .cal-row:last-child { border-bottom: none; }
+  .cal-row.cal-head {
+    background: rgba(255,255,255,0.06);
+    font-size: 10.5px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .cal-row.cal-data { cursor: pointer; }
+  .cal-row.cal-data:hover { background: rgba(255,255,255,0.07); }
+  .cal-label {
+    padding: 9px 12px; display: flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 500; color: #f8fafc;
+  }
+  .cal-cell {
+    padding: 6px 3px; text-align: center; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cal-cell.is-now { background: rgba(255,255,255,0.07); }
+  .cal-head .cal-cell.is-now { color: var(--accent); font-weight: 700; }
+  .cal-bar {
+    width: 100%; height: 18px; border-radius: 5px;
+    opacity: 0.52; transition: opacity 0.18s, transform 0.18s;
+  }
+  .cal-row.cal-data:hover .cal-bar { opacity: 0.85; }
+  .cal-bar.now-active {
+    opacity: 1; box-shadow: 0 0 12px rgba(255,255,255,0.35);
+    outline: 1.5px solid #fff;
+  }
+  .cal-legend {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+    margin-top: 12px; font-size: 11.5px; color: var(--text-muted);
+  }
+  .sub-glass-box {
+    margin-top: 18px; padding: 16px 18px; border-radius: 14px;
+    background: var(--accent-soft);
+    border: 1px solid rgba(255,255,255,0.14);
+  }
+  .sub-glass-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .sub-glass-desc { font-size: 12px; color: var(--text-sub); margin-bottom: 11px; }
+  .sub-glass-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .glass-input, .glass-select, .glass-textarea {
+    width: 100%; padding: 9px 12px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(8, 12, 20, 0.72); color: #fff;
+    font-family: inherit; font-size: 13px; outline: none;
+    transition: border-color 0.16s;
+  }
+  .glass-input:focus, .glass-select:focus, .glass-textarea:focus {
+    border-color: var(--accent);
+  }
+  .glass-select option { background: #0f172a; color: #fff; }
+  .glass-textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
+  .sub-glass-row .glass-input { flex: 1 1 200px; }
+  .glass-primary-btn {
+    padding: 9px 18px; border-radius: 10px; border: none;
+    background: var(--accent); color: #0b101b;
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: filter 0.16s, opacity 0.16s;
+  }
+  .glass-primary-btn:hover { filter: brightness(1.08); }
+  .glass-primary-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Report Modal Layout */
+  .report-grid {
+    display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 22px;
+  }
+  @media (max-width: 720px) {
+    .report-grid { grid-template-columns: 1fr; }
+    .cal-row { grid-template-columns: 108px repeat(12, 1fr); }
+    .cal-label { font-size: 11px; padding: 7px 6px; }
+  }
+  .rpt-field { margin-bottom: 13px; }
+  .rpt-label {
+    display: block; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 6px;
+  }
+  .rpt-status-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px;
+  }
+  .rpt-status-btn {
+    padding: 8px 6px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.05); color: var(--text-sub);
+    font-family: inherit; font-size: 11.5px; font-weight: 500;
+    cursor: pointer; text-align: center; transition: all 0.16s;
+  }
+  .rpt-status-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .rpt-status-btn.selected {
+    background: var(--accent-soft); border-color: var(--accent); color: #fff; font-weight: 600;
+  }
+  .rpt-toast {
+    padding: 10px 13px; border-radius: 10px; font-size: 12.5px;
+    margin-bottom: 12px; display: none;
+  }
+  .rpt-toast.ok { background: rgba(34,197,94,0.2); border: 1px solid rgba(34,197,94,0.45); color: #bbf7d0; }
+  .rpt-toast.err { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.45); color: #fecaca; }
+  .rpt-feed-wrap {
+    border-left: 1px solid rgba(255,255,255,0.1);
+    padding-left: 18px; max-height: 460px; overflow-y: auto;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent;
+  }
+  @media (max-width: 720px) {
+    .rpt-feed-wrap { border-left: none; border-top: 1px solid rgba(255,255,255,0.1); padding-left: 0; padding-top: 16px; }
+  }
+  .feed-item {
+    display: flex; gap: 10px; padding: 11px 10px; border-radius: 12px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+    margin-bottom: 8px; cursor: pointer; transition: background 0.16s, border-color 0.16s;
+  }
+  .feed-item:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.18); }
+  .feed-ico {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+  .feed-main { flex: 1; min-width: 0; }
+  .feed-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .feed-spot { font-size: 12.5px; font-weight: 600; color: #fff; }
+  .feed-pill {
+    font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 99px;
+    background: var(--accent-soft); color: #fff; border: 1px solid rgba(255,255,255,0.14);
+  }
+  .feed-note { font-size: 12px; color: var(--text-sub); margin-top: 4px; line-height: 1.45; }
+  .feed-meta { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; }
+  .rpt-count-pill {
+    font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px;
+    background: var(--accent); color: #0b101b; margin-left: 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading Curtain -->
+<div id="loading-screen">
+  <div class="load-emblem" id="load-emblem">🌸</div>
+  <div class="load-title">Leuven Seizoenen</div>
+  <div class="load-sub" id="load-sub">正在載入魯汶 3D 城市建築與四季粒子層…</div>
+  <div class="load-bar"><div class="load-bar-fill"></div></div>
+</div>
+
+<!-- 3D Map Container -->
+<div id="map"></div>
+<div id="atmosphere-veil"></div>
+
+<!-- 1 & 4A. Left Dock: Brand Card + Spot List Panel -->
+<div class="left-dock">
+  <aside class="brand-card glass">
+    <div class="brand-top">
+      <div class="brand-title-wrap">
+        <div class="brand-title"><span class="brand-dot"></span>Leuven Seizoenen</div>
+        <div class="brand-sub" data-i18n="brand_sub">Four Seasons in Leuven · 3D Map</div>
+      </div>
+      <div class="lang-switch" aria-label="Language switcher">
+        <button class="lang-btn active" data-lang="zh">中</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="nl">NL</button>
+        <button class="lang-btn" data-lang="fr">FR</button>
+      </div>
+    </div>
+    <p class="brand-desc" data-i18n="brand_desc">
+      以真實魯汶街道與 3D 建築白模為底圖，即時切換春夏秋冬光影與 3D 季節粒子，探索全城代表花木與歷史地標。
+    </p>
+    <div class="brand-meta-row">
+      <div class="season-pill" id="active-season-pill">
+        <span id="pill-icon">🌸</span>
+        <span id="pill-text">春 · 櫻花吹雪</span>
+      </div>
+      <div class="weather-mini" title="Leuven Live Weather (Open-Meteo)">
+        <span>⛅</span>
+        <span id="live-temp">--°C</span>
+      </div>
+    </div>
+  </aside>
+
+  <section id="spots-panel" class="spots-panel glass">
+    <div class="spots-header">
+      <div class="spots-heading">
+        <span data-i18n="list_title">魯汶四季景點</span>
+        <span id="spots-count" class="spots-count">0</span>
+      </div>
+      <div class="filter-toggle">
+        <button id="filter-all" class="filter-chip active" data-i18n="filter_all">全部</button>
+        <button id="filter-season" class="filter-chip" data-i18n="filter_season">當季精選</button>
+      </div>
+    </div>
+    <div id="spots-list" class="spots-list"></div>
+    <div class="spots-footer">
+      <span><span class="perf-dot" id="perf-dot"></span><span id="particle-stat">Particles: 0</span></span>
+      <span>MapLibre + Three.js</span>
+    </div>
+  </section>
+</div>
+
+<!-- 2. Top Search & Quick Navigation Bar -->
+<div class="top-nav-bar">
+  <div class="search-box glass">
+    <span class="search-icon">🔍</span>
+    <input id="search-input" class="search-input" type="text" autocomplete="off" placeholder="搜尋景點、花種或關鍵字 (Kruidtuin, 楓葉...)" />
+    <button id="search-clear" class="search-clear" title="Clear">✕</button>
+  </div>
+
+  <div class="quick-tools glass">
+    <button id="btn-open-calendar" class="tool-btn" title="Flower & Season Calendar">📅 <span data-i18n="btn_calendar">花曆</span></button>
+    <button id="btn-open-report" class="tool-btn" title="Community Condition Reports">📣 <span data-i18n="btn_report">回報</span><span id="nav-rpt-count" class="rpt-count-pill" style="display:none;">0</span></button>
+    <button id="btn-toggle-inat" class="tool-btn active" title="Toggle iNaturalist Plant Observations">🌿 <span data-i18n="btn_inat">植物觀測</span><span id="nav-inat-count" class="inat-count-pill" style="display:none;">0</span></button>
+    <div class="tool-divider"></div>
+    <button id="btn-reset-view" class="tool-btn" title="Reset 3D Overview (R)">🧭 <span data-i18n="btn_reset">重置 3D</span></button>
+    <button id="btn-toggle-3d" class="tool-btn active" title="Toggle 3D Pitch">🏙️ <span id="lbl-3d">3D</span></button>
+    <div class="tool-divider"></div>
+    <button id="btn-density" class="tool-btn" title="Adjust 3D Particle Density">✨ <span id="lbl-density">粒子: 標準</span></button>
+    <div class="tool-divider"></div>
+    <button id="btn-toggle-list" class="tool-btn active" title="Show/Hide Spot List">☰ <span data-i18n="btn_list">景點</span></button>
+  </div>
+</div>
+
+<!-- 3. Right-Side Season Switcher Rail -->
+<nav class="season-rail glass" aria-label="Season switcher">
+  <button class="season-btn active" data-season="spring" title="Spring (Key 1)">
+    <span class="season-kbd">1</span>
+    <span class="s-ico">🌸</span>
+    <span class="s-lbl" data-i18n="s_spring">春</span>
+    <span class="s-sub">Spring</span>
+  </button>
+  <button class="season-btn" data-season="summer" title="Summer (Key 2)">
+    <span class="season-kbd">2</span>
+    <span class="s-ico">☀️</span>
+    <span class="s-lbl" data-i18n="s_summer">夏</span>
+    <span class="s-sub">Summer</span>
+  </button>
+  <button class="season-btn" data-season="autumn" title="Autumn (Key 3)">
+    <span class="season-kbd">3</span>
+    <span class="s-ico">🍁</span>
+    <span class="s-lbl" data-i18n="s_autumn">秋</span>
+    <span class="s-sub">Autumn</span>
+  </button>
+  <button class="season-btn" data-season="winter" title="Winter (Key 4)">
+    <span class="season-kbd">4</span>
+    <span class="s-ico">❄️</span>
+    <span class="s-lbl" data-i18n="s_winter">冬</span>
+    <span class="s-sub">Winter</span>
+  </button>
+</nav>
+
+<button id="reopen-list-btn" class="reopen-list-btn glass">☰ <span data-i18n="btn_open_list">展開景點清單</span></button>
+
+<!-- 4B. Dynamic Spot Detail Card -->
+<article id="detail-card" class="detail-card glass" aria-live="polite">
+  <div class="detail-hero" id="detail-hero">
+    <div class="detail-hero-overlay"></div>
+    <div class="detail-hero-badges" id="detail-badges"></div>
+    <button id="detail-close" class="detail-close" title="Close (Esc)">✕</button>
+    <div class="detail-hero-title-wrap">
+      <h2 id="detail-title" class="detail-title"></h2>
+      <div id="detail-subtitle" class="detail-subtitle"></div>
+    </div>
+  </div>
+  <div class="detail-body">
+    <div class="detail-season-tabs" id="detail-season-tabs"></div>
+    <p id="detail-desc" class="detail-desc"></p>
+    <div class="detail-meta-grid">
+      <div class="meta-box">
+        <div class="meta-k" data-i18n="meta_best">最佳賞景</div>
+        <div id="detail-best" class="meta-v"></div>
+      </div>
+      <div class="meta-box">
+        <div class="meta-k" data-i18n="meta_hours">開放時間</div>
+        <div id="detail-hours" class="meta-v"></div>
+      </div>
+    </div>
+    <div class="detail-actions">
+      <button id="btn-orbit" class="act-btn">🔄 <span id="lbl-orbit">360° 繞飛</span></button>
+      <button id="btn-detail-report" class="act-btn">📣 <span data-i18n="btn_report_spot">回報</span></button>
+      <button id="btn-detail-reset" class="act-btn">🧭 <span data-i18n="btn_overview">全景</span></button>
+      <a id="btn-gmaps" class="act-btn primary" target="_blank" rel="noopener noreferrer">📍 <span data-i18n="btn_nav">導航</span></a>
+    </div>
+  </div>
+</article>
+
+<!-- 5A. Flower & Four-Season Calendar Modal -->
+<div id="modal-calendar" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="cal-modal-title">
+  <div class="modal-shell">
+    <div class="modal-header">
+      <div>
+        <h2 id="cal-modal-title" class="modal-title">📅 <span data-i18n="cal_title">魯汶全年花曆與季景</span></h2>
+        <div class="modal-sub" data-i18n="cal_sub">點選任一花種或季節項目，即可切換 3D 地圖對應季節</div>
+      </div>
+      <button class="modal-close" data-close-modal="modal-calendar" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="calendar-grid"></div>
+      <div class="cal-legend">
+        <span data-i18n="cal_note">* 開花與變葉時間受氣候影響，以現場社群回報為準。</span>
+        <span id="cal-now-pill"></span>
+      </div>
+      <div class="sub-glass-box">
+        <div class="sub-glass-title" data-i18n="sub_title">🌸 花季訂閱通知</div>
+        <div class="sub-glass-desc" data-i18n="sub_desc">當魯汶熱門花季或楓紅盛開時，透過 Email 提醒您。</div>
+        <div class="sub-glass-row">
+          <input id="sub-email" class="glass-input" type="email" placeholder="your@email.com" />
+          <button id="sub-btn" class="glass-primary-btn" data-i18n="sub_btn">訂閱</button>
+        </div>
+        <div id="sub-msg" style="font-size:12px;margin-top:8px;display:none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5B. Community Condition Report Modal -->
+<div id="modal-report" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="rpt-modal-title">
+  <div class="modal-shell">
+    <div class="modal-header">
+      <div>
+        <h2 id="rpt-modal-title" class="modal-title">📣 <span data-i18n="rpt_title">回報現場花況與季景</span></h2>
+        <div class="modal-sub" data-i18n="rpt_sub">分享您在魯汶現場的觀察，與社群共享最新花況、楓紅與雪景！</div>
+      </div>
+      <button class="modal-close" data-close-modal="modal-report" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="report-grid">
+        <div>
+          <div id="rpt-toast" class="rpt-toast"></div>
+          <div class="rpt-field">
+            <label class="rpt-label" for="rpt-location" data-i18n="rpt_lbl_location">景點地點</label>
+            <select id="rpt-location" class="glass-select"></select>
+          </div>
+          <div class="rpt-field">
+            <label class="rpt-label" data-i18n="rpt_lbl_status">現場狀態</label>
+            <div id="rpt-status-grid" class="rpt-status-grid"></div>
+          </div>
+          <div class="rpt-field">
+            <label class="rpt-label" for="rpt-note" data-i18n="rpt_lbl_note">現場觀察備註</label>
+            <textarea id="rpt-note" class="glass-textarea" rows="3" placeholder="你看到了什麼？花開幾成、楓紅程度或小提示？"></textarea>
+          </div>
+          <div class="rpt-field">
+            <label class="rpt-label" for="rpt-name" data-i18n="rpt_lbl_name">你的名字（可選）</label>
+            <input id="rpt-name" class="glass-input" type="text" maxlength="40" placeholder="匿名" />
+          </div>
+          <button id="rpt-submit" class="glass-primary-btn" style="width:100%;" data-i18n="rpt_submit">提交回報</button>
+        </div>
+        <div class="rpt-feed-wrap">
+          <div class="rpt-label" style="margin-bottom:10px;" data-i18n="rpt_lbl_feed">最新社群回報（點擊可飛往 3D 地標）</div>
+          <div id="report-feed-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ════════════════════════════════════════════════════════════
+     1. CONSTANTS, I18N & SEASON VISUAL CONFIGURATIONS
+     ════════════════════════════════════════════════════════════ */
+  const LEUVEN_ORIGIN = [4.7009, 50.8798];
+  const DEFAULT_CAMERA = {
+    center: [4.7005, 50.8772],
+    zoom: 14.25,
+    pitch: 56,
+    bearing: -18
+  };
+
+  const I18N = {
+    zh: {
+      brand_sub: 'Four Seasons in Leuven · 3D 互動導覽',
+      brand_desc: '保留魯汶真實街道與 3D 白模建築，結合四季光影與 Three.js 季節粒子特效，探索全城花木與歷史地標。',
+      search_ph: '搜尋景點、花種或關鍵字 (Kruidtuin、楓葉…)',
+      btn_reset: '重置 3D',
+      btn_list: '景點',
+      btn_open_list: '展開景點清單',
+      list_title: '魯汶四季景點',
+      filter_all: '全部',
+      filter_season: '當季精選',
+      rec_badge: '當季推薦',
+      emitter_badge: '✨ 局部季節粒子區',
+      meta_best: '最佳賞景',
+      meta_hours: '開放時間',
+      btn_orbit: '360° 繞飛',
+      btn_orbit_stop: '停止繞飛',
+      btn_overview: '全景',
+      btn_nav: '導航',
+      s_spring: '春', s_summer: '夏', s_autumn: '秋', s_winter: '冬',
+      density_prefix: '粒子',
+      densities: { off: '關閉', low: '輕量', med: '標準', high: '豐富' },
+      no_results: '找不到符合條件的魯汶景點',
+      load_sub: '正在載入魯汶 3D 城市建築與四季粒子層…',
+      btn_calendar: '花曆', btn_report: '回報', btn_report_spot: '回報', btn_inat: '植物觀測', inat_view: '在 iNaturalist 查看 ↗', inat_obs_by: '觀測者',
+      cal_title: '魯汶全年花曆與季景', cal_sub: '點選任一花種或季節項目，即可切換 3D 地圖對應季節',
+      cal_note: '* 開花與變葉時間受氣候影響，以現場社群回報為準。', cal_now_label: '當月',
+      sub_title: '🌸 花季訂閱通知', sub_desc: '當魯汶熱門花季或楓紅盛開時，透過 Email 提醒您。',
+      sub_btn: '訂閱', sub_ph: '你的 Email', sub_ok: '訂閱成功！花季到來時我們會通知您。', sub_err: '訂閱失敗，請稍後重試。',
+      rpt_title: '回報現場花況與季景', rpt_sub: '分享您在魯汶現場的觀察，與社群共享最新花況、楓紅與雪景！',
+      rpt_lbl_location: '景點地點', rpt_lbl_status: '現場狀態', rpt_lbl_note: '現場觀察備註',
+      rpt_lbl_name: '你的名字（可選）', rpt_submit: '提交回報', rpt_lbl_feed: '最新社群回報（點擊可飛往 3D 地標）',
+      rpt_select_loc: '選擇魯汶景點…', rpt_note_ph: '你看到了什麼？花開幾成、楓紅程度或小提示？', rpt_name_ph: '匿名',
+      rpt_ok: '謝謝！你的現場回報已送出。', rpt_err: '提交失敗，請重試。', rpt_empty: '目前尚無回報，成為第一位分享者！',
+      rpt_status: { peak: '🌸 盛開中', soon: '🌷 即將開放', fading: '🌿 漸漸凋謝', foliage: '🍁 楓葉觀賞', winter: '❄️ 冬雪節慶', ended: '🍂 已結束' },
+      time_ago: { just: '剛剛', min: '分鐘前', hr: '小時前', day: '天前', days: '天前' }
+    },
+    en: {
+      brand_sub: 'Four Seasons in Leuven · 3D Map',
+      brand_desc: 'Real Leuven streets & 3D architectural buildings paired with live Three.js seasonal particles across all four seasons.',
+      search_ph: 'Search landmarks, blooms or tags (Kruidtuin, maple...)',
+      btn_reset: 'Reset 3D',
+      btn_list: 'Spots',
+      btn_open_list: 'Show Spots',
+      list_title: 'Leuven Landmarks',
+      filter_all: 'All',
+      filter_season: 'In Season',
+      rec_badge: 'Featured',
+      emitter_badge: '✨ Local Particle Zone',
+      meta_best: 'Best Window',
+      meta_hours: 'Hours',
+      btn_orbit: '360° Orbit',
+      btn_orbit_stop: 'Stop Orbit',
+      btn_overview: 'Overview',
+      btn_nav: 'Directions',
+      s_spring: 'Spring', s_summer: 'Summer', s_autumn: 'Autumn', s_winter: 'Winter',
+      density_prefix: 'FX',
+      densities: { off: 'Off', low: 'Low', med: 'Med', high: 'High' },
+      no_results: 'No matching Leuven spots found',
+      load_sub: 'Loading 3D Leuven buildings & seasonal particle layer…',
+      btn_calendar: 'Calendar', btn_report: 'Report', btn_report_spot: 'Report', btn_inat: 'iNat', inat_view: 'View on iNaturalist ↗', inat_obs_by: 'Observer',
+      cal_title: 'Leuven Bloom & Season Calendar', cal_sub: 'Click any row to switch the 3D map to its matching season',
+      cal_note: '* Bloom & foliage dates vary by year and weather.', cal_now_label: 'Now',
+      sub_title: '🌸 Get Bloom Alerts', sub_desc: 'Receive an email when Leuven\'s favourite spots come into bloom.',
+      sub_btn: 'Subscribe', sub_ph: 'your@email.com', sub_ok: 'Subscribed! We\'ll notify you when it\'s time.', sub_err: 'Something went wrong. Please try again.',
+      rpt_title: 'Report Live Conditions', rpt_sub: 'Help the community by sharing what you see across Leuven.',
+      rpt_lbl_location: 'Location', rpt_lbl_status: 'Condition', rpt_lbl_note: 'Field Note',
+      rpt_lbl_name: 'Your name (optional)', rpt_submit: 'Submit Report', rpt_lbl_feed: 'Recent Community Reports (click to fly)',
+      rpt_select_loc: 'Select a Leuven location…', rpt_note_ph: 'What did you see? Bloom %, autumn foliage or tips?', rpt_name_ph: 'Anonymous',
+      rpt_ok: 'Thank you! Your report has been submitted.', rpt_err: 'Submission failed. Please try again.', rpt_empty: 'No reports yet — be the first!',
+      rpt_status: { peak: '🌸 In bloom', soon: '🌷 Coming soon', fading: '🌿 Fading', foliage: '🍁 Autumn foliage', winter: '❄️ Winter lights/snow', ended: '🍂 Ended' },
+      time_ago: { just: 'Just now', min: 'min ago', hr: 'hr ago', day: 'day ago', days: 'days ago' }
+    },
+    nl: {
+      brand_sub: 'Vier Seizoenen in Leuven · 3D Kaart',
+      brand_desc: 'Echte Leuvense straten en 3D-gebouwen met seizoensgebonden 3D-deeltjes voor lente, zomer, herfst en winter.',
+      search_ph: 'Zoek plek, bloesem of trefwoord (Kruidtuin, herfst...)',
+      btn_reset: 'Reset 3D',
+      btn_list: 'Plekken',
+      btn_open_list: 'Toon Plekken',
+      list_title: 'Leuvense Plekken',
+      filter_all: 'Alle',
+      filter_season: 'Seizoensfavoriet',
+      rec_badge: 'Aanrader',
+      emitter_badge: '✨ Lokale Deeltjeszone',
+      meta_best: 'Beste Periode',
+      meta_hours: 'Openingsuren',
+      btn_orbit: '360° Draaien',
+      btn_orbit_stop: 'Stoppen',
+      btn_overview: 'Overzicht',
+      btn_nav: 'Route',
+      s_spring: 'Lente', s_summer: 'Zomer', s_autumn: 'Herfst', s_winter: 'Winter',
+      density_prefix: 'FX',
+      densities: { off: 'Uit', low: 'Laag', med: 'Normaal', high: 'Hoog' },
+      no_results: 'Geen overeenkomende plekken gevonden',
+      load_sub: '3D-gebouwen van Leuven & seizoenslaag laden…',
+      btn_calendar: 'Kalender', btn_report: 'Melden', btn_report_spot: 'Melden', btn_inat: 'iNat', inat_view: 'Bekijk op iNaturalist ↗', inat_obs_by: 'Waarnemer',
+      cal_title: 'Leuvense Bloeikalender', cal_sub: 'Klik op een rij om de 3D-kaart naar dat seizoen te schakelen',
+      cal_note: '* Bloeidata variëren per jaar en weersomstandigheden.', cal_now_label: 'Nu',
+      sub_title: '🌸 Bloeialarmen', sub_desc: 'Ontvang een e-mail als jouw favoriete plekken in bloei staan.',
+      sub_btn: 'Abonneren', sub_ph: 'jouw@email.com', sub_ok: 'Geabonneerd! We laten je weten als het bloeit.', sub_err: 'Er ging iets mis. Probeer opnieuw.',
+      rpt_title: 'Status melden', rpt_sub: 'Help de gemeenschap door te delen wat je vandaag ziet in Leuven.',
+      rpt_lbl_location: 'Locatie', rpt_lbl_status: 'Status', rpt_lbl_note: 'Notitie',
+      rpt_lbl_name: 'Jouw naam (optioneel)', rpt_submit: 'Melding versturen', rpt_lbl_feed: 'Recente meldingen (klik om te vliegen)',
+      rpt_select_loc: 'Kies een locatie…', rpt_note_ph: 'Wat heb je gezien? Bloei, herfstkleur of tips?', rpt_name_ph: 'Anoniem',
+      rpt_ok: 'Bedankt! Je melding is verstuurd.', rpt_err: 'Verzenden mislukt. Probeer opnieuw.', rpt_empty: 'Nog geen meldingen — wees de eerste!',
+      rpt_status: { peak: '🌸 In bloei', soon: '🌷 Binnenkort', fading: '🌿 Afnemend', foliage: '🍁 Herfstkleur', winter: '❄️ Wintersfeer', ended: '🍂 Voorbij' },
+      time_ago: { just: 'Zojuist', min: 'min geleden', hr: 'uur geleden', day: 'dag geleden', days: 'dagen geleden' }
+    },
+    fr: {
+      brand_sub: 'Quatre Saisons à Louvain · Carte 3D',
+      brand_desc: 'Rues réelles et bâtiments 3D de Louvain animés par des particules saisonnières Three.js au fil des quatre saisons.',
+      search_ph: 'Rechercher un lieu ou mot-clé (Kruidtuin, érable...)',
+      btn_reset: 'Vue 3D',
+      btn_list: 'Lieux',
+      btn_open_list: 'Voir les lieux',
+      list_title: 'Lieux de Louvain',
+      filter_all: 'Tous',
+      filter_season: 'De saison',
+      rec_badge: 'Conseillé',
+      emitter_badge: '✨ Zone Particules',
+      meta_best: 'Meilleure Période',
+      meta_hours: 'Horaires',
+      btn_orbit: 'Orbite 360°',
+      btn_orbit_stop: 'Arrêter',
+      btn_overview: 'Aperçu',
+      btn_nav: 'Itinéraire',
+      s_spring: 'Printemps', s_summer: 'Été', s_autumn: 'Automne', s_winter: 'Hiver',
+      density_prefix: 'FX',
+      densities: { off: 'Off', low: 'Bas', med: 'Moyen', high: 'Élevé' },
+      no_results: 'Aucun lieu trouvé à Louvain',
+      load_sub: 'Chargement des bâtiments 3D et particules saisonnières…',
+      btn_calendar: 'Calendrier', btn_report: 'Signaler', btn_report_spot: 'Signaler', btn_inat: 'iNat', inat_view: 'Voir sur iNaturalist ↗', inat_obs_by: 'Observateur',
+      cal_title: 'Calendrier Floral de Louvain', cal_sub: 'Cliquez sur une ligne pour afficher la saison correspondante en 3D',
+      cal_note: '* Les dates varient selon les années et le climat.', cal_now_label: 'Maintenant',
+      sub_title: '🌸 Alertes de Floraison', sub_desc: 'Recevez un e-mail lorsque vos sites préférés sont en fleurs.',
+      sub_btn: 'S\'abonner', sub_ph: 'votre@email.com', sub_ok: 'Abonné(e) ! Nous vous contacterons à la floraison.', sub_err: 'Une erreur est survenue. Réessayez.',
+      rpt_title: 'Signaler les Conditions', rpt_sub: 'Aidez la communauté en partageant vos observations à Louvain.',
+      rpt_lbl_location: 'Lieu', rpt_lbl_status: 'État', rpt_lbl_note: 'Note',
+      rpt_lbl_name: 'Votre nom (optionnel)', rpt_submit: 'Envoyer', rpt_lbl_feed: 'Signalements récents (cliquer pour voler)',
+      rpt_select_loc: 'Choisissez un lieu…', rpt_note_ph: 'Qu\'avez-vous observé ?', rpt_name_ph: 'Anonyme',
+      rpt_ok: 'Merci ! Votre signalement a été envoyé.', rpt_err: 'Échec de l\'envoi. Réessayez.', rpt_empty: 'Aucun signalement pour l\'instant !',
+      rpt_status: { peak: '🌸 En fleurs', soon: '🌷 Bientôt', fading: '🌿 En déclin', foliage: '🍁 Automne', winter: '❄️ Hiver', ended: '🍂 Terminé' },
+      time_ago: { just: 'À l\'instant', min: 'min', hr: 'h', day: 'j', days: 'j' }
+    }
+  };
+
+  const SEASON_CONFIG = {
+    spring: {
+      icon: '🌸',
+      accent: '#ff6fa5',
+      accentSoft: 'rgba(255, 111, 165, 0.24)',
+      accentGlow: 'rgba(255, 111, 165, 0.54)',
+      pillLabel: { zh: '春 · 櫻花吹雪', en: 'Spring · Sakura Drift', nl: 'Lente · Bloesemwind', fr: 'Printemps · Pétales' },
+      veil: 'linear-gradient(180deg, rgba(255, 174, 210, 0.48) 0%, rgba(255, 216, 232, 0.18) 30%, rgba(255,255,255,0) 60%)',
+      mapColors: {
+        background: '#f8edf1',
+        water: '#62bce6',
+        park: '#a6deb0',
+        wood: '#7fcc92',
+        roadMajor: '#fffafc',
+        roadMinor: '#f5e4ea',
+        buildingStops: [0, '#fdeff4', 10, '#f3cfe0', 22, '#dfa8c3', 48, '#c27fa3'],
+        light: { anchor: 'viewport', color: '#ffdce9', intensity: 0.66, position: [1.3, 145, 50] }
+      },
+      particles: {
+        sprite: 'petal',
+        globalRatio: 0.50,
+        densityMultiplier: 1.05,
+        sizeRange: [3.8, 7.2],
+        speedY: [-6.8, -2.6],
+        windX: [10.5, 20.5],
+        windZ: [3.0, 7.5],
+        gustStrength: 0.48,
+        gustFreq: 0.72,
+        swayAmp: 9.2,
+        swayFreq: 1.45,
+        spinRange: [-3.2, 3.2],
+        maxHeight: 175,
+        colors: ['#ff6fa3', '#ff99c2', '#ffb8d6', '#ff4f93', '#ffe0ee']
+      }
+    },
+    summer: {
+      icon: '☀️',
+      accent: '#22c55e',
+      accentSoft: 'rgba(34, 197, 94, 0.24)',
+      accentGlow: 'rgba(34, 197, 94, 0.52)',
+      pillLabel: { zh: '夏 · 微光綠意', en: 'Summer · Sunlit Shimmer', nl: 'Zomer · Zonneglans', fr: 'Été · Lueurs Estivales' },
+      veil: 'linear-gradient(180deg, rgba(134, 239, 172, 0.36) 0%, rgba(254, 240, 138, 0.16) 28%, rgba(255,255,255,0) 58%)',
+      mapColors: {
+        background: '#eef5e8',
+        water: '#2cb4e6',
+        park: '#6fd48d',
+        wood: '#39b066',
+        roadMajor: '#fffdf7',
+        roadMinor: '#e5efe0',
+        buildingStops: [0, '#faf7ec', 10, '#e7e8d5', 22, '#c4d9c4', 48, '#8cbda8'],
+        light: { anchor: 'viewport', color: '#fff8d6', intensity: 0.72, position: [1.1, 118, 66] }
+      },
+      particles: {
+        sprite: 'sunmote',
+        globalRatio: 0.44,
+        densityMultiplier: 0.68,
+        sizeRange: [3.8, 8.0],
+        speedY: [0.9, 3.2],
+        windX: [-2.4, 3.6],
+        windZ: [-2.4, 2.4],
+        gustStrength: 0.22,
+        gustFreq: 0.45,
+        swayAmp: 5.2,
+        swayFreq: 0.9,
+        spinRange: [-0.6, 0.6],
+        maxHeight: 135,
+        colors: ['#fef08a', '#fde047', '#6ee7b7', '#ffffff', '#bef264']
+      }
+    },
+    autumn: {
+      icon: '🍁',
+      accent: '#f97316',
+      accentSoft: 'rgba(249, 115, 22, 0.26)',
+      accentGlow: 'rgba(249, 115, 22, 0.55)',
+      pillLabel: { zh: '秋 · 楓葉飄落', en: 'Autumn · Falling Maples', nl: 'Herfst · Vallende Bladeren', fr: 'Automne · Feuilles d\'Érable' },
+      veil: 'linear-gradient(180deg, rgba(251, 146, 60, 0.44) 0%, rgba(253, 212, 138, 0.18) 30%, rgba(255,255,255,0) 60%)',
+      mapColors: {
+        background: '#f3e2cc',
+        water: '#5a8fb0',
+        park: '#e69b49',
+        wood: '#c95d2d',
+        roadMajor: '#fff5e6',
+        roadMinor: '#ebd7be',
+        buildingStops: [0, '#f7dfc3', 10, '#e6b786', 22, '#cc8550', 48, '#9e532b'],
+        light: { anchor: 'viewport', color: '#ffb357', intensity: 0.76, position: [1.55, 228, 30] }
+      },
+      particles: {
+        sprite: 'maple',
+        globalRatio: 0.48,
+        densityMultiplier: 1.0,
+        sizeRange: [4.6, 8.4],
+        speedY: [-9.2, -4.0],
+        windX: [5.5, 13.5],
+        windZ: [-3.5, 6.0],
+        gustStrength: 0.52,
+        gustFreq: 0.85,
+        swayAmp: 13.0,
+        swayFreq: 1.75,
+        spinRange: [-3.8, 3.8],
+        maxHeight: 185,
+        colors: ['#ff4500', '#f97316', '#dc2626', '#fbbf24', '#ea580c']
+      }
+    },
+    winter: {
+      icon: '❄️',
+      accent: '#38bdf8',
+      accentSoft: 'rgba(56, 189, 248, 0.26)',
+      accentGlow: 'rgba(56, 189, 248, 0.54)',
+      pillLabel: { zh: '冬 · 全城降雪', en: 'Winter · Snowfall', nl: 'Winter · Sneeuwval', fr: 'Hiver · Chute de Neige' },
+      veil: 'linear-gradient(180deg, rgba(125, 195, 245, 0.50) 0%, rgba(196, 228, 252, 0.20) 32%, rgba(255,255,255,0) 62%)',
+      mapColors: {
+        background: '#cfe1f5',
+        water: '#5386b5',
+        park: '#f3f8ff',
+        wood: '#a2c0de',
+        roadMajor: '#eef5fc',
+        roadMinor: '#d8e7f6',
+        buildingStops: [0, '#eaf2fc', 10, '#bfd7f0', 22, '#8cb2dc', 48, '#5d89bd'],
+        light: { anchor: 'viewport', color: '#b8ddff', intensity: 0.70, position: [1.45, 195, 36] }
+      },
+      particles: {
+        sprite: 'snowflake',
+        globalRatio: 0.80,
+        densityMultiplier: 1.15,
+        sizeRange: [3.2, 6.4],
+        speedY: [-13.0, -6.0],
+        windX: [-3.8, 4.8],
+        windZ: [-2.8, 3.6],
+        gustStrength: 0.36,
+        gustFreq: 0.55,
+        swayAmp: 6.2,
+        swayFreq: 1.05,
+        spinRange: [-1.4, 1.4],
+        maxHeight: 220,
+        colors: ['#ffffff', '#e0f2fe', '#f0f9ff', '#bae6fd', '#ffffff']
+      }
+    }
+  };
+
+  const DENSITY_LEVELS = ['low', 'med', 'high', 'off'];
+  const DENSITY_COUNTS = { off: 0, low: 1500, med: 3200, high: 5600 };
+  const MAX_PARTICLES = 6000;
+
+  /* Embedded fallback data so beta5.html also works if opened directly via file:// */
+  const FALLBACK_SPOTS = [
+    {
+      id: 'kruidtuin', icon: '🌸', lat: 50.8778, lng: 4.6912,
+      category: { zh: '植物園 · 花木', en: 'Botanical Garden', nl: 'Botanische Tuin', fr: 'Jardin botanique' },
+      name: { nl: 'Kruidtuin', en: 'Botanical Garden', fr: 'Jardin botanique', zh: '魯汶植物園' },
+      seasons: ['spring', 'summer', 'autumn'], primarySeason: 'spring',
+      best: { zh: '4月中 – 5月中 · 10月底楓紅', en: 'Mid Apr – Mid May · Late Oct', nl: 'Half apr – Half mei', fr: 'Mi-avr – Mi-mai' },
+      hours: { zh: '08:00–18:00（免費）', en: '08:00–18:00 (Free)', nl: '08:00–18:00', fr: '08:00–18:00' },
+      seasonDescriptions: {
+        spring: { zh: '比利時最古老植物園（1738年）。四月紫藤、山茶花與櫻花盛放，粉嫩花瓣隨微風飄落池面。', en: 'Belgium\'s oldest botanical garden (1738), famed for wisteria, camellias and spring blossoms.' },
+        summer: { zh: '百年老樹綠蔭與玻璃溫室水蓮池，最適合夏日午後靜坐閱讀。', en: 'Lush shade under century-old trees beside the glasshouse and lily ponds.' },
+        autumn: { zh: '溫室旁的日本楓轉為火紅，十月底銀杏落葉鋪成金色地毯。', en: 'Japanese maple turns scarlet while ginkgo leaves carpet the garden in gold.' },
+        winter: { zh: '步入免費玻璃溫室欣賞熱帶蘭花與仙人掌，感受寒冬暖意。', en: 'Step inside the heated glasshouse for tropical flora during winter.' }
+      },
+      emitter: { enabled: true, radius: 175, seasons: ['spring', 'autumn'], intensity: 1.4 },
+      camera: { zoom: 16.7, pitch: 60, bearing: -24 },
+      visual: { image: '', motif: 'botanical', palette: ['#f9a8d4', '#86efac', '#1e293b'] },
+      gmaps: 'https://maps.google.com/?q=Kruidtuin+Leuven',
+      tags: ['kruidtuin', 'botanical', '植物園', '櫻花']
+    },
+    {
+      id: 'arenberg', icon: '🍁', lat: 50.8626, lng: 4.6839,
+      category: { zh: '文藝復興城堡 · 林蔭公園', en: 'Castle & Parkland', nl: 'Kasteel & Park', fr: 'Château & Parc' },
+      name: { nl: 'Kasteelpark Arenberg', en: 'Arenberg Castle Park', fr: 'Parc du Château d\'Arenberg', zh: '阿倫堡城堡公園' },
+      seasons: ['spring', 'summer', 'autumn'], primarySeason: 'autumn',
+      best: { zh: '10月底 – 11月中楓紅', en: 'Late Oct – Mid Nov', nl: 'Eind okt – Half nov', fr: 'Fin oct – Mi-nov' },
+      hours: { zh: '全天開放', en: 'Open 24h', nl: '24u open', fr: 'Ouvert 24h/24' },
+      seasonDescriptions: {
+        spring: { zh: '三月櫻花沿著草坡與河畔綻放，隨後玫瑰與牡丹一路接力至六月。', en: 'Cherry blossom in March followed by roses and peonies through June.' },
+        summer: { zh: '高聳林蔭大道與戴勒河微風，是魯汶夏日散步與單車首選。', en: 'Shaded grand avenues and river breezes ideal for summer walks.' },
+        autumn: { zh: '楓葉火紅、橡樹金黃，16世紀古堡掩映在漫天落葉之中，秋色最盛。', en: 'A dramatic canopy of red, orange and gold wraps the 16th-century castle.' },
+        winter: { zh: '薄霜覆蓋城堡尖塔與河畔草地，展現古典莊嚴冬景。', en: 'Crisp winter frost outlines the Renaissance turrets and riverside lawns.' }
+      },
+      emitter: { enabled: true, radius: 240, seasons: ['autumn', 'spring', 'summer'], intensity: 1.55 },
+      camera: { zoom: 15.9, pitch: 62, bearing: 34 },
+      visual: { image: '', motif: 'castle', palette: ['#f59e0b', '#dc2626', '#1f2937'] },
+      gmaps: 'https://maps.google.com/?q=Kasteelpark+Arenberg+Leuven',
+      tags: ['arenberg', 'castle', '城堡', '楓葉']
+    },
+    {
+      id: 'vaartkom', icon: '☀️', lat: 50.8878, lng: 4.7031,
+      category: { zh: '運河水岸 · 創意生活區', en: 'Canal Waterfront', nl: 'Waterfront', fr: 'Quais & Canal' },
+      name: { nl: 'Vaartkom', en: 'Vaartkom Waterfront', fr: 'Bassin du Vaartkom', zh: '瓦爾特科姆運河區' },
+      seasons: ['summer', 'spring'], primarySeason: 'summer',
+      best: { zh: '5月–9月夏日水岸', en: 'May – Sep', nl: 'Mei – Sep', fr: 'Mai – Sep' },
+      hours: { zh: '全天開放', en: 'Open 24h', nl: '24u open', fr: 'Ouvert 24h/24' },
+      seasonDescriptions: {
+        spring: { zh: '水岸咖啡露台在暖陽下重新開放，適合運河單車散策。', en: 'Waterfront terraces reopen under spring sunshine along the canal.' },
+        summer: { zh: '魯汶最具活力的夏日水岸，歷史紅磚筒倉與日光水岸露台交織。', en: 'Sunlit canal decks, Sluispark greens, and breezy summer terraces.' },
+        autumn: { zh: '金黃秋陽將紅磚啤酒廠倉庫倒映於平靜運河水面。', en: 'Golden autumn reflections across the calm historic canal basin.' },
+        winter: { zh: '歷史筒倉空間透出溫暖燈火，冬夜小酌與咖啡格外愜意。', en: 'Warm glowing cafés inside restored brick warehouses.' }
+      },
+      emitter: { enabled: true, radius: 210, seasons: ['summer'], intensity: 1.35 },
+      camera: { zoom: 16.2, pitch: 58, bearing: 24 },
+      visual: { image: '', motif: 'waterfront', palette: ['#34d399', '#38bdf8', '#0f172a'] },
+      gmaps: 'https://maps.google.com/?q=Vaartkom+Leuven',
+      tags: ['vaartkom', 'summer', '運河', '水岸']
+    },
+    {
+      id: 'groot-begijnhof', icon: '❄️', lat: 50.8712, lng: 4.6968,
+      category: { zh: 'UNESCO 世界遺產', en: 'UNESCO Historic Quarter', nl: 'UNESCO Werelderfgoed', fr: 'Patrimoine UNESCO' },
+      name: { nl: 'Groot Begijnhof', en: 'Groot Begijnhof', fr: 'Grand Béguinage', zh: '大貝金霍夫' },
+      seasons: ['spring', 'autumn', 'winter'], primarySeason: 'winter',
+      best: { zh: '春花 · 秋紅 · 冬雪街燈', en: 'Spring · Autumn · Winter snow', nl: 'Lente · Herfst · Winter', fr: 'Printemps · Automne · Hiver' },
+      hours: { zh: '全天開放', en: 'Open 24h', nl: '24u open', fr: 'Ouvert 24h/24' },
+      seasonDescriptions: {
+        spring: { zh: '石板小巷兩旁櫻花與梅花綻放，寧靜庭院洋溢早春詩意。', en: 'Cherry and plum blossoms line the serene cobblestone alleys.' },
+        summer: { zh: '濃綠藤蔓與流水聲帶來靜謐沁涼的夏日古城避暑氛圍。', en: 'Peaceful ivy-draped courtyards and cool stone bridges over the Dijle.' },
+        autumn: { zh: '爬牆虎在百年紅磚牆上染成深紅，黃金時刻光影動人。', en: 'Virginia creeper turns deep crimson on ancient brick walls.' },
+        winter: { zh: '細雪覆蓋陡峭屋脊與石板巷弄，暖黃壁燈亮起如童話冬夜。', en: 'Snow blankets gabled roofs while warm lanterns glow over cobblestone lanes.' }
+      },
+      emitter: { enabled: true, radius: 185, seasons: ['winter', 'autumn', 'spring'], intensity: 1.45 },
+      camera: { zoom: 16.9, pitch: 62, bearing: -38 },
+      visual: { image: '', motif: 'beguinage', palette: ['#7dd3fc', '#fca5a5', '#1e1b4b'] },
+      gmaps: 'https://maps.google.com/?q=Groot+Begijnhof+Leuven',
+      tags: ['begijnhof', 'unesco', 'winter', '大貝金霍夫']
+    },
+    {
+      id: 'abdij-van-park', icon: '🌺', lat: 50.8643, lng: 4.7174,
+      category: { zh: '古修道院 · 湖畔濕地', en: 'Abbey & Ponds', nl: 'Abdij & Vijvers', fr: 'Abbaye & Étangs' },
+      name: { nl: 'Abdij van Park', en: 'Park Abbey', fr: 'Abbaye du Parc', zh: '公園修道院' },
+      seasons: ['spring', 'summer', 'autumn', 'winter'], primarySeason: 'summer',
+      best: { zh: '四季皆美 · 湖畔步道', en: 'All-season lakeside trails', nl: 'Vier seizoenen', fr: 'Quatre saisons' },
+      hours: { zh: '園區全天 · 博物館 10:00–17:00', en: 'Grounds 24h · Museum 10–17', nl: 'Domein 24u', fr: 'Domaine 24h/24' },
+      seasonDescriptions: {
+        spring: { zh: '梅花二月最早開放，春末修道院花園與湖畔野花爭妍。', en: 'Early February plum blossoms followed by vibrant abbey gardens.' },
+        summer: { zh: '潔白修道院高牆倒映翠綠湖水與蘆葦，最適合單車環湖。', en: 'Whitewashed abbey walls mirror in emerald reed-lined ponds.' },
+        autumn: { zh: '十月湖畔樹木轉為金黃，倒映於水面如油畫般迷人。', en: 'Golden beech and oak reflections across the tranquil abbey ponds.' },
+        winter: { zh: '白雪覆蓋開闊草坡與靜止湖面，是最佳冬日散步路線。', en: 'Snow-dusted meadows and misty ponds frame the abbey spire.' }
+      },
+      emitter: { enabled: true, radius: 230, seasons: ['summer', 'autumn', 'winter'], intensity: 1.35 },
+      camera: { zoom: 15.8, pitch: 58, bearing: -52 },
+      visual: { image: '', motif: 'abbey', palette: ['#6ee7b7', '#fcd34d', '#1e293b'] },
+      gmaps: 'https://maps.google.com/?q=Park+Abbey+Leuven',
+      tags: ['abbey', 'abdij', '修道院', '湖畔']
+    },
+    {
+      id: 'sint-donatuspark', icon: '🌳', lat: 50.8756, lng: 4.7024,
+      category: { zh: '城市公園 · 古城牆', en: 'City Park', nl: 'Stadspark', fr: 'Parc municipal' },
+      name: { nl: 'Sint-Donatuspark', en: 'St. Donatus Park', fr: 'Parc Saint-Donat', zh: '聖多納圖斯公園' },
+      seasons: ['spring', 'summer', 'autumn'], primarySeason: 'autumn',
+      best: { zh: '春櫻水仙 · 秋楓古牆', en: 'Spring blossoms & autumn maples', nl: 'Lente & herfst', fr: 'Printemps & automne' },
+      hours: { zh: '全天開放', en: 'Open 24h', nl: '24u open', fr: 'Ouvert 24h/24' },
+      seasonDescriptions: {
+        spring: { zh: '櫻花與水仙沿池塘與中世紀古城牆塔樓綻放。', en: 'Cherry blossoms and daffodils frame the medieval wall towers.' },
+        summer: { zh: '開闊草坪與濃密樹蔭是市中心最自在的野餐公園。', en: 'Shaded lawns and sunny picnic spots in the heart of Leuven.' },
+        autumn: { zh: '高大楓樹與栗樹在古石牆邊化作紅金浪潮。', en: 'Tall maples turn fiery orange and gold beside medieval ramparts.' },
+        winter: { zh: '薄雪勾勒中世紀城牆垛口，於鬧區旁留下一隅寧靜。', en: 'Snow outlines the medieval wall battlements in winter quiet.' }
+      },
+      emitter: { enabled: true, radius: 170, seasons: ['spring', 'autumn'], intensity: 1.45 },
+      camera: { zoom: 16.9, pitch: 60, bearing: 18 },
+      visual: { image: '', motif: 'park', palette: ['#f59e0b', '#f472b6', '#1e293b'] },
+      gmaps: 'https://maps.google.com/?q=Sint-Donatuspark+Leuven',
+      tags: ['sint-donatuspark', 'park', '公園', '楓葉']
+    },
+    {
+      id: 'grote-markt', icon: '🏛️', lat: 50.8791, lng: 4.7011,
+      category: { zh: '哥德式地標 · 歷史核心', en: 'Gothic Landmark', nl: 'Historisch Centrum', fr: 'Grand-Place' },
+      name: { nl: 'Stadhuis & Grote Markt', en: 'Town Hall & Main Square', fr: 'Hôtel de Ville & Grand-Place', zh: '魯汶市政廳與大廣場' },
+      seasons: ['spring', 'summer', 'autumn', 'winter'], primarySeason: 'winter',
+      best: { zh: '12月 Wintertijd 節慶燈海', en: 'Dec Wintertijd festive lights', nl: 'Dec Wintertijd', fr: 'Déc Wintertijd' },
+      hours: { zh: '全天開放', en: 'Open 24h', nl: '24u open', fr: 'Ouvert 24h/24' },
+      seasonDescriptions: {
+        spring: { zh: '明媚春光勾勒哥德式市政廳 236 座精細石雕。', en: 'Spring light illuminates the 236 Gothic statues of the Town Hall.' },
+        summer: { zh: '街頭音樂與露天露台讓大廣場充滿夏日活力。', en: 'Buzzing summer festivals and long sunlit evenings beneath the spires.' },
+        autumn: { zh: '低斜金色秋陽為砂岩浮雕投下深邃立體陰影。', en: 'Low golden autumn sun casts dramatic shadows across the sandstone facade.' },
+        winter: { zh: '巨型聖誕樹與暖金燈飾在紛飛白雪中閃耀，最具冬日節慶氛圍。', en: 'Festive Wintertijd warm lights shine against crisp winter snowfall.' }
+      },
+      emitter: { enabled: true, radius: 155, seasons: ['winter'], intensity: 1.4 },
+      camera: { zoom: 17.2, pitch: 64, bearing: -16 },
+      visual: { image: '', motif: 'townhall', palette: ['#fde68a', '#7dd3fc', '#0f172a'] },
+      gmaps: 'https://maps.google.com/?q=Grote+Markt+Leuven',
+      tags: ['stadhuis', 'grote markt', '市政廳', '冬日']
+    }
+  ];
+
+  /* ════════════════════════════════════════════════════════════
+     2. APPLICATION STATE
+     ════════════════════════════════════════════════════════════ */
+  const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const state = {
+    lang: 'zh',
+    season: 'spring',
+    density: prefersReducedMotion ? 'low' : 'med',
+    filterMode: 'all', // 'all' | 'season'
+    searchQuery: '',
+    spots: [],
+    selectedSpotId: null,
+    detailSeasonTab: 'spring',
+    is3D: true,
+    isOrbiting: false,
+    orbitRaf: null,
+    listCollapsed: window.innerWidth <= 760
+  };
+
+  let map = null;
+  let markers = new Map();
+  let particleLayer = null;
+
+  /* Helper: safe localized lookup */
+  function L(obj, fallback = '') {
+    if (!obj) return fallback;
+    if (typeof obj === 'string') return obj;
+    return obj[state.lang] || obj.zh || obj.en || obj.nl || obj.fr || fallback;
+  }
+
+  function T(key) {
+    return (I18N[state.lang] && I18N[state.lang][key]) || I18N.en[key] || key;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     3. DATA LOADER (spots_seizoenen.json -> legacy spots.json -> fallback)
+     ════════════════════════════════════════════════════════════ */
+  function normalizeLegacySpots(rawArray) {
+    // Group legacy leuven-bloeit spots.json entries that share nearly identical coordinates
+    const grouped = new Map();
+    for (const item of rawArray) {
+      const key = `${item.lat.toFixed(3)},${item.lng.toFixed(3)}`;
+      const isFoliage = item.status === 'foliage';
+      const inferredSeasons = isFoliage ? ['autumn'] : ['spring', 'summer'];
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          id: 'spot-' + item.id,
+          icon: item.icon || '🌸',
+          lat: item.lat,
+          lng: item.lng,
+          category: { zh: '魯汶賞花景點', en: 'Leuven Spot', nl: 'Leuven Plek', fr: 'Lieu à Louvain' },
+          name: item.name,
+          seasons: [...inferredSeasons],
+          primarySeason: isFoliage ? 'autumn' : 'spring',
+          best: item.best,
+          hours: item.hours,
+          seasonDescriptions: {
+            spring: !isFoliage ? item.tip : item.tip,
+            summer: item.tip,
+            autumn: isFoliage ? item.tip : item.tip,
+            winter: item.tip
+          },
+          emitter: { enabled: true, radius: 160, seasons: [...inferredSeasons], intensity: 1.25 },
+          camera: { zoom: 16.8, pitch: 60, bearing: -20 },
+          visual: { image: '', motif: isFoliage ? 'castle' : 'park', palette: ['#f48fb1', '#86efac', '#1e293b'] },
+          gmaps: item.gmaps || `https://maps.google.com/?q=${item.lat},${item.lng}`,
+          tags: [item.name?.nl, item.name?.en, item.name?.zh, item.flowers?.zh, item.flowers?.en].filter(Boolean)
+        });
+      } else {
+        const existing = grouped.get(key);
+        for (const s of inferredSeasons) {
+          if (!existing.seasons.includes(s)) existing.seasons.push(s);
+          if (!existing.emitter.seasons.includes(s)) existing.emitter.seasons.push(s);
+        }
+        if (isFoliage) existing.seasonDescriptions.autumn = item.tip;
+        else existing.seasonDescriptions.spring = item.tip;
+      }
+    }
+    return Array.from(grouped.values());
+  }
+
+  async function loadSpotsData() {
+    const bust = '?v=' + Date.now();
+    try {
+      const res = await fetch('./spots_seizoenen.json' + bust);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.spots) && data.spots.length) return data.spots;
+      }
+    } catch (_) { /* try legacy spots.json */ }
+
+    try {
+      const res = await fetch('./spots.json' + bust);
+      if (res.ok) {
+        const raw = await res.json();
+        if (Array.isArray(raw) && raw.length) return normalizeLegacySpots(raw);
+      }
+    } catch (_) { /* fall back to embedded dataset */ }
+
+    return FALLBACK_SPOTS;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     4. PROCEDURAL HIGH-DPI CANVAS SPRITES FOR THREE.JS PARTICLES
+     ════════════════════════════════════════════════════════════ */
+  function createSpriteTexture(kind) {
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const c = size / 2;
+    ctx.clearRect(0, 0, size, size);
+
+    if (kind === 'petal') {
+      // Delicate sakura petal with notched tip & soft gradient
+      ctx.save();
+      ctx.translate(c, c);
+      ctx.rotate(-0.18);
+      const grad = ctx.createRadialGradient(0, 12, 4, 0, -4, 48);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      grad.addColorStop(0.55, 'rgba(255, 232, 240, 0.96)');
+      grad.addColorStop(1, 'rgba(255, 198, 220, 0.25)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(0, 44);
+      ctx.bezierCurveTo(-36, 22, -38, -28, -10, -44);
+      ctx.quadraticCurveTo(0, -30, 0, -28);
+      ctx.quadraticCurveTo(0, -30, 10, -44);
+      ctx.bezierCurveTo(38, -28, 36, 22, 0, 44);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    } else if (kind === 'sunmote') {
+      // Luminous summer bokeh orb with subtle halo
+      const grad = ctx.createRadialGradient(c, c, 2, c, c, 54);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      grad.addColorStop(0.24, 'rgba(255, 252, 225, 0.85)');
+      grad.addColorStop(0.58, 'rgba(255, 245, 190, 0.26)');
+      grad.addColorStop(1, 'rgba(255, 245, 190, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(c, c, 54, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (kind === 'maple') {
+      // Classic 5-lobed autumn maple leaf silhouette + soft vein glow
+      ctx.save();
+      ctx.translate(c, c + 4);
+      const grad = ctx.createRadialGradient(0, 6, 4, 0, -4, 52);
+      grad.addColorStop(0, 'rgba(255, 246, 220, 1)');
+      grad.addColorStop(0.55, 'rgba(255, 225, 180, 0.96)');
+      grad.addColorStop(1, 'rgba(240, 185, 120, 0.78)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(0, -48);
+      ctx.lineTo(10, -22);
+      ctx.lineTo(34, -30);
+      ctx.lineTo(24, -8);
+      ctx.lineTo(46, 2);
+      ctx.lineTo(20, 14);
+      ctx.lineTo(24, 28);
+      ctx.lineTo(4, 22);
+      ctx.lineTo(3, 44);
+      ctx.lineTo(-3, 44);
+      ctx.lineTo(-4, 22);
+      ctx.lineTo(-24, 28);
+      ctx.lineTo(-20, 14);
+      ctx.lineTo(-46, 2);
+      ctx.lineTo(-24, -8);
+      ctx.lineTo(-34, -30);
+      ctx.lineTo(-10, -22);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    } else {
+      // Winter crystalline 6-pointed snowflake with soft glow
+      const glow = ctx.createRadialGradient(c, c, 4, c, c, 52);
+      glow.addColorStop(0, 'rgba(255, 255, 255, 0.96)');
+      glow.addColorStop(0.45, 'rgba(235, 248, 255, 0.55)');
+      glow.addColorStop(1, 'rgba(210, 238, 255, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(c, c, 52, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.translate(c, c);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.96)';
+      ctx.lineCap = 'round';
+      for (let i = 0; i < 6; i++) {
+        ctx.save();
+        ctx.rotate((i * Math.PI) / 3);
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -42);
+        ctx.stroke();
+
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, -19); ctx.lineTo(-10, -29);
+        ctx.moveTo(0, -19); ctx.lineTo(10, -29);
+        ctx.moveTo(0, -30); ctx.lineTo(-7, -37);
+        ctx.moveTo(0, -30); ctx.lineTo(7, -37);
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     5. THREE.JS CUSTOM 3D SEASONAL PARTICLE & BEACON LAYER
+     ════════════════════════════════════════════════════════════ */
+  function createSeasonalParticleLayer() {
+    const originMerc = maplibregl.MercatorCoordinate.fromLngLat(LEUVEN_ORIGIN, 0);
+    const meterScale = originMerc.meterInMercatorCoordinateUnits();
+
+    function lngLatToLocal(lng, lat, alt = 0) {
+      const mc = maplibregl.MercatorCoordinate.fromLngLat([lng, lat], alt);
+      return {
+        x: (mc.x - originMerc.x) / meterScale,
+        y: alt,
+        z: (mc.y - originMerc.y) / meterScale
+      };
+    }
+
+    const layer = {
+      id: 'leuven-season-particles',
+      type: 'custom',
+      renderingMode: '3d',
+
+      onAdd(mapInstance, gl) {
+        this.map = mapInstance;
+        this.camera = new THREE.Camera();
+        this.scene = new THREE.Scene();
+
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: mapInstance.getCanvas(),
+          context: gl,
+          antialias: true
+        });
+        this.renderer.autoClear = false;
+
+        // Generate all 4 procedural sprite textures once
+        this.textures = {
+          petal: createSpriteTexture('petal'),
+          sunmote: createSpriteTexture('sunmote'),
+          maple: createSpriteTexture('maple'),
+          snowflake: createSpriteTexture('snowflake')
+        };
+
+        // Pre-allocate GPU buffers for main seasonal particles
+        this.positions = new Float32Array(MAX_PARTICLES * 3);
+        this.sizes = new Float32Array(MAX_PARTICLES);
+        this.colors = new Float32Array(MAX_PARTICLES * 3);
+        this.alphas = new Float32Array(MAX_PARTICLES);
+        this.angles = new Float32Array(MAX_PARTICLES);
+
+        // CPU physics metadata per particle
+        this.meta = new Array(MAX_PARTICLES);
+        for (let i = 0; i < MAX_PARTICLES; i++) {
+          this.meta[i] = {
+            vx: 0, vy: -4, vz: 0,
+            spin: 0, phase: Math.random() * Math.PI * 2,
+            baseAlpha: 0.85,
+            originX: 0, originZ: 0, radius: 1300, maxY: 160,
+            isGlobal: true
+          };
+        }
+
+        this.geometry = new THREE.BufferGeometry();
+        this.geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
+        this.geometry.setAttribute('aSize', new THREE.BufferAttribute(this.sizes, 1));
+        this.geometry.setAttribute('aColor', new THREE.BufferAttribute(this.colors, 3));
+        this.geometry.setAttribute('aAlpha', new THREE.BufferAttribute(this.alphas, 1));
+        this.geometry.setAttribute('aAngle', new THREE.BufferAttribute(this.angles, 1));
+        this.geometry.setDrawRange(0, 0);
+
+        this.material = new THREE.ShaderMaterial({
+          transparent: true,
+          depthTest: true,
+          depthWrite: false,
+          blending: THREE.NormalBlending,
+          uniforms: {
+            uTexture: { value: this.textures.petal },
+            uPixelRatio: { value: Math.min(window.devicePixelRatio || 1, 2) },
+            uScaleFactor: { value: 1.0 }
+          },
+          vertexShader: `
+            attribute float aSize;
+            attribute vec3 aColor;
+            attribute float aAlpha;
+            attribute float aAngle;
+            uniform float uPixelRatio;
+            uniform float uScaleFactor;
+            varying vec3 vColor;
+            varying float vAlpha;
+            varying float vAngle;
+            void main() {
+              vColor = aColor;
+              vAlpha = aAlpha;
+              vAngle = aAngle;
+              vec4 clipPos = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+              gl_Position = clipPos;
+              float px = aSize * uScaleFactor * uPixelRatio / max(clipPos.w, 0.00001);
+              gl_PointSize = clamp(px, 4.2 * uPixelRatio, 38.0 * uPixelRatio);
+            }
+          `,
+          fragmentShader: `
+            uniform sampler2D uTexture;
+            varying vec3 vColor;
+            varying float vAlpha;
+            varying float vAngle;
+            void main() {
+              vec2 uv = gl_PointCoord - vec2(0.5);
+              float s = sin(vAngle);
+              float c = cos(vAngle);
+              vec2 rotUv = vec2(uv.x * c - uv.y * s, uv.x * s + uv.y * c) + vec2(0.5);
+              if (rotUv.x < 0.0 || rotUv.x > 1.0 || rotUv.y < 0.0 || rotUv.y > 1.0) discard;
+              vec4 tex = texture2D(uTexture, rotUv);
+              float alpha = tex.a * vAlpha;
+              if (alpha < 0.02) discard;
+              gl_FragColor = vec4(tex.rgb * vColor, alpha);
+            }
+          `
+        });
+
+        this.points = new THREE.Points(this.geometry, this.material);
+        this.points.frustumCulled = false;
+        this.scene.add(this.points);
+
+        // Winter festive warm-glow lights around historic Leuven hubs
+        this.festiveCount = 220;
+        this.festivePos = new Float32Array(this.festiveCount * 3);
+        this.festiveSizes = new Float32Array(this.festiveCount);
+        this.festiveColors = new Float32Array(this.festiveCount * 3);
+        this.festiveAlphas = new Float32Array(this.festiveCount);
+        this.festiveAngles = new Float32Array(this.festiveCount);
+        this.festivePhases = new Float32Array(this.festiveCount);
+
+        this.festiveGeo = new THREE.BufferGeometry();
+        this.festiveGeo.setAttribute('position', new THREE.BufferAttribute(this.festivePos, 3));
+        this.festiveGeo.setAttribute('aSize', new THREE.BufferAttribute(this.festiveSizes, 1));
+        this.festiveGeo.setAttribute('aColor', new THREE.BufferAttribute(this.festiveColors, 3));
+        this.festiveGeo.setAttribute('aAlpha', new THREE.BufferAttribute(this.festiveAlphas, 1));
+        this.festiveGeo.setAttribute('aAngle', new THREE.BufferAttribute(this.festiveAngles, 1));
+
+        this.festiveMat = this.material.clone();
+        this.festiveMat.uniforms = {
+          uTexture: { value: this.textures.sunmote },
+          uPixelRatio: { value: Math.min(window.devicePixelRatio || 1, 2) },
+          uScaleFactor: { value: 1.0 }
+        };
+        this.festiveMat.blending = THREE.AdditiveBlending;
+
+        this.festivePoints = new THREE.Points(this.festiveGeo, this.festiveMat);
+        this.festivePoints.frustumCulled = false;
+        this.festivePoints.visible = false;
+        this.scene.add(this.festivePoints);
+
+        // 3D Landmark Ground Selection Beacon (pulsing concentric rings)
+        this.beaconGroup = new THREE.Group();
+        this.beaconGroup.visible = false;
+        const innerRingGeo = new THREE.RingGeometry(12, 17, 48);
+        innerRingGeo.rotateX(-Math.PI / 2);
+        this.beaconInnerMat = new THREE.MeshBasicMaterial({
+          color: 0xf48fb1, transparent: true, opacity: 0.72,
+          side: THREE.DoubleSide, depthWrite: false
+        });
+        this.beaconInner = new THREE.Mesh(innerRingGeo, this.beaconInnerMat);
+        this.beaconInner.position.y = 1.5;
+
+        const outerRingGeo = new THREE.RingGeometry(24, 28, 48);
+        outerRingGeo.rotateX(-Math.PI / 2);
+        this.beaconOuterMat = new THREE.MeshBasicMaterial({
+          color: 0xf48fb1, transparent: true, opacity: 0.42,
+          side: THREE.DoubleSide, depthWrite: false
+        });
+        this.beaconOuter = new THREE.Mesh(outerRingGeo, this.beaconOuterMat);
+        this.beaconOuter.position.y = 1.5;
+
+        this.beaconGroup.add(this.beaconInner, this.beaconOuter);
+        this.scene.add(this.beaconGroup);
+
+        // Model transform matrix from Three.js local meters -> MapLibre Mercator
+        this.modelMatrix = new THREE.Matrix4()
+          .makeTranslation(originMerc.x, originMerc.y, originMerc.z)
+          .scale(new THREE.Vector3(meterScale, -meterScale, meterScale))
+          .multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+
+        this.activeCount = 0;
+        this.lastTime = performance.now();
+        this.elapsed = 0;
+
+        this.rebuildForSeason(state.season);
+      },
+
+      setBeacon(spot) {
+        if (!this.beaconGroup) return;
+        if (!spot) {
+          this.beaconGroup.visible = false;
+          return;
+        }
+        const pos = lngLatToLocal(spot.lng, spot.lat, 0);
+        this.beaconGroup.position.set(pos.x, 0, pos.z);
+        this.beaconGroup.visible = true;
+        const col = new THREE.Color(SEASON_CONFIG[state.season].accent);
+        this.beaconInnerMat.color.copy(col);
+        this.beaconOuterMat.color.copy(col);
+      },
+
+      initFestiveLights() {
+        const hubs = [
+          { lng: 4.7011, lat: 50.8791, r: 160 }, // Grote Markt
+          { lng: 4.6968, lat: 50.8712, r: 170 }, // Groot Begijnhof
+          { lng: 4.7073, lat: 50.8784, r: 135 }, // Ladeuzeplein
+          { lng: 4.7174, lat: 50.8643, r: 150 }  // Park Abbey
+        ];
+        const warmPalette = [new THREE.Color('#fde68a'), new THREE.Color('#fbbf24'), new THREE.Color('#fed7aa'), new THREE.Color('#f59e0b')];
+        for (let i = 0; i < this.festiveCount; i++) {
+          const hub = hubs[i % hubs.length];
+          const center = lngLatToLocal(hub.lng, hub.lat, 0);
+          const ang = Math.random() * Math.PI * 2;
+          const dist = Math.sqrt(Math.random()) * hub.r;
+          const idx = i * 3;
+          this.festivePos[idx] = center.x + Math.cos(ang) * dist;
+          this.festivePos[idx + 1] = 8 + Math.random() * 52;
+          this.festivePos[idx + 2] = center.z + Math.sin(ang) * dist;
+          this.festiveSizes[i] = 5.5 + Math.random() * 5.8;
+          const c = warmPalette[i % warmPalette.length];
+          this.festiveColors[idx] = c.r;
+          this.festiveColors[idx + 1] = c.g;
+          this.festiveColors[idx + 2] = c.b;
+          this.festiveAlphas[i] = 0.55;
+          this.festiveAngles[i] = 0;
+          this.festivePhases[i] = Math.random() * Math.PI * 2;
+        }
+        this.festiveGeo.attributes.position.needsUpdate = true;
+        this.festiveGeo.attributes.aSize.needsUpdate = true;
+        this.festiveGeo.attributes.aColor.needsUpdate = true;
+        this.festiveGeo.attributes.aAlpha.needsUpdate = true;
+      },
+
+      rebuildForSeason(seasonKey) {
+        if (!this.geometry) return;
+        const cfg = SEASON_CONFIG[seasonKey];
+        const pCfg = cfg.particles;
+
+        this.material.uniforms.uTexture.value = this.textures[pCfg.sprite];
+        this.material.blending = seasonKey === 'summer' ? THREE.AdditiveBlending : THREE.NormalBlending;
+        this.material.needsUpdate = true;
+
+        // Update beacon tint
+        const accentCol = new THREE.Color(cfg.accent);
+        this.beaconInnerMat.color.copy(accentCol);
+        this.beaconOuterMat.color.copy(accentCol);
+
+        // Compute active particle budget
+        const baseCount = DENSITY_COUNTS[state.density] || 0;
+        const total = Math.min(MAX_PARTICLES, Math.round(baseCount * pCfg.densityMultiplier));
+        this.activeCount = total;
+
+        // Gather local emitters for this season
+        const emitters = state.spots
+          .filter(s => s.emitter && s.emitter.enabled && (!s.emitter.seasons || s.emitter.seasons.includes(seasonKey)))
+          .map(s => {
+            const loc = lngLatToLocal(s.lng, s.lat, 0);
+            return {
+              x: loc.x,
+              z: loc.z,
+              radius: s.emitter.radius || 160,
+              weight: s.emitter.intensity || 1.0
+            };
+          });
+
+        const totalWeight = emitters.reduce((acc, e) => acc + e.weight, 0);
+        const globalCount = emitters.length ? Math.round(total * pCfg.globalRatio) : total;
+        const palette = pCfg.colors.map(hex => new THREE.Color(hex));
+
+        for (let i = 0; i < total; i++) {
+          const isGlobal = i < globalCount;
+          let ox = 0, oz = 0, rad = 1650;
+
+          if (!isGlobal && emitters.length) {
+            let pick = Math.random() * totalWeight;
+            let chosen = emitters[0];
+            for (const em of emitters) {
+              pick -= em.weight;
+              if (pick <= 0) { chosen = em; break; }
+            }
+            ox = chosen.x;
+            oz = chosen.z;
+            rad = chosen.radius;
+          }
+
+          const ang = Math.random() * Math.PI * 2;
+          const dist = (isGlobal ? Math.sqrt(Math.random()) : Math.pow(Math.random(), 0.65)) * rad;
+          const px = ox + Math.cos(ang) * dist;
+          const pz = oz + Math.sin(ang) * dist;
+          const py = 3 + Math.random() * pCfg.maxHeight;
+
+          const idx = i * 3;
+          this.positions[idx] = px;
+          this.positions[idx + 1] = py;
+          this.positions[idx + 2] = pz;
+
+          const size = pCfg.sizeRange[0] + Math.random() * (pCfg.sizeRange[1] - pCfg.sizeRange[0]);
+          this.sizes[i] = isGlobal ? size : size * 1.12;
+
+          const col = palette[Math.floor(Math.random() * palette.length)];
+          this.colors[idx] = col.r;
+          this.colors[idx + 1] = col.g;
+          this.colors[idx + 2] = col.b;
+
+          const m = this.meta[i];
+          m.originX = ox;
+          m.originZ = oz;
+          m.radius = rad;
+          m.maxY = isGlobal ? pCfg.maxHeight : pCfg.maxHeight * 0.72;
+          m.isGlobal = isGlobal;
+          m.vx = pCfg.windX[0] + Math.random() * (pCfg.windX[1] - pCfg.windX[0]);
+          m.vy = pCfg.speedY[0] + Math.random() * (pCfg.speedY[1] - pCfg.speedY[0]);
+          m.vz = pCfg.windZ[0] + Math.random() * (pCfg.windZ[1] - pCfg.windZ[0]);
+          m.spin = pCfg.spinRange[0] + Math.random() * (pCfg.spinRange[1] - pCfg.spinRange[0]);
+          m.phase = Math.random() * Math.PI * 2;
+          m.baseAlpha = seasonKey === 'summer' ? (0.62 + Math.random() * 0.36) : (0.82 + Math.random() * 0.18);
+
+          this.alphas[i] = m.baseAlpha;
+          this.angles[i] = Math.random() * Math.PI * 2;
+        }
+
+        this.geometry.setDrawRange(0, total);
+        this.geometry.attributes.position.needsUpdate = true;
+        this.geometry.attributes.aSize.needsUpdate = true;
+        this.geometry.attributes.aColor.needsUpdate = true;
+        this.geometry.attributes.aAlpha.needsUpdate = true;
+        this.geometry.attributes.aAngle.needsUpdate = true;
+
+        // Festive winter lights toggle
+        if (seasonKey === 'winter' && state.density !== 'off') {
+          this.initFestiveLights();
+          this.festivePoints.visible = true;
+        } else {
+          this.festivePoints.visible = false;
+        }
+
+        updateParticleStatUI(total + (this.festivePoints.visible ? this.festiveCount : 0));
+      },
+
+      stepSimulation(dt) {
+        const seasonKey = state.season;
+        const pCfg = SEASON_CONFIG[seasonKey].particles;
+        this.elapsed += dt;
+        const t = this.elapsed;
+
+        if (this.activeCount > 0) {
+          const pos = this.positions;
+          const ang = this.angles;
+          const alp = this.alphas;
+          const swayAmp = pCfg.swayAmp;
+          const swayFreq = pCfg.swayFreq;
+          const gustStrength = pCfg.gustStrength || 0.3;
+          const gustFreq = pCfg.gustFreq || 0.6;
+          const globalGust = 1 + gustStrength * Math.sin(t * gustFreq);
+
+          for (let i = 0; i < this.activeCount; i++) {
+            const m = this.meta[i];
+            const idx = i * 3;
+            let x = pos[idx];
+            let y = pos[idx + 1];
+            let z = pos[idx + 2];
+
+            // Seasonal horizontal sway, organic gusts & buoyancy
+            const swayX = Math.sin(t * swayFreq + m.phase) * swayAmp * dt;
+            const swayZ = Math.cos(t * swayFreq * 0.82 + m.phase * 1.3) * swayAmp * 0.72 * dt;
+
+            x += m.vx * globalGust * dt + swayX;
+            y += m.vy * dt;
+            z += m.vz * globalGust * dt + swayZ;
+            ang[i] += m.spin * dt;
+
+            // Recycle bounds
+            const dx = x - m.originX;
+            const dz = z - m.originZ;
+            const outOfRadius = (dx * dx + dz * dz) > (m.radius * m.radius * 1.28);
+
+            if (seasonKey === 'summer') {
+              // Gently rising sun-motes wrap vertically & breathe in opacity
+              if (y > m.maxY || outOfRadius) {
+                const a = Math.random() * Math.PI * 2;
+                const d = Math.sqrt(Math.random()) * m.radius;
+                x = m.originX + Math.cos(a) * d;
+                z = m.originZ + Math.sin(a) * d;
+                y = 4 + Math.random() * 18;
+              }
+              const breath = 0.55 + 0.45 * Math.sin(t * 2.1 + m.phase);
+              const edgeFade = Math.min(1, y / 16) * Math.min(1, (m.maxY - y) / 22);
+              alp[i] = m.baseAlpha * breath * Math.max(0.05, edgeFade);
+            } else {
+              // Falling petals / leaves / snowflakes recycle cleanly at top canopy
+              if (y < 1.5 || outOfRadius) {
+                const a = Math.random() * Math.PI * 2;
+                const d = (m.isGlobal ? Math.sqrt(Math.random()) : Math.pow(Math.random(), 0.65)) * m.radius;
+                x = m.originX + Math.cos(a) * d;
+                z = m.originZ + Math.sin(a) * d;
+                y = m.maxY * (0.82 + Math.random() * 0.25);
+              }
+              const groundFade = Math.min(1, (y - 1.5) / 14);
+              const topFade = Math.min(1, Math.max(0.05, (m.maxY * 1.08 - y) / 24));
+              alp[i] = m.baseAlpha * groundFade * topFade;
+            }
+
+            pos[idx] = x;
+            pos[idx + 1] = y;
+            pos[idx + 2] = z;
+          }
+
+          this.geometry.attributes.position.needsUpdate = true;
+          this.geometry.attributes.aAngle.needsUpdate = true;
+          this.geometry.attributes.aAlpha.needsUpdate = true;
+        }
+
+        // Shimmer festive winter lights
+        if (this.festivePoints.visible) {
+          for (let i = 0; i < this.festiveCount; i++) {
+            this.festiveAlphas[i] = 0.35 + 0.45 * (0.5 + 0.5 * Math.sin(t * 2.4 + this.festivePhases[i]));
+          }
+          this.festiveGeo.attributes.aAlpha.needsUpdate = true;
+        }
+
+        // Pulse 3D selection beacon
+        if (this.beaconGroup.visible) {
+          const pulse = (t * 0.75) % 1;
+          const s = 0.75 + pulse * 1.25;
+          this.beaconOuter.scale.set(s, 1, s);
+          this.beaconOuterMat.opacity = (1 - pulse) * 0.58;
+          this.beaconInner.rotation.y = t * 0.6;
+        }
+      },
+
+      render(gl, matrixInput) {
+        const now = performance.now();
+        const dt = Math.min((now - this.lastTime) / 1000, 0.05);
+        this.lastTime = now;
+
+        this.stepSimulation(dt);
+
+        // Support both MapLibre v4 array matrix and v5 CustomRenderMethodInput
+        const rawMatrix = (matrixInput && matrixInput.defaultProjectionData)
+          ? matrixInput.defaultProjectionData.mainMatrix
+          : matrixInput;
+
+        const projMat = new THREE.Matrix4().fromArray(rawMatrix).multiply(this.modelMatrix);
+        this.camera.projectionMatrix.copy(projMat);
+
+        // Dynamically compute exact perspective pixel scale per meter at current map center
+        const c = this.map.getCenter();
+        const localCenter = lngLatToLocal(c.lng, c.lat, 20);
+        const p0 = new THREE.Vector4(localCenter.x, localCenter.y, localCenter.z, 1).applyMatrix4(projMat);
+        const p1 = new THREE.Vector4(localCenter.x + 1, localCenter.y, localCenter.z, 1).applyMatrix4(projMat);
+        const ndcPerMeter = Math.hypot((p1.x / p1.w) - (p0.x / p0.w), (p1.y / p1.w) - (p0.y / p0.w));
+        const cssHeight = this.map.getCanvas().clientHeight || window.innerHeight;
+        const pixelsPerMeter = ndcPerMeter * 0.5 * cssHeight;
+        const scaleFactor = pixelsPerMeter * Math.abs(p0.w);
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        this.material.uniforms.uScaleFactor.value = scaleFactor;
+        this.material.uniforms.uPixelRatio.value = dpr;
+        this.festiveMat.uniforms.uScaleFactor.value = scaleFactor;
+        this.festiveMat.uniforms.uPixelRatio.value = dpr;
+
+        this.renderer.resetState();
+        this.renderer.render(this.scene, this.camera);
+
+        // Keep animating if particles, festive glow, or beacon are active
+        if (this.activeCount > 0 || this.festivePoints.visible || this.beaconGroup.visible) {
+          this.map.triggerRepaint();
+        }
+      }
+    };
+
+    return layer;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     6. MAPLIBRE 3D BUILDINGS & SEASONAL THEME ENGINE
+     ════════════════════════════════════════════════════════════ */
+  function setup3DBuildingsAndCustomLayer() {
+    const style = map.getStyle();
+    const layers = style.layers || [];
+
+    // Locate vector source (OpenFreeMap uses 'openmaptiles')
+    const vectorSourceName = Object.keys(style.sources || {}).find(
+      k => style.sources[k].type === 'vector'
+    ) || 'openmaptiles';
+
+    // Insert 3D buildings below the first symbol label layer
+    let labelLayerId;
+    for (const l of layers) {
+      if (l.type === 'symbol' && l.layout && l.layout['text-field']) {
+        labelLayerId = l.id;
+        break;
+      }
+    }
+
+    // Soften any existing flat building layers so extruded buildings look crisp
+    for (const l of layers) {
+      if (l['source-layer'] === 'building' && l.type === 'fill') {
+        try { map.setPaintProperty(l.id, 'fill-opacity', 0.25); } catch (_) {}
+      }
+    }
+
+    if (!map.getLayer('leuven-3d-buildings')) {
+      map.addLayer({
+        id: 'leuven-3d-buildings',
+        source: vectorSourceName,
+        'source-layer': 'building',
+        type: 'fill-extrusion',
+        minzoom: 12.2,
+        filter: ['!=', ['get', 'hide_3d'], true],
+        paint: {
+          'fill-extrusion-color': [
+            'interpolate', ['linear'],
+            ['coalesce', ['get', 'render_height'], ['get', 'height'], 9],
+            0, '#f2ecee',
+            18, '#e6dce0',
+            45, '#d9cbd2'
+          ],
+          'fill-extrusion-height': [
+            'interpolate', ['linear'], ['zoom'],
+            12.2, 0,
+            13.4, ['coalesce', ['get', 'render_height'], ['get', 'height'], 9]
+          ],
+          'fill-extrusion-base': [
+            'interpolate', ['linear'], ['zoom'],
+            12.2, 0,
+            13.4, ['coalesce', ['get', 'render_min_height'], ['get', 'min_height'], 0]
+          ],
+          'fill-extrusion-opacity': 0.92,
+          'fill-extrusion-vertical-gradient': true
+        }
+      }, labelLayerId);
+    }
+
+    // Mount Three.js Custom 3D Seasonal Particle Layer
+    particleLayer = createSeasonalParticleLayer();
+    map.addLayer(particleLayer);
+  }
+
+  function applyMapSeasonTheme(seasonKey) {
+    const cfg = SEASON_CONFIG[seasonKey];
+    const c = cfg.mapColors;
+
+    // Update CSS design tokens & atmospheric horizon veil
+    const root = document.documentElement;
+    root.style.setProperty('--accent', cfg.accent);
+    root.style.setProperty('--accent-soft', cfg.accentSoft);
+    root.style.setProperty('--accent-glow', cfg.accentGlow);
+    document.getElementById('atmosphere-veil').style.background = cfg.veil;
+
+    if (!map || !map.isStyleLoaded()) return;
+
+    const layers = map.getStyle().layers || [];
+    for (const l of layers) {
+      const id = l.id.toLowerCase();
+      try {
+        if (l.type === 'background') {
+          map.setPaintProperty(l.id, 'background-color', c.background);
+        } else if (l.type === 'fill') {
+          if (id.includes('water')) {
+            map.setPaintProperty(l.id, 'fill-color', c.water);
+          } else if (id.includes('wood') || id.includes('forest')) {
+            map.setPaintProperty(l.id, 'fill-color', c.wood);
+          } else if (id.includes('park') || id.includes('grass') || id.includes('green') || id.includes('landcover') || id.includes('cemetery')) {
+            map.setPaintProperty(l.id, 'fill-color', c.park);
+          }
+        } else if (l.type === 'line') {
+          if (id.includes('waterway')) {
+            map.setPaintProperty(l.id, 'line-color', c.water);
+          } else if (id.includes('highway_major') || id.includes('road_major') || id.includes('motorway') || id.includes('trunk') || id.includes('primary')) {
+            map.setPaintProperty(l.id, 'line-color', c.roadMajor);
+          } else if (id.includes('road') || id.includes('highway') || id.includes('street')) {
+            map.setPaintProperty(l.id, 'line-color', c.roadMinor);
+          }
+        }
+      } catch (_) { /* skip expression-only properties gracefully */ }
+    }
+
+    if (map.getLayer('leuven-3d-buildings')) {
+      map.setPaintProperty('leuven-3d-buildings', 'fill-extrusion-color', [
+        'interpolate', ['linear'],
+        ['coalesce', ['get', 'render_height'], ['get', 'height'], 9],
+        ...c.buildingStops
+      ]);
+      map.setPaintProperty('leuven-3d-buildings', 'fill-extrusion-opacity', 0.94);
+    }
+
+    try {
+      map.setLight(c.light);
+    } catch (_) {}
+
+    if (particleLayer) {
+      particleLayer.rebuildForSeason(seasonKey);
+      map.triggerRepaint();
+    }
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     7. PROCEDURAL ARCHITECTURAL SVG BANNER FOR DETAIL CARDS
+     ════════════════════════════════════════════════════════════ */
+  function buildSpotArtworkSVG(spot, seasonKey) {
+    const sCfg = SEASON_CONFIG[seasonKey];
+    const pal = (spot.visual && spot.visual.palette) || [sCfg.accent, '#94a3b8', '#0f172a'];
+    const motif = (spot.visual && spot.visual.motif) || 'park';
+    const c1 = sCfg.accent;
+    const c2 = pal[1] || '#64748b';
+    const c3 = pal[2] || '#0f172a';
+
+    let silhouette = '';
+    if (motif === 'castle') {
+      silhouette = `
+        <path d="M0 150 L0 105 L58 105 L58 72 L70 48 L82 72 L82 88 L155 88 L155 64 L182 40 L209 64 L209 88 L280 88 L280 72 L292 48 L304 72 L304 105 L380 105 L380 150 Z" fill="rgba(15,23,42,0.58)"/>
+        <rect x="172" y="96" width="20" height="32" rx="10" fill="rgba(255,255,255,0.16)"/>
+      `;
+    } else if (motif === 'townhall') {
+      silhouette = `
+        <path d="M0 150 L0 112 L72 112 L84 44 L96 112 L126 112 L138 30 L150 112 L176 112 L190 18 L204 112 L230 112 L242 30 L254 112 L284 112 L296 44 L308 112 L380 112 L380 150 Z" fill="rgba(15,23,42,0.62)"/>
+        <g fill="rgba(253,230,138,0.55)">
+          <circle cx="138" cy="78" r="2.2"/><circle cx="164" cy="78" r="2.2"/><circle cx="190" cy="72" r="2.5"/><circle cx="216" cy="78" r="2.2"/><circle cx="242" cy="78" r="2.2"/>
+        </g>
+      `;
+    } else if (motif === 'waterfront' || motif === 'river') {
+      silhouette = `
+        <path d="M0 112 L42 112 L42 64 L96 64 L96 112 L135 112 L135 48 L178 48 L178 112 L236 112 L250 76 L310 76 L310 112 L380 112 L380 150 L0 150 Z" fill="rgba(15,23,42,0.52)"/>
+        <path d="M0 124 Q 60 118, 120 124 T 240 124 T 380 124" stroke="rgba(255,255,255,0.38)" stroke-width="2" fill="none"/>
+        <path d="M25 134 Q 85 129, 145 134 T 265 134 T 365 134" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" fill="none"/>
+      `;
+    } else if (motif === 'beguinage' || motif === 'abbey') {
+      silhouette = `
+        <path d="M0 150 L0 108 L46 108 L74 72 L102 108 L138 108 L168 62 L198 108 L225 108 L242 36 L259 108 L294 108 L322 76 L350 108 L380 108 L380 150 Z" fill="rgba(15,23,42,0.56)"/>
+        <path d="M98 150 A 38 24 0 0 1 174 150 Z" fill="rgba(255,255,255,0.12)"/>
+      `;
+    } else {
+      // Botanical / Park / Boulevard canopies
+      silhouette = `
+        <circle cx="62" cy="112" r="46" fill="rgba(15,23,42,0.44)"/>
+        <circle cx="132" cy="98" r="54" fill="rgba(15,23,42,0.50)"/>
+        <circle cx="218" cy="108" r="50" fill="rgba(15,23,42,0.42)"/>
+        <circle cx="304" cy="96" r="58" fill="rgba(15,23,42,0.52)"/>
+        <path d="M168 150 Q 190 74, 212 150" stroke="rgba(255,255,255,0.28)" stroke-width="2" fill="none"/>
+      `;
+    }
+
+    return `
+      <svg viewBox="0 0 380 150" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gBg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="${c3}"/>
+            <stop offset="55%" stop-color="${c2}" stop-opacity="0.62"/>
+            <stop offset="100%" stop-color="${c1}" stop-opacity="0.86"/>
+          </linearGradient>
+          <radialGradient id="gGlow" cx="76%" cy="26%" r="48%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.48"/>
+            <stop offset="100%" stop-color="${c1}" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="380" height="150" fill="url(#gBg)"/>
+        <rect width="380" height="150" fill="url(#gGlow)"/>
+        <circle cx="290" cy="38" r="22" fill="rgba(255,255,255,0.18)"/>
+        ${silhouette}
+      </svg>
+    `;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     8. MAP MARKERS, SIDEBAR LIST & DETAIL CARD INTERACTIONS
+     ════════════════════════════════════════════════════════════ */
+  function getFilteredSpots() {
+    const q = state.searchQuery.trim().toLowerCase();
+    return state.spots.filter(spot => {
+      if (state.filterMode === 'season' && !spot.seasons.includes(state.season)) {
+        return false;
+      }
+      if (!q) return true;
+      const haystack = [
+        spot.name?.zh, spot.name?.en, spot.name?.nl, spot.name?.fr,
+        spot.category?.zh, spot.category?.en, spot.category?.nl,
+        spot.highlights?.zh, spot.highlights?.en,
+        ...(spot.tags || []),
+        ...(spot.seasons || [])
+      ].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
+  }
+
+  function renderMarkers() {
+    if (!map) return;
+    const visibleIds = new Set(getFilteredSpots().map(s => s.id));
+
+    for (const spot of state.spots) {
+      let entry = markers.get(spot.id);
+      if (!entry) {
+        const el = document.createElement('div');
+        el.className = 'spot-marker';
+        el.innerHTML = `
+          <div class="marker-pin"><span>${spot.icon || '📍'}</span></div>
+          <div class="marker-stem"></div>
+          <div class="marker-label"></div>
+        `;
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectSpot(spot.id, true);
+        });
+        const m = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat([spot.lng, spot.lat])
+          .addTo(map);
+        entry = { marker: m, el };
+        markers.set(spot.id, entry);
+      }
+
+      const inSeason = spot.seasons.includes(state.season);
+      const isSelected = spot.id === state.selectedSpotId;
+      const isVisible = visibleIds.has(spot.id);
+
+      entry.el.style.display = isVisible ? 'flex' : 'none';
+      entry.el.classList.toggle('in-season', inSeason);
+      entry.el.classList.toggle('dimmed', !inSeason && !isSelected);
+      entry.el.classList.toggle('selected', isSelected);
+      entry.el.querySelector('.marker-label').textContent = L(spot.name);
+      entry.el.style.zIndex = isSelected ? '15' : (inSeason ? '8' : '3');
+    }
+  }
+
+  function renderSpotsList() {
+    const listEl = document.getElementById('spots-list');
+    const filtered = getFilteredSpots();
+
+    // Sort: current season featured spots first
+    const sorted = [...filtered].sort((a, b) => {
+      const aPrimary = a.primarySeason === state.season ? 2 : (a.seasons.includes(state.season) ? 1 : 0);
+      const bPrimary = b.primarySeason === state.season ? 2 : (b.seasons.includes(state.season) ? 1 : 0);
+      return bPrimary - aPrimary;
+    });
+
+    document.getElementById('spots-count').textContent = sorted.length;
+
+    if (sorted.length === 0) {
+      listEl.innerHTML = `<div style="padding:26px 14px;text-align:center;color:var(--text-muted);font-size:12.5px;">${T('no_results')}</div>`;
+      return;
+    }
+
+    const seasonIcons = { spring: '🌸', summer: '☀️', autumn: '🍁', winter: '❄️' };
+
+    listEl.innerHTML = sorted.map(spot => {
+      const inSeason = spot.seasons.includes(state.season);
+      const isPrimary = spot.primarySeason === state.season;
+      const isActive = spot.id === state.selectedSpotId;
+
+      const seasonBadges = ['spring', 'summer', 'autumn', 'winter']
+        .filter(s => spot.seasons.includes(s))
+        .map(s => `<span class="mini-season ${s === state.season ? 'match' : ''}" title="${s}">${seasonIcons[s]}</span>`)
+        .join('');
+
+      const thumbUrl = spot.visual && spot.visual.image;
+      const avatarHtml = thumbUrl
+        ? `<img src="${thumbUrl}" alt="${L(spot.name)}" loading="lazy" onerror="this.remove()" /><span class="spot-avatar-badge">${spot.icon || '📍'}</span>`
+        : `${spot.icon || '📍'}`;
+
+      return `
+        <div class="spot-item ${isActive ? 'active' : ''} ${inSeason ? 'in-season' : 'off-season'}" data-spot-id="${spot.id}">
+          <div class="spot-avatar">${avatarHtml}</div>
+          <div class="spot-body">
+            <div class="spot-name-row">
+              <div class="spot-name">${L(spot.name)}</div>
+              ${isPrimary ? `<span class="spot-rec-badge">${T('rec_badge')}</span>` : ''}
+            </div>
+            <div class="spot-cat">${L(spot.category)}</div>
+            <div class="spot-seasons">${seasonBadges}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('.spot-item').forEach(el => {
+      el.addEventListener('click', () => selectSpot(el.dataset.spotId, true));
+    });
+  }
+
+  function renderDetailCard() {
+    const card = document.getElementById('detail-card');
+    const spot = state.spots.find(s => s.id === state.selectedSpotId);
+    if (!spot) {
+      card.classList.remove('open');
+      return;
+    }
+
+    const tabSeason = state.detailSeasonTab || state.season;
+    const heroEl = document.getElementById('detail-hero');
+    const existingArt = heroEl.querySelector('svg, img');
+    if (existingArt) existingArt.remove();
+    const existingCredit = heroEl.querySelector('.detail-photo-credit');
+    if (existingCredit) existingCredit.remove();
+
+    if (spot.visual && spot.visual.image) {
+      const img = document.createElement('img');
+      img.src = spot.visual.image;
+      img.alt = L(spot.name);
+      img.loading = 'eager';
+      img.onerror = () => {
+        img.remove();
+        const cr = heroEl.querySelector('.detail-photo-credit');
+        if (cr) cr.remove();
+        heroEl.insertAdjacentHTML('afterbegin', buildSpotArtworkSVG(spot, tabSeason));
+      };
+      heroEl.insertAdjacentElement('afterbegin', img);
+      if (spot.visual.credit) {
+        const creditEl = document.createElement('div');
+        creditEl.className = 'detail-photo-credit';
+        creditEl.textContent = '📷 ' + spot.visual.credit;
+        heroEl.appendChild(creditEl);
+      }
+    } else {
+      heroEl.insertAdjacentHTML('afterbegin', buildSpotArtworkSVG(spot, tabSeason));
+    }
+
+    // Badges
+    const badges = [];
+    badges.push(`<span class="hero-badge">${spot.icon || '📍'} ${L(spot.category)}</span>`);
+    if (spot.emitter && spot.emitter.enabled && (!spot.emitter.seasons || spot.emitter.seasons.includes(state.season))) {
+      badges.push(`<span class="hero-badge">${T('emitter_badge')}</span>`);
+    }
+    document.getElementById('detail-badges').innerHTML = badges.join('');
+
+    // Title & subtitle
+    document.getElementById('detail-title').textContent = L(spot.name);
+    const altName = state.lang === 'nl' ? (spot.name.en || spot.name.zh) : (spot.name.nl || spot.name.en);
+    document.getElementById('detail-subtitle').textContent = `${altName} · ${spot.lat.toFixed(4)}°N, ${spot.lng.toFixed(4)}°E`;
+
+    // 4-season tabs inside detail card
+    const tabsEl = document.getElementById('detail-season-tabs');
+    const seasonMeta = [
+      { key: 'spring', ico: '🌸', lbl: T('s_spring') },
+      { key: 'summer', ico: '☀️', lbl: T('s_summer') },
+      { key: 'autumn', ico: '🍁', lbl: T('s_autumn') },
+      { key: 'winter', ico: '❄️', lbl: T('s_winter') }
+    ];
+    tabsEl.innerHTML = seasonMeta.map(sm => `
+      <button class="d-stab ${sm.key === tabSeason ? 'active' : ''} ${spot.seasons.includes(sm.key) ? 'best' : ''}" data-dseason="${sm.key}">
+        <span>${sm.ico}</span><span>${sm.lbl}</span>
+      </button>
+    `).join('');
+    tabsEl.querySelectorAll('.d-stab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.detailSeasonTab = btn.dataset.dseason;
+        if (state.season !== btn.dataset.dseason) {
+          setSeason(btn.dataset.dseason, false);
+        }
+        renderDetailCard();
+      });
+    });
+
+    // Description & metadata
+    const descObj = spot.seasonDescriptions && spot.seasonDescriptions[tabSeason];
+    document.getElementById('detail-desc').textContent = L(descObj) || L(spot.highlights) || '';
+    document.getElementById('detail-best').textContent = L(spot.best);
+    document.getElementById('detail-hours').textContent = L(spot.hours);
+    document.getElementById('btn-gmaps').href = spot.gmaps || `https://maps.google.com/?q=${spot.lat},${spot.lng}`;
+
+    updateOrbitBtnUI();
+    card.classList.add('open');
+  }
+
+  function selectSpot(spotId, fly = true) {
+    stopOrbit();
+    state.selectedSpotId = spotId;
+    state.detailSeasonTab = state.season;
+
+    const spot = state.spots.find(s => s.id === spotId);
+    if (!spot) return;
+
+    if (particleLayer) particleLayer.setBeacon(spot);
+    renderSpotsList();
+    renderMarkers();
+    renderDetailCard();
+
+    if (fly && map) {
+      const cam = spot.camera || { zoom: 16.6, pitch: 60, bearing: -20 };
+      map.flyTo({
+        center: [spot.lng, spot.lat],
+        zoom: cam.zoom,
+        pitch: state.is3D ? cam.pitch : 0,
+        bearing: cam.bearing,
+        duration: 1650,
+        essential: true
+      });
+    }
+  }
+
+  function closeDetailCard() {
+    stopOrbit();
+    state.selectedSpotId = null;
+    if (particleLayer) particleLayer.setBeacon(null);
+    document.getElementById('detail-card').classList.remove('open');
+    renderSpotsList();
+    renderMarkers();
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     9. CAMERA CONTROLS (RESET 3D, 2D/3D PITCH, 360° ORBIT)
+     ════════════════════════════════════════════════════════════ */
+  function resetOverview() {
+    stopOrbit();
+    if (!map) return;
+    map.flyTo({
+      center: DEFAULT_CAMERA.center,
+      zoom: DEFAULT_CAMERA.zoom,
+      pitch: state.is3D ? DEFAULT_CAMERA.pitch : 0,
+      bearing: DEFAULT_CAMERA.bearing,
+      duration: 1450,
+      essential: true
+    });
+  }
+
+  function toggle3DMode() {
+    state.is3D = !state.is3D;
+    const btn = document.getElementById('btn-toggle-3d');
+    btn.classList.toggle('active', state.is3D);
+    document.getElementById('lbl-3d').textContent = state.is3D ? '3D' : '2D';
+    if (map) {
+      map.easeTo({ pitch: state.is3D ? 58 : 0, duration: 750 });
+    }
+  }
+
+  function startOrbit() {
+    if (!map) return;
+    state.isOrbiting = true;
+    updateOrbitBtnUI();
+    let last = performance.now();
+    const tick = (now) => {
+      if (!state.isOrbiting) return;
+      const dt = (now - last) / 1000;
+      last = now;
+      map.setBearing((map.getBearing() + dt * 14) % 360);
+      state.orbitRaf = requestAnimationFrame(tick);
+    };
+    state.orbitRaf = requestAnimationFrame(tick);
+  }
+
+  function stopOrbit() {
+    if (!state.isOrbiting) return;
+    state.isOrbiting = false;
+    if (state.orbitRaf) cancelAnimationFrame(state.orbitRaf);
+    state.orbitRaf = null;
+    updateOrbitBtnUI();
+  }
+
+  function updateOrbitBtnUI() {
+    const btn = document.getElementById('btn-orbit');
+    const lbl = document.getElementById('lbl-orbit');
+    if (!btn || !lbl) return;
+    btn.classList.toggle('orbiting', state.isOrbiting);
+    lbl.textContent = state.isOrbiting ? T('btn_orbit_stop') : T('btn_orbit');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     10. SEASON, LANGUAGE & DENSITY SWITCHING
+     ════════════════════════════════════════════════════════════ */
+  function setSeason(seasonKey, syncDetailTab = true) {
+    if (!SEASON_CONFIG[seasonKey]) return;
+    state.season = seasonKey;
+    if (syncDetailTab) state.detailSeasonTab = seasonKey;
+
+    document.querySelectorAll('.season-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.season === seasonKey);
+    });
+
+    const cfg = SEASON_CONFIG[seasonKey];
+    document.getElementById('pill-icon').textContent = cfg.icon;
+    document.getElementById('pill-text').textContent = L(cfg.pillLabel);
+    document.getElementById('load-emblem').textContent = cfg.icon;
+
+    applyMapSeasonTheme(seasonKey);
+    renderSpotsList();
+    renderMarkers();
+    if (state.selectedSpotId) renderDetailCard();
+  }
+
+  function cycleDensity() {
+    const idx = DENSITY_LEVELS.indexOf(state.density);
+    state.density = DENSITY_LEVELS[(idx + 1) % DENSITY_LEVELS.length];
+    updateDensityUI();
+    if (particleLayer) {
+      particleLayer.rebuildForSeason(state.season);
+      if (map) map.triggerRepaint();
+    }
+  }
+
+  function updateDensityUI() {
+    const mapLabels = I18N[state.lang].densities;
+    document.getElementById('lbl-density').textContent = `${T('density_prefix')}: ${mapLabels[state.density]}`;
+    document.getElementById('btn-density').classList.toggle('active', state.density !== 'off');
+  }
+
+  function updateParticleStatUI(count) {
+    const el = document.getElementById('particle-stat');
+    const dot = document.getElementById('perf-dot');
+    if (el) el.textContent = `3D Particles: ${count.toLocaleString()}`;
+    if (dot) dot.style.background = count > 0 ? SEASON_CONFIG[state.season].accent : '#64748b';
+  }
+
+  function applyLanguage(lang) {
+    state.lang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = T(el.dataset.i18n);
+    });
+    document.getElementById('search-input').placeholder = T('search_ph');
+    document.getElementById('load-sub').textContent = T('load_sub');
+    document.getElementById('pill-text').textContent = L(SEASON_CONFIG[state.season].pillLabel);
+    const subEmail = document.getElementById('sub-email');
+    if (subEmail) subEmail.placeholder = T('sub_ph');
+    const rptNote = document.getElementById('rpt-note');
+    if (rptNote) rptNote.placeholder = T('rpt_note_ph');
+    const rptName = document.getElementById('rpt-name');
+    if (rptName) rptName.placeholder = T('rpt_name_ph');
+    updateDensityUI();
+    updateOrbitBtnUI();
+    renderSpotsList();
+    renderMarkers();
+    renderCalendarModal();
+    buildReportLocationSelect();
+    buildReportStatusGrid();
+    renderReportFeed();
+    if (state.selectedSpotId) renderDetailCard();
+  }
+
+  function setListCollapsed(collapsed) {
+    state.listCollapsed = collapsed;
+    document.getElementById('spots-panel').classList.toggle('collapsed', collapsed);
+    document.getElementById('btn-toggle-list').classList.toggle('active', !collapsed);
+    document.getElementById('reopen-list-btn').classList.toggle('visible', collapsed);
+  }
+
+  async function fetchLiveWeather() {
+    try {
+      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=50.88&longitude=4.70&current=temperature_2m&timezone=Europe/Brussels');
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json.current && typeof json.current.temperature_2m === 'number') {
+        document.getElementById('live-temp').textContent = Math.round(json.current.temperature_2m) + '°C';
+      }
+    } catch (_) { /* optional live badge */ }
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     11. FLOWER CALENDAR, FIREBASE & COMMUNITY REPORT SYSTEM
+     ════════════════════════════════════════════════════════════ */
+  const FIREBASE_ENABLED = true;
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCde2pp9yVQaw2SIWoNa2LHbebB5b7ws-k",
+    authDomain:        "leuven-bloeit.firebaseapp.com",
+    projectId:         "leuven-bloeit",
+    storageBucket:     "leuven-bloeit.firebasestorage.app",
+    messagingSenderId: "19000836456",
+    appId:             "1:19000836456:web:68e5090d74f69ec03596dd"
+  };
+  let db = null;
+  if (FIREBASE_ENABLED && typeof firebase !== 'undefined') {
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+    } catch (e) {
+      console.warn('Firebase init skipped:', e.message);
+    }
+  }
+
+  const CALENDAR_DATA = [
+    { icon: '🌸', season: 'spring', name: { en: 'Plum Blossom', fr: 'Prunier', nl: 'Pruimenbloesem', zh: '梅花' }, start: 1, end: 2, color: '#f9a8d4' },
+    { icon: '🌺', season: 'spring', name: { en: 'Camellia', fr: 'Camélia', nl: 'Camelia', zh: '山茶花' }, start: 0, end: 3, color: '#f43f5e' },
+    { icon: '💜', season: 'spring', name: { en: 'Crocus', fr: 'Crocus', nl: 'Krokus', zh: '番紅花' }, start: 1, end: 3, color: '#c084fc' },
+    { icon: '🌼', season: 'spring', name: { en: 'Narcissus', fr: 'Narcisse', nl: 'Narcis', zh: '水仙' }, start: 2, end: 3, color: '#fde047' },
+    { icon: '🌸', season: 'spring', name: { en: 'Cherry Blossom', fr: 'Cerisier', nl: 'Kersenbloesem', zh: '櫻花' }, start: 2, end: 3, color: '#ff6fa3' },
+    { icon: '🌷', season: 'spring', name: { en: 'Tulip & Bluebells', fr: 'Tulipe & Jacinthes', nl: 'Tulp & Boshyacint', zh: '鬱金香與藍鈴花' }, start: 3, end: 4, color: '#f472b6' },
+    { icon: '💜', season: 'spring', name: { en: 'Wisteria', fr: 'Glycine', nl: 'Blauweregen', zh: '紫藤' }, start: 3, end: 5, color: '#a78bfa' },
+    { icon: '🌹', season: 'summer', name: { en: 'Rose', fr: 'Rose', nl: 'Roos', zh: '玫瑰' }, start: 4, end: 7, color: '#fb7185' },
+    { icon: '🌸', season: 'summer', name: { en: 'Peony', fr: 'Pivoine', nl: 'Pioen', zh: '牡丹' }, start: 4, end: 5, color: '#f9a8d4' },
+    { icon: '💐', season: 'summer', name: { en: 'Lavender', fr: 'Lavande', nl: 'Lavendel', zh: '薰衣草' }, start: 5, end: 8, color: '#a78bfa' },
+    { icon: '🌻', season: 'summer', name: { en: 'Sunflower', fr: 'Tournesol', nl: 'Zonnebloem', zh: '向日葵' }, start: 6, end: 8, color: '#facc15' },
+    { icon: '💙', season: 'summer', name: { en: 'Hydrangea', fr: 'Hortensia', nl: 'Hortensia', zh: '繡球花' }, start: 5, end: 8, color: '#60a5fa' },
+    { icon: '🌺', season: 'autumn', name: { en: 'Cosmos', fr: 'Cosmos', nl: 'Cosmea', zh: '大波斯菊' }, start: 7, end: 9, color: '#f472b6' },
+    { icon: '🍁', season: 'autumn', name: { en: 'Autumn Foliage', fr: 'Feuillage automnal', nl: 'Herfstkleur', zh: '楓葉與銀杏秋色' }, start: 9, end: 10, color: '#f97316' },
+    { icon: '❄️', season: 'winter', name: { en: 'Wintertijd & Lights', fr: 'Wintertijd & Lumières', nl: 'Wintertijd & Kerst', zh: '冬日雪景與節慶燈海' }, start: 11, end: 11, color: '#38bdf8' }
+  ];
+
+  let selectedReportStatus = 'peak';
+  let communityReports = [];
+
+  function openModal(id) {
+    closeModals();
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id === 'modal-calendar') renderCalendarModal();
+    if (id === 'modal-report') {
+      buildReportLocationSelect();
+      buildReportStatusGrid();
+      renderReportFeed();
+    }
+    el.classList.add('open');
+  }
+
+  function closeModals() {
+    document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
+  }
+
+  function openReportForSpot(spotId) {
+    openModal('modal-report');
+    const sel = document.getElementById('rpt-location');
+    if (sel && spotId) sel.value = spotId;
+  }
+
+  function renderCalendarModal() {
+    const grid = document.getElementById('calendar-grid');
+    if (!grid) return;
+    const now = new Date().getMonth();
+    const months = {
+      en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      fr: ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'],
+      nl: ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'],
+      zh: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+    }[state.lang] || ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    let html = `<div class="cal-table">`;
+    html += `<div class="cal-row cal-head"><div class="cal-label">${T('btn_calendar')}</div>`;
+    months.forEach((m, i) => {
+      html += `<div class="cal-cell ${i === now ? 'is-now' : ''}">${m}</div>`;
+    });
+    html += `</div>`;
+
+    CALENDAR_DATA.forEach(item => {
+      html += `<div class="cal-row cal-data" data-cal-season="${item.season}">
+        <div class="cal-label"><span>${item.icon}</span><span>${L(item.name)}</span></div>`;
+      months.forEach((_, i) => {
+        const active = i >= item.start && i <= item.end;
+        const isNow = i === now;
+        html += `<div class="cal-cell ${isNow ? 'is-now' : ''}">
+          ${active ? `<div class="cal-bar ${isNow ? 'now-active' : ''}" style="background:${item.color};"></div>` : ''}
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+    grid.innerHTML = html;
+
+    const nowPill = document.getElementById('cal-now-pill');
+    if (nowPill) nowPill.textContent = `● ${T('cal_now_label')}: ${months[now]}`;
+
+    grid.querySelectorAll('.cal-row.cal-data').forEach(row => {
+      row.addEventListener('click', () => {
+        const s = row.dataset.calSeason;
+        closeModals();
+        if (s) setSeason(s);
+      });
+    });
+  }
+
+  async function subscribeEmail() {
+    const input = document.getElementById('sub-email');
+    const msgEl = document.getElementById('sub-msg');
+    const email = (input.value || '').trim();
+    if (!email || !email.includes('@')) { input.focus(); return; }
+
+    if (db) {
+      try {
+        await db.collection('subscriptions').add({
+          email,
+          lang: state.lang,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        msgEl.textContent = T('sub_ok');
+        msgEl.style.color = '#86efac';
+        msgEl.style.display = 'block';
+        input.value = '';
+      } catch (_) {
+        msgEl.textContent = T('sub_err');
+        msgEl.style.color = '#fca5a5';
+        msgEl.style.display = 'block';
+      }
+    } else {
+      msgEl.textContent = T('sub_ok') + ' (local)';
+      msgEl.style.color = '#86efac';
+      msgEl.style.display = 'block';
+      input.value = '';
+    }
+  }
+
+  function resolveSpotFromReport(spotId) {
+    if (spotId === undefined || spotId === null) return null;
+    const str = String(spotId);
+    const num = Number(spotId);
+    return state.spots.find(s =>
+      s.id === str || (Array.isArray(s.legacyIds) && s.legacyIds.includes(num))
+    ) || null;
+  }
+
+  function timeAgo(ts) {
+    const diff = Math.max(0, (Date.now() - ts) / 1000);
+    const ta = (I18N[state.lang] && I18N[state.lang].time_ago) || I18N.en.time_ago;
+    if (diff < 60) return ta.just;
+    if (diff < 3600) return `${Math.floor(diff / 60)} ${ta.min}`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} ${ta.hr}`;
+    if (diff < 172800) return `1 ${ta.day}`;
+    return `${Math.floor(diff / 86400)} ${ta.days}`;
+  }
+
+  function buildReportLocationSelect() {
+    const sel = document.getElementById('rpt-location');
+    if (!sel) return;
+    const prev = sel.value;
+    sel.innerHTML = `<option value="">${T('rpt_select_loc')}</option>` +
+      state.spots.map(s => `<option value="${s.id}">${s.icon || '📍'} ${L(s.name)} (${s.name.nl})</option>`).join('');
+    if (prev) sel.value = prev;
+  }
+
+  function buildReportStatusGrid() {
+    const grid = document.getElementById('rpt-status-grid');
+    if (!grid) return;
+    const st = (I18N[state.lang] && I18N[state.lang].rpt_status) || I18N.en.rpt_status;
+    const keys = ['peak', 'soon', 'fading', 'foliage', 'winter', 'ended'];
+    grid.innerHTML = keys.map(k =>
+      `<button type="button" class="rpt-status-btn ${k === selectedReportStatus ? 'selected' : ''}" data-rstatus="${k}">${st[k] || k}</button>`
+    ).join('');
+    grid.querySelectorAll('.rpt-status-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedReportStatus = btn.dataset.rstatus;
+        buildReportStatusGrid();
+      });
+    });
+  }
+
+  function showReportToast(msg, ok) {
+    const el = document.getElementById('rpt-toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'rpt-toast ' + (ok ? 'ok' : 'err');
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 4500);
+  }
+
+  async function submitReport() {
+    const sel = document.getElementById('rpt-location');
+    const noteEl = document.getElementById('rpt-note');
+    const nameEl = document.getElementById('rpt-name');
+    const btn = document.getElementById('rpt-submit');
+    const spotId = sel.value;
+    if (!spotId) { sel.focus(); return; }
+
+    btn.disabled = true;
+    const report = {
+      spotId,
+      status: selectedReportStatus,
+      note: (noteEl.value || '').trim(),
+      name: (nameEl.value || '').trim() || null,
+      ts: Date.now()
+    };
+
+    if (db) {
+      try {
+        await db.collection('reports').add({
+          ...report,
+          photoUrl: null,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        communityReports.unshift(report);
+        showReportToast(T('rpt_ok'), true);
+      } catch (e) {
+        console.warn('Firestore write failed, saving locally:', e.message);
+        communityReports.unshift(report);
+        showReportToast(T('rpt_ok') + ' (local)', true);
+      }
+    } else {
+      communityReports.unshift(report);
+      showReportToast(T('rpt_ok') + ' (local)', true);
+    }
+
+    noteEl.value = '';
+    nameEl.value = '';
+    renderReportFeed();
+    btn.disabled = false;
+  }
+
+  async function loadReportFeed() {
+    if (!db) {
+      renderReportFeed();
+      return;
+    }
+    try {
+      const snap = await db.collection('reports').orderBy('createdAt', 'desc').limit(25).get();
+      communityReports = snap.docs.map(d => {
+        const v = d.data();
+        return {
+          ...v,
+          ts: v.createdAt && typeof v.createdAt.toMillis === 'function' ? v.createdAt.toMillis() : (v.ts || Date.now())
+        };
+      });
+    } catch (e) {
+      console.warn('Firestore load skipped:', e.message);
+    }
+    renderReportFeed();
+  }
+
+  function renderReportFeed() {
+    const feed = document.getElementById('report-feed-list');
+    const badge = document.getElementById('nav-rpt-count');
+    if (badge) {
+      badge.textContent = communityReports.length;
+      badge.style.display = communityReports.length > 0 ? 'inline-block' : 'none';
+    }
+    if (!feed) return;
+    if (communityReports.length === 0) {
+      feed.innerHTML = `<div style="font-size:12.5px;color:var(--text-muted);padding:12px 2px;">${T('rpt_empty')}</div>`;
+      return;
+    }
+    const st = (I18N[state.lang] && I18N[state.lang].rpt_status) || I18N.en.rpt_status;
+    feed.innerHTML = communityReports.map(r => {
+      const spot = resolveSpotFromReport(r.spotId);
+      const spotName = spot ? L(spot.name) : String(r.spotId);
+      const icon = spot ? (spot.icon || '🌸') : '🌸';
+      const statusLbl = st[r.status] || r.status;
+      const safeNote = (r.note || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const safeName = (r.name || T('rpt_name_ph')).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `
+        <div class="feed-item" data-fly-spot="${spot ? spot.id : ''}">
+          <div class="feed-ico">${icon}</div>
+          <div class="feed-main">
+            <div class="feed-top">
+              <span class="feed-spot">${spotName}</span>
+              <span class="feed-pill">${statusLbl}</span>
+            </div>
+            ${safeNote ? `<div class="feed-note">${safeNote}</div>` : ''}
+            <div class="feed-meta">${safeName} · ${timeAgo(r.ts)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    feed.querySelectorAll('.feed-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const sid = el.dataset.flySpot;
+        if (sid) {
+          closeModals();
+          selectSpot(sid, true);
+        }
+      });
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     11B. iNATURALIST 3D PLANT OBSERVATIONS LAYER
+     ════════════════════════════════════════════════════════════ */
+  let inatMarkers = [];
+  let inatVisible = true;
+  let activeInatPopup = null;
+
+  function buildInatPopupHTML(ob) {
+    const common = (ob.taxon && (ob.taxon.preferred_common_name || ob.taxon.name)) || 'Plant';
+    const sci = (ob.taxon && ob.taxon.name && ob.taxon.preferred_common_name && ob.taxon.name !== ob.taxon.preferred_common_name)
+      ? ob.taxon.name : '';
+    const photo = ob.photos && ob.photos[0] && ob.photos[0].url
+      ? ob.photos[0].url.replace('square', 'medium') : '';
+    const date = ob.observed_on || '';
+    const user = (ob.user && ob.user.login) || 'iNaturalist';
+    const url = `https://www.inaturalist.org/observations/${ob.id}`;
+    const esc = s => String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    return `
+      ${photo ? `<img class="inat-pop-img" src="${photo}" alt="${esc(common)}" loading="lazy" />` : ''}
+      <div class="inat-pop-body">
+        <div class="inat-pop-badge">🌿 iNaturalist · Research Grade</div>
+        <div class="inat-pop-title">${esc(common)}</div>
+        ${sci ? `<div class="inat-pop-sci">${esc(sci)}</div>` : ''}
+        <div class="inat-pop-meta">
+          <span>${T('inat_obs_by')}: ${esc(user)}</span>
+          <span>${esc(date)}</span>
+        </div>
+        <a class="inat-pop-link" href="${url}" target="_blank" rel="noopener noreferrer">${T('inat_view')}</a>
+      </div>
+    `;
+  }
+
+  async function fetchInaturalist() {
+    if (!map) return;
+    try {
+      const url = 'https://api.inaturalist.org/v1/observations?lat=50.876&lng=4.700&radius=5&iconic_taxa=Plantae&per_page=30&quality_grade=research&order_by=observed_on&photos=true';
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const d = await res.json();
+      const obs = d.results || [];
+
+      inatMarkers.forEach(item => item.marker.remove());
+      inatMarkers = [];
+
+      for (const ob of obs) {
+        if (!ob.location) continue;
+        const parts = ob.location.split(',').map(Number);
+        if (parts.length !== 2 || Number.isNaN(parts[0]) || Number.isNaN(parts[1])) continue;
+        const [lat, lng] = parts;
+
+        const el = document.createElement('div');
+        el.className = 'inat-marker';
+        el.setAttribute('role', 'button');
+        el.setAttribute('tabindex', '0');
+        el.textContent = '🌿';
+        el.title = (ob.taxon && (ob.taxon.preferred_common_name || ob.taxon.name)) || 'iNaturalist';
+
+        const popup = new maplibregl.Popup({ offset: 18, maxWidth: '260px', closeOnClick: true });
+
+        const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+          .setLngLat([lng, lat]);
+
+        const openThisPopup = (e) => {
+          e.stopPropagation();
+          if (activeInatPopup && activeInatPopup !== popup) activeInatPopup.remove();
+          if (popup.isOpen()) {
+            popup.remove();
+            activeInatPopup = null;
+          } else {
+            popup.setLngLat([lng, lat]).setHTML(buildInatPopupHTML(ob)).addTo(map);
+            activeInatPopup = popup;
+          }
+        };
+
+        el.addEventListener('click', openThisPopup);
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openThisPopup(e);
+          }
+        });
+
+        if (inatVisible) marker.addTo(map);
+        inatMarkers.push({ marker, popup, ob });
+      }
+
+      const badge = document.getElementById('nav-inat-count');
+      if (badge) {
+        badge.textContent = inatMarkers.length;
+        badge.style.display = inatMarkers.length > 0 ? 'inline-block' : 'none';
+      }
+    } catch (e) {
+      console.warn('iNaturalist fetch skipped:', e.message);
+    }
+  }
+
+  function toggleInat() {
+    inatVisible = !inatVisible;
+    const btn = document.getElementById('btn-toggle-inat');
+    if (btn) btn.classList.toggle('active', inatVisible);
+    if (!inatVisible && activeInatPopup) {
+      activeInatPopup.remove();
+      activeInatPopup = null;
+    }
+    for (const item of inatMarkers) {
+      if (inatVisible) item.marker.addTo(map);
+      else item.marker.remove();
+    }
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     12. UI EVENT BINDINGS & INITIALIZATION
+     ════════════════════════════════════════════════════════════ */
+  function bindEvents() {
+    // Season buttons
+    document.querySelectorAll('.season-btn').forEach(btn => {
+      btn.addEventListener('click', () => setSeason(btn.dataset.season));
+    });
+
+    // Language buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyLanguage(btn.dataset.lang));
+    });
+
+    // Search box
+    const searchInput = document.getElementById('search-input');
+    const searchClear = document.getElementById('search-clear');
+    searchInput.addEventListener('input', () => {
+      state.searchQuery = searchInput.value;
+      searchClear.classList.toggle('visible', state.searchQuery.length > 0);
+      renderSpotsList();
+      renderMarkers();
+    });
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      state.searchQuery = '';
+      searchClear.classList.remove('visible');
+      renderSpotsList();
+      renderMarkers();
+      searchInput.focus();
+    });
+
+    // Filter chips
+    document.getElementById('filter-all').addEventListener('click', () => {
+      state.filterMode = 'all';
+      document.getElementById('filter-all').classList.add('active');
+      document.getElementById('filter-season').classList.remove('active');
+      renderSpotsList();
+      renderMarkers();
+    });
+    document.getElementById('filter-season').addEventListener('click', () => {
+      state.filterMode = 'season';
+      document.getElementById('filter-season').classList.add('active');
+      document.getElementById('filter-all').classList.remove('active');
+      renderSpotsList();
+      renderMarkers();
+    });
+
+    // Quick toolbar controls
+    document.getElementById('btn-open-calendar').addEventListener('click', () => openModal('modal-calendar'));
+    document.getElementById('btn-open-report').addEventListener('click', () => openModal('modal-report'));
+    document.getElementById('btn-toggle-inat').addEventListener('click', toggleInat);
+    document.getElementById('btn-reset-view').addEventListener('click', resetOverview);
+    document.getElementById('btn-toggle-3d').addEventListener('click', toggle3DMode);
+    document.getElementById('btn-density').addEventListener('click', cycleDensity);
+    document.getElementById('btn-toggle-list').addEventListener('click', () => setListCollapsed(!state.listCollapsed));
+    document.getElementById('reopen-list-btn').addEventListener('click', () => setListCollapsed(false));
+
+    // Modal controls (close buttons, backdrop clicks, form submits)
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+      btn.addEventListener('click', closeModals);
+    });
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeModals();
+      });
+    });
+    document.getElementById('sub-btn').addEventListener('click', subscribeEmail);
+    document.getElementById('rpt-submit').addEventListener('click', submitReport);
+
+    // Detail card buttons
+    document.getElementById('detail-close').addEventListener('click', closeDetailCard);
+    document.getElementById('btn-detail-report').addEventListener('click', () => openReportForSpot(state.selectedSpotId));
+    document.getElementById('btn-detail-reset').addEventListener('click', resetOverview);
+    document.getElementById('btn-orbit').addEventListener('click', () => {
+      if (state.isOrbiting) stopOrbit();
+      else startOrbit();
+    });
+
+    // Keyboard shortcuts (1-4 seasons, R reset, Esc close)
+    window.addEventListener('keydown', (e) => {
+      const tag = document.activeElement && document.activeElement.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        if (e.key === 'Escape') document.activeElement.blur();
+        return;
+      }
+      if (e.key === 'Escape') {
+        if (document.querySelector('.modal-backdrop.open')) closeModals();
+        else closeDetailCard();
+        return;
+      }
+      if (document.querySelector('.modal-backdrop.open')) return;
+      if (e.key === '1') setSeason('spring');
+      else if (e.key === '2') setSeason('summer');
+      else if (e.key === '3') setSeason('autumn');
+      else if (e.key === '4') setSeason('winter');
+      else if (e.key === 'r' || e.key === 'R') resetOverview();
+    });
+  }
+
+  function hideLoadingScreen() {
+    document.getElementById('loading-screen').classList.add('hidden');
+  }
+
+  async function init() {
+    // Safety fallback to guarantee loading overlay always dismisses
+    setTimeout(hideLoadingScreen, 4500);
+
+    bindEvents();
+    setListCollapsed(state.listCollapsed);
+
+    state.spots = await loadSpotsData();
+    applyLanguage(state.lang);
+    fetchLiveWeather();
+    loadReportFeed();
+
+    map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://tiles.openfreemap.org/styles/positron',
+      center: DEFAULT_CAMERA.center,
+      zoom: DEFAULT_CAMERA.zoom,
+      pitch: DEFAULT_CAMERA.pitch,
+      bearing: DEFAULT_CAMERA.bearing,
+      antialias: true,
+      maxPitch: 75,
+      minZoom: 11.5,
+      maxZoom: 19
+    });
+
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+
+    // Stop auto-orbit immediately whenever user interacts
+    map.on('mousedown', stopOrbit);
+    map.on('touchstart', stopOrbit);
+    map.on('wheel', stopOrbit);
+
+    // Subtle atmospheric horizon opacity scales smoothly with 3D pitch
+    map.on('pitch', () => {
+      const p = map.getPitch();
+      document.getElementById('atmosphere-veil').style.opacity = (0.28 + (p / 75) * 0.72).toFixed(2);
+    });
+
+    map.on('style.load', () => {
+      setup3DBuildingsAndCustomLayer();
+      applyMapSeasonTheme(state.season);
+      renderMarkers();
+      fetchInaturalist();
+      hideLoadingScreen();
+    });
+
+    map.on('error', (err) => {
+      console.warn('MapLibre notice:', err && err.error ? err.error.message : err);
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
