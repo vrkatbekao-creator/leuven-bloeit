@@ -295,23 +295,52 @@
     background: rgba(255,255,255,0.08);
   }
 
-  /* ── 4A. LEFT-SIDE SPOT LIST PANEL ── */
+  /* ── 4A. LEFT-SIDE COLLAPSIBLE SPOT LIST DRAWER ── */
+  .spots-backdrop {
+    position: fixed; inset: 0; z-index: 38;
+    background: rgba(6, 10, 18, 0.44);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity 0.22s ease, visibility 0.22s ease;
+  }
+  .spots-backdrop.visible {
+    opacity: 1; visibility: visible; pointer-events: auto;
+  }
+  .left-dock.list-collapsed {
+    bottom: auto;
+  }
   .spots-panel {
     width: 100%; flex: 1; min-height: 0;
     pointer-events: auto;
     border-radius: var(--radius-lg);
     display: flex; flex-direction: column;
     overflow: hidden;
-    transition: transform 0.3s cubic-bezier(.22,1,.36,1), opacity 0.25s ease;
+    transition: transform 0.28s cubic-bezier(.22,1,.36,1), opacity 0.22s ease, max-height 0.25s ease;
   }
   .spots-panel.collapsed {
     transform: translateX(calc(-100% - 28px));
     opacity: 0; pointer-events: none;
+    max-height: 0; border-width: 0;
   }
   .spots-header {
-    padding: 12px 14px 10px;
+    padding: 11px 12px 10px 14px;
     border-bottom: 1px solid rgba(255,255,255,0.09);
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  }
+  .spots-header-right {
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+  .spots-collapse-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.08); color: #fff;
+    font-size: 13px; cursor: pointer; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background 0.16s, border-color 0.16s;
+  }
+  .spots-collapse-btn:hover {
+    background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3);
   }
   .spots-heading {
     font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em;
@@ -671,14 +700,66 @@
   .maplibregl-ctrl-attrib a { color: rgba(255,255,255,0.85) !important; }
   .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right { z-index: 10; }
 
-  /* Floating sidebar reopen button when collapsed */
+  /* Floating sidebar reopen pill when collapsed */
   .reopen-list-btn {
-    position: fixed; left: 16px; bottom: 20px; z-index: 21;
-    height: 40px; padding: 0 14px; border-radius: 99px;
-    color: #fff; font-family: inherit; font-size: 12.5px; font-weight: 500;
-    cursor: pointer; display: none; align-items: center; gap: 6px;
+    position: fixed; left: 16px; bottom: 20px; z-index: 22;
+    height: 42px; padding: 0 15px; border-radius: 99px;
+    color: #fff; font-family: inherit; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; display: none; align-items: center; gap: 7px;
+    border-color: rgba(255,255,255,0.2);
+    transition: transform 0.18s ease, border-color 0.18s ease;
+  }
+  .reopen-list-btn:hover {
+    transform: translateY(-1px); border-color: var(--accent);
   }
   .reopen-list-btn.visible { display: inline-flex; }
+  .reopen-count {
+    font-size: 10.5px; padding: 1.5px 7px; border-radius: 99px;
+    background: var(--accent); color: #0b101b; font-weight: 700;
+  }
+
+  /* ── 4C. FLOATING 360° ORBIT CINEMA MINI-HUD (NON-OBSTRUCTIVE) ── */
+  .orbit-hud {
+    position: fixed; left: 50%; bottom: 20px; z-index: 32;
+    transform: translate(-50%, 24px);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    border-radius: 99px; padding: 6px 8px 6px 14px;
+    display: inline-flex; align-items: center; gap: 10px;
+    max-width: calc(100vw - 24px);
+    border-color: var(--accent);
+    box-shadow: 0 0 26px var(--accent-soft), var(--glass-shadow);
+    transition: transform 0.26s cubic-bezier(.22,1,.36,1), opacity 0.22s ease, visibility 0.22s ease;
+  }
+  .orbit-hud.active {
+    transform: translate(-50%, 0);
+    opacity: 1; visibility: visible; pointer-events: auto;
+  }
+  .orbit-spin {
+    display: inline-block; font-size: 15px;
+    animation: spinOrbit 3.6s linear infinite;
+  }
+  @keyframes spinOrbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .orbit-hud-text {
+    font-size: 12.5px; font-weight: 600; color: #fff;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 200px;
+  }
+  .orbit-hud-btn {
+    height: 30px; padding: 0 11px; border-radius: 99px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.1); color: #fff;
+    font-family: inherit; font-size: 11.5px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    transition: background 0.15s, filter 0.15s;
+  }
+  .orbit-hud-btn:hover { background: rgba(255,255,255,0.2); }
+  .orbit-hud-btn.stop {
+    background: var(--accent); color: #0b101b; border-color: transparent;
+  }
+  .orbit-hud-btn.stop:hover { filter: brightness(1.08); }
 
   /* ── RESPONSIVE ── */
   @media (max-width: 960px) {
@@ -688,19 +769,31 @@
   @media (max-width: 760px) {
     .left-dock {
       top: 12px; left: 12px; right: 12px; bottom: auto; width: auto;
+      z-index: 20;
+    }
+    .left-dock:not(.list-collapsed) {
+      z-index: 45;
     }
     .brand-card {
-      width: 100%; padding: 10px 13px;
+      width: 100%; padding: 9px 12px;
     }
+    .brand-title { font-size: 18px; }
+    .brand-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .brand-desc { display: none; }
+    .brand-meta-row { margin-top: 7px; padding-top: 7px; }
     .top-nav-bar {
-      top: 108px; left: 12px; right: 12px;
+      top: 120px; left: 12px; right: 12px;
     }
     .quick-tools { height: 40px; width: 100%; }
     .search-box { width: 100%; min-width: 0; height: 40px; }
     .spots-panel {
-      position: fixed; left: 12px; top: 204px; bottom: 72px;
-      width: min(310px, calc(100vw - 24px));
+      position: fixed; left: 12px; top: 12px; bottom: 12px;
+      width: min(320px, 86vw); max-height: none;
+      z-index: 46;
+      background: rgba(13, 18, 29, 0.94);
+    }
+    .spots-panel.collapsed {
+      max-height: none;
     }
     .reopen-list-btn {
       left: 12px; bottom: 16px;
@@ -715,7 +808,13 @@
     }
     .detail-card {
       right: 12px; left: 12px; bottom: 70px; width: auto;
+      max-height: 60vh; overflow-y: auto;
     }
+    .detail-hero { height: 134px; }
+    .orbit-hud {
+      bottom: 68px; padding: 5px 7px 5px 12px; gap: 7px;
+    }
+    .orbit-hud-text { max-width: 120px; font-size: 12px; }
   }
 
   /* ── 5. FROSTED GLASS MODALS (CALENDAR & COMMUNITY REPORT) ── */
@@ -928,8 +1027,11 @@
 <div id="map"></div>
 <div id="atmosphere-veil"></div>
 
-<!-- 1 & 4A. Left Dock: Brand Card + Spot List Panel -->
-<div class="left-dock">
+<!-- Mobile/Drawer Backdrop -->
+<div id="spots-backdrop" class="spots-backdrop"></div>
+
+<!-- 1 & 4A. Left Dock: Brand Card + Collapsible Spot List Drawer -->
+<div id="left-dock" class="left-dock">
   <aside class="brand-card glass">
     <div class="brand-top">
       <div class="brand-title-wrap">
@@ -964,9 +1066,12 @@
         <span data-i18n="list_title">魯汶四季景點</span>
         <span id="spots-count" class="spots-count">0</span>
       </div>
-      <div class="filter-toggle">
-        <button id="filter-all" class="filter-chip active" data-i18n="filter_all">全部</button>
-        <button id="filter-season" class="filter-chip" data-i18n="filter_season">當季精選</button>
+      <div class="spots-header-right">
+        <div class="filter-toggle">
+          <button id="filter-all" class="filter-chip active" data-i18n="filter_all">全部</button>
+          <button id="filter-season" class="filter-chip" data-i18n="filter_season">當季精選</button>
+        </div>
+        <button id="btn-close-list" class="spots-collapse-btn" title="Collapse List (L)" aria-label="Collapse Spot List">✕</button>
       </div>
     </div>
     <div id="spots-list" class="spots-list"></div>
@@ -1042,7 +1147,17 @@
   </nav>
 </div>
 
-<button id="reopen-list-btn" class="reopen-list-btn glass">☰ <span data-i18n="btn_open_list">展開景點清單</span></button>
+<button id="reopen-list-btn" class="reopen-list-btn glass" title="Open Spot List Drawer (L)">
+  ☰ <span data-i18n="btn_open_list">景點抽屜</span><span id="reopen-count" class="reopen-count">0</span>
+</button>
+
+<!-- 4C. Floating 360° Orbit Cinema Mini-HUD -->
+<div id="orbit-hud" class="orbit-hud glass" role="status" aria-live="polite">
+  <span class="orbit-spin">🔄</span>
+  <span id="orbit-hud-text" class="orbit-hud-text">360° 繞飛中</span>
+  <button id="btn-orbit-info" class="orbit-hud-btn" data-i18n="btn_orbit_info">📄 介紹</button>
+  <button id="btn-orbit-stop" class="orbit-hud-btn stop" data-i18n="btn_orbit_stop">停止繞飛</button>
+</div>
 
 <!-- 4B. Dynamic Spot Detail Card -->
 <article id="detail-card" class="detail-card glass" aria-live="polite">
@@ -1179,6 +1294,7 @@
       meta_hours: '開放時間',
       btn_orbit: '360° 繞飛',
       btn_orbit_stop: '停止繞飛',
+      btn_orbit_info: '📄 介紹',
       btn_overview: '全景',
       btn_nav: '導航',
       s_spring: '春', s_summer: '夏', s_autumn: '秋', s_winter: '冬',
@@ -1215,6 +1331,7 @@
       meta_hours: 'Hours',
       btn_orbit: '360° Orbit',
       btn_orbit_stop: 'Stop Orbit',
+      btn_orbit_info: '📄 Info',
       btn_overview: 'Overview',
       btn_nav: 'Directions',
       s_spring: 'Spring', s_summer: 'Summer', s_autumn: 'Autumn', s_winter: 'Winter',
@@ -1251,6 +1368,7 @@
       meta_hours: 'Openingsuren',
       btn_orbit: '360° Draaien',
       btn_orbit_stop: 'Stoppen',
+      btn_orbit_info: '📄 Info',
       btn_overview: 'Overzicht',
       btn_nav: 'Route',
       s_spring: 'Lente', s_summer: 'Zomer', s_autumn: 'Herfst', s_winter: 'Winter',
@@ -1287,6 +1405,7 @@
       meta_hours: 'Horaires',
       btn_orbit: 'Orbite 360°',
       btn_orbit_stop: 'Arrêter',
+      btn_orbit_info: '📄 Info',
       btn_overview: 'Aperçu',
       btn_nav: 'Itinéraire',
       s_spring: 'Printemps', s_summer: 'Été', s_autumn: 'Automne', s_winter: 'Hiver',
@@ -2540,6 +2659,8 @@
     });
 
     document.getElementById('spots-count').textContent = sorted.length;
+    const reopenCount = document.getElementById('reopen-count');
+    if (reopenCount) reopenCount.textContent = sorted.length;
 
     if (sorted.length === 0) {
       listEl.innerHTML = `<div style="padding:26px 14px;text-align:center;color:var(--text-muted);font-size:12.5px;">${T('no_results')}</div>`;
@@ -2668,12 +2789,17 @@
   }
 
   function selectSpot(spotId, fly = true) {
-    stopOrbit();
+    stopOrbit(false);
     state.selectedSpotId = spotId;
     state.detailSeasonTab = state.season;
 
     const spot = state.spots.find(s => s.id === spotId);
     if (!spot) return;
+
+    // Auto-collapse spot list drawer on mobile so user sees the 3D flyTo immediately
+    if (window.innerWidth <= 760 && !state.listCollapsed) {
+      setListCollapsed(true);
+    }
 
     if (particleLayer) particleLayer.setBeacon(spot);
     renderSpotsList();
@@ -2694,7 +2820,7 @@
   }
 
   function closeDetailCard() {
-    stopOrbit();
+    stopOrbit(false);
     state.selectedSpotId = null;
     if (particleLayer) particleLayer.setBeacon(null);
     document.getElementById('detail-card').classList.remove('open');
@@ -2706,7 +2832,7 @@
      9. CAMERA CONTROLS (RESET 3D, 2D/3D PITCH, 360° ORBIT)
      ════════════════════════════════════════════════════════════ */
   function resetOverview() {
-    stopOrbit();
+    stopOrbit(false);
     if (!map) return;
     map.flyTo({
       center: DEFAULT_CAMERA.center,
@@ -2731,24 +2857,46 @@
   function startOrbit() {
     if (!map) return;
     state.isOrbiting = true;
+
+    // Auto-hide detail card & collapse spot list drawer so 360° 3D orbit is 100% unobstructed
+    document.getElementById('detail-card').classList.remove('open');
+    if (!state.listCollapsed) setListCollapsed(true);
+
+    // Ensure 3D tilted pitch for a true cinematic flyaround
+    if (!state.is3D) toggle3DMode();
+    else if (map.getPitch() < 45) map.easeTo({ pitch: 60, duration: 600 });
+
+    const spot = state.spots.find(s => s.id === state.selectedSpotId);
+    const hudText = document.getElementById('orbit-hud-text');
+    if (hudText) {
+      hudText.textContent = spot ? `${spot.icon || '📍'} ${L(spot.name)}` : '360° Orbit';
+    }
+    const hud = document.getElementById('orbit-hud');
+    if (hud) hud.classList.add('active');
+
     updateOrbitBtnUI();
     let last = performance.now();
     const tick = (now) => {
       if (!state.isOrbiting) return;
       const dt = (now - last) / 1000;
       last = now;
-      map.setBearing((map.getBearing() + dt * 14) % 360);
+      map.setBearing((map.getBearing() + dt * 15) % 360);
       state.orbitRaf = requestAnimationFrame(tick);
     };
     state.orbitRaf = requestAnimationFrame(tick);
   }
 
-  function stopOrbit() {
+  function stopOrbit(restoreDetail = false) {
     if (!state.isOrbiting) return;
     state.isOrbiting = false;
     if (state.orbitRaf) cancelAnimationFrame(state.orbitRaf);
     state.orbitRaf = null;
+    const hud = document.getElementById('orbit-hud');
+    if (hud) hud.classList.remove('active');
     updateOrbitBtnUI();
+    if (restoreDetail === true && state.selectedSpotId) {
+      renderDetailCard();
+    }
   }
 
   function updateOrbitBtnUI() {
@@ -2780,7 +2928,7 @@
     applyMapSeasonTheme(seasonKey);
     renderSpotsList();
     renderMarkers();
-    if (state.selectedSpotId) renderDetailCard();
+    if (state.selectedSpotId && !state.isOrbiting) renderDetailCard();
   }
 
   function setSeasonDrawerOpen(open) {
@@ -2846,14 +2994,25 @@
     buildReportLocationSelect();
     buildReportStatusGrid();
     renderReportFeed();
-    if (state.selectedSpotId) renderDetailCard();
+    if (state.selectedSpotId && !state.isOrbiting) renderDetailCard();
+    if (state.isOrbiting && state.selectedSpotId) {
+      const sp = state.spots.find(s => s.id === state.selectedSpotId);
+      const ht = document.getElementById('orbit-hud-text');
+      if (sp && ht) ht.textContent = `${sp.icon || '📍'} ${L(sp.name)}`;
+    }
   }
 
   function setListCollapsed(collapsed) {
     state.listCollapsed = collapsed;
     document.getElementById('spots-panel').classList.toggle('collapsed', collapsed);
+    const leftDock = document.getElementById('left-dock');
+    if (leftDock) leftDock.classList.toggle('list-collapsed', collapsed);
     document.getElementById('btn-toggle-list').classList.toggle('active', !collapsed);
     document.getElementById('reopen-list-btn').classList.toggle('visible', collapsed);
+    const backdrop = document.getElementById('spots-backdrop');
+    if (backdrop) {
+      backdrop.classList.toggle('visible', !collapsed && window.innerWidth <= 760);
+    }
   }
 
   async function fetchLiveWeather() {
@@ -3350,7 +3509,19 @@
     document.getElementById('btn-toggle-3d').addEventListener('click', toggle3DMode);
     document.getElementById('btn-density').addEventListener('click', cycleDensity);
     document.getElementById('btn-toggle-list').addEventListener('click', () => setListCollapsed(!state.listCollapsed));
+    document.getElementById('btn-close-list').addEventListener('click', () => setListCollapsed(true));
+    document.getElementById('spots-backdrop').addEventListener('click', () => setListCollapsed(true));
     document.getElementById('reopen-list-btn').addEventListener('click', () => setListCollapsed(false));
+
+    // Orbit Cinema HUD controls
+    document.getElementById('btn-orbit-stop').addEventListener('click', () => stopOrbit(false));
+    document.getElementById('btn-orbit-info').addEventListener('click', () => stopOrbit(true));
+
+    // Sync mobile backdrop visibility when window resizes
+    window.addEventListener('resize', () => {
+      const backdrop = document.getElementById('spots-backdrop');
+      if (backdrop) backdrop.classList.toggle('visible', !state.listCollapsed && window.innerWidth <= 760);
+    });
 
     // Modal controls (close buttons, backdrop clicks, form submits)
     document.querySelectorAll('[data-close-modal]').forEach(btn => {
@@ -3383,6 +3554,8 @@
       if (e.key === 'Escape') {
         if (document.querySelector('.modal-backdrop.open')) closeModals();
         else if (drawerWrap.classList.contains('open')) setSeasonDrawerOpen(false);
+        else if (state.isOrbiting) stopOrbit(false);
+        else if (!state.listCollapsed && window.innerWidth <= 760) setListCollapsed(true);
         else closeDetailCard();
         return;
       }
@@ -3391,6 +3564,7 @@
       else if (e.key === '2') setSeason('summer');
       else if (e.key === '3') setSeason('autumn');
       else if (e.key === '4') setSeason('winter');
+      else if (e.key === 'l' || e.key === 'L') setListCollapsed(!state.listCollapsed);
       else if (e.key === 'r' || e.key === 'R') resetOverview();
     });
   }
@@ -3427,9 +3601,9 @@
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 
     // Stop auto-orbit immediately whenever user interacts
-    map.on('mousedown', stopOrbit);
-    map.on('touchstart', stopOrbit);
-    map.on('wheel', stopOrbit);
+    map.on('mousedown', () => stopOrbit(false));
+    map.on('touchstart', () => stopOrbit(false));
+    map.on('wheel', () => stopOrbit(false));
 
     // Subtle atmospheric horizon opacity scales smoothly with 3D pitch
     map.on('pitch', () => {
