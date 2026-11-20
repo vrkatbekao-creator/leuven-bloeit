@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Leuven Seizoenen — 魯汶四季 3D 互動地圖 (Beta 5)</title>
+<title>Leuven Seizoenen — 魯汶四季 3D 互動地圖</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -1095,6 +1095,8 @@
     <button id="btn-density" class="tool-btn" title="Adjust 3D Particle Density">✨ <span id="lbl-density">粒子: 標準</span></button>
     <div class="tool-divider"></div>
     <button id="btn-toggle-list" class="tool-btn active" title="Show/Hide Spot List">☰ <span data-i18n="btn_list">景點</span></button>
+    <div class="tool-divider"></div>
+    <a id="btn-legacy-link" class="tool-btn" href="./legacy.html" style="text-decoration:none;" title="Switch to 2D Legacy Version">🗺️ <span data-i18n="btn_legacy">2D 經典版</span></a>
   </div>
 
   <div class="search-box glass">
@@ -1302,7 +1304,7 @@
       densities: { off: '關閉', low: '輕量', med: '標準', high: '豐富' },
       no_results: '找不到符合條件的魯汶景點',
       load_sub: '正在載入魯汶 3D 城市建築與四季粒子層…',
-      btn_calendar: '花曆', btn_report: '回報', btn_report_spot: '回報', btn_inat: '植物觀測', inat_view: '在 iNaturalist 查看 ↗', inat_obs_by: '觀測者',
+      btn_calendar: '花曆', btn_report: '回報', btn_report_spot: '回報', btn_inat: '植物觀測', btn_legacy: '2D 經典版', inat_view: '在 iNaturalist 查看 ↗', inat_obs_by: '觀測者',
       cal_title: '魯汶全年花曆與季景', cal_sub: '點選任一花種或季節項目，即可切換 3D 地圖對應季節',
       cal_note: '* 開花與變葉時間受氣候影響，以現場社群回報為準。', cal_now_label: '當月',
       sub_title: '🌸 花季訂閱通知', sub_desc: '當魯汶熱門花季或楓紅盛開時，透過 Email 提醒您。',
@@ -1339,7 +1341,7 @@
       densities: { off: 'Off', low: 'Low', med: 'Med', high: 'High' },
       no_results: 'No matching Leuven spots found',
       load_sub: 'Loading 3D Leuven buildings & seasonal particle layer…',
-      btn_calendar: 'Calendar', btn_report: 'Report', btn_report_spot: 'Report', btn_inat: 'iNat', inat_view: 'View on iNaturalist ↗', inat_obs_by: 'Observer',
+      btn_calendar: 'Calendar', btn_report: 'Report', btn_report_spot: 'Report', btn_inat: 'iNat', btn_legacy: '2D Legacy', inat_view: 'View on iNaturalist ↗', inat_obs_by: 'Observer',
       cal_title: 'Leuven Bloom & Season Calendar', cal_sub: 'Click any row to switch the 3D map to its matching season',
       cal_note: '* Bloom & foliage dates vary by year and weather.', cal_now_label: 'Now',
       sub_title: '🌸 Get Bloom Alerts', sub_desc: 'Receive an email when Leuven\'s favourite spots come into bloom.',
@@ -1376,7 +1378,7 @@
       densities: { off: 'Uit', low: 'Laag', med: 'Normaal', high: 'Hoog' },
       no_results: 'Geen overeenkomende plekken gevonden',
       load_sub: '3D-gebouwen van Leuven & seizoenslaag laden…',
-      btn_calendar: 'Kalender', btn_report: 'Melden', btn_report_spot: 'Melden', btn_inat: 'iNat', inat_view: 'Bekijk op iNaturalist ↗', inat_obs_by: 'Waarnemer',
+      btn_calendar: 'Kalender', btn_report: 'Melden', btn_report_spot: 'Melden', btn_inat: 'iNat', btn_legacy: '2D Klassiek', inat_view: 'Bekijk op iNaturalist ↗', inat_obs_by: 'Waarnemer',
       cal_title: 'Leuvense Bloeikalender', cal_sub: 'Klik op een rij om de 3D-kaart naar dat seizoen te schakelen',
       cal_note: '* Bloeidata variëren per jaar en weersomstandigheden.', cal_now_label: 'Nu',
       sub_title: '🌸 Bloeialarmen', sub_desc: 'Ontvang een e-mail als jouw favoriete plekken in bloei staan.',
@@ -1413,7 +1415,7 @@
       densities: { off: 'Off', low: 'Bas', med: 'Moyen', high: 'Élevé' },
       no_results: 'Aucun lieu trouvé à Louvain',
       load_sub: 'Chargement des bâtiments 3D et particules saisonnières…',
-      btn_calendar: 'Calendrier', btn_report: 'Signaler', btn_report_spot: 'Signaler', btn_inat: 'iNat', inat_view: 'Voir sur iNaturalist ↗', inat_obs_by: 'Observateur',
+      btn_calendar: 'Calendrier', btn_report: 'Signaler', btn_report_spot: 'Signaler', btn_inat: 'iNat', btn_legacy: '2D Classique', inat_view: 'Voir sur iNaturalist ↗', inat_obs_by: 'Observateur',
       cal_title: 'Calendrier Floral de Louvain', cal_sub: 'Cliquez sur une ligne pour afficher la saison correspondante en 3D',
       cal_note: '* Les dates varient selon les années et le climat.', cal_now_label: 'Maintenant',
       sub_title: '🌸 Alertes de Floraison', sub_desc: 'Recevez un e-mail lorsque vos sites préférés sont en fleurs.',
